@@ -346,9 +346,8 @@
 <span id="qat-purr-compiler-builders-module"></span><h1>qat.purr.compiler.builders module<a class="headerlink" href="#module-qat.purr.compiler.builders" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.Axis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.Axis" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.Axis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>An enumeration.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.Axis.X">
 <span class="sig-name descname"><span class="pre">X</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.compiler.builders.Axis.X" title="Link to this definition"></a></dt>
@@ -368,7 +367,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.FluidBuilderWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FluidBuilderWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.FluidBuilderWrapper" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FluidBuilderWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.FluidBuilderWrapper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
 <p>Wrapper to allow builders to return a tuple of values while also allowing fluid API
 consumption if those values are not required. Think of it like optional return values
@@ -391,7 +390,7 @@ that don’t require unpacking to discard.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base instruction builder class that leaves unimplemented the methods that vary on a
 hardware-by-hardware basis.</p>
@@ -485,7 +484,7 @@ it deals with nested builders and merging.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.calibration_id">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibration_id</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.calibration_id" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibration_id</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.calibration_id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -528,7 +527,7 @@ it deals with nested builders and merging.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.deserialize">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.deserialize" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.deserialize" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
@@ -567,7 +566,7 @@ it deals with nested builders and merging.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.instructions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.instructions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -692,7 +691,7 @@ builder itself.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.QuantumInstructionBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.QuantumInstructionBuilder.ECR">

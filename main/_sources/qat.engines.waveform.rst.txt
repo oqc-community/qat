@@ -3,8 +3,8 @@ qat.engines.waveform package
 
 .. automodule:: qat.engines.waveform
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

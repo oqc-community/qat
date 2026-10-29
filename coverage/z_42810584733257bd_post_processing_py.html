@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_42810584733257bd_results_processing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -134,7 +134,7 @@
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">                <span class="key">return</span> <span class="op">{</span><span class="nam">ProcessAxis</span><span class="op">.</span><span class="nam">SEQUENCE</span><span class="op">:</span> <span class="op">-</span><span class="num">2</span><span class="op">,</span> <span class="nam">ProcessAxis</span><span class="op">.</span><span class="nam">TIME</span><span class="op">:</span> <span class="op">-</span><span class="num">1</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">                <span class="key">return</span> <span class="op">{</span><span class="nam">ProcessAxis</span><span class="op">.</span><span class="nam">TIME</span><span class="op">:</span> <span class="op">-</span><span class="num">1</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span><span class="str">f"The acquisition mode {mode} is not supported."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">The acquisition mode </span><span class="op">{</span><span class="nam">mode</span><span class="op">}</span><span class="fst"> is not supported.</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t"><span class="key">def</span> <span class="nam">apply_post_processing</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -161,7 +161,7 @@
     <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">            <span class="key">return</span> <span class="nam">discriminate</span><span class="op">(</span><span class="nam">response</span><span class="op">,</span> <span class="nam">axes</span><span class="op">,</span> <span class="nam">post_processing</span><span class="op">.</span><span class="nam">args</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">        <span class="key">case</span> <span class="nam">_</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">            <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">                <span class="str">f"Post processing type {post_processing.process_type} is not implemented."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Post processing type </span><span class="op">{</span><span class="nam">post_processing</span><span class="op">.</span><span class="nam">process_type</span><span class="op">}</span><span class="fst"> is not implemented.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -244,13 +244,13 @@
     <p class="pln"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">    <span class="key">if</span> <span class="nam">A</span><span class="op">.</span><span class="nam">shape</span> <span class="op">!=</span> <span class="op">(</span><span class="num">2</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">161&#x202F;&#x219B;&#x202F;162</span><span class="annotate long">line 161 didn't jump to line 162 because the condition on line 161 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t163" href="#t163">163</a></span><span class="t">            <span class="str">f"Equalise transform must be shape (2, 2) for single-channel operation; "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">            <span class="str">f"got {A.shape}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t163" href="#t163">163</a></span><span class="t">            <span class="fst">f"</span><span class="fst">Equalise transform must be shape (2, 2) for single-channel operation; </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">            <span class="fst">f"</span><span class="fst">got </span><span class="op">{</span><span class="nam">A</span><span class="op">.</span><span class="nam">shape</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t165" href="#t165">165</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t166" href="#t166">166</a></span><span class="t">    <span class="key">if</span> <span class="nam">b_iq</span><span class="op">.</span><span class="nam">shape</span> <span class="op">!=</span> <span class="op">(</span><span class="num">2</span><span class="op">,</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">166&#x202F;&#x219B;&#x202F;167</span><span class="annotate long">line 166 didn't jump to line 167 because the condition on line 166 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t167" href="#t167">167</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t">            <span class="str">f"Equalise offset must be shape (2,) for single-channel operation; "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t169" href="#t169">169</a></span><span class="t">            <span class="str">f"got {b_iq.shape}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t">            <span class="fst">f"</span><span class="fst">Equalise offset must be shape (2,) for single-channel operation; </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t169" href="#t169">169</a></span><span class="t">            <span class="fst">f"</span><span class="fst">got </span><span class="op">{</span><span class="nam">b_iq</span><span class="op">.</span><span class="nam">shape</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t172" href="#t172">172</a></span><span class="t">    <span class="com"># Represent each complex sample as a real [I, Q] vector, apply the affine</span>&nbsp;</span><span class="r"></span></p>
@@ -391,7 +391,7 @@
             <a class="nav" href="z_42810584733257bd_results_processing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

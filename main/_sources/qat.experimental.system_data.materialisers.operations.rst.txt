@@ -3,8 +3,8 @@ qat.experimental.system\_data.materialisers.operations package
 
 .. automodule:: qat.experimental.system_data.materialisers.operations
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

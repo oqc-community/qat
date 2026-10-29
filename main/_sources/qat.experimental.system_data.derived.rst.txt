@@ -3,8 +3,8 @@ qat.experimental.system\_data.derived package
 
 .. automodule:: qat.experimental.system_data.derived
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

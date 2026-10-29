@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -726,7 +726,7 @@ instructions interleaved with phase shifts can also be folded into a single wait
 reduces the number of quantum instructions.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ApplySquashContiguousOptimizations</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ApplySquashContiguousOptimizations</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Apply commuting + contiguous fold optimizations.</p>
 <dl class="py method">
@@ -748,7 +748,7 @@ reduces the number of quantum instructions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.CommuteWaitBeforePhaseShift">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CommuteWaitBeforePhaseShift</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.CommuteWaitBeforePhaseShift" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CommuteWaitBeforePhaseShift</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.CommuteWaitBeforePhaseShift" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Commute phase shift operations past wait operations to enable better folding.</p>
 <p><strong>Scenario 1: PhaseShift, Wait -&gt; Wait, PhaseShift</strong></p>
@@ -789,7 +789,7 @@ waits to one side, after which fold patterns eliminate redundant operations.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousPhases">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldContiguousPhases</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousPhases" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldContiguousPhases</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousPhases" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Fold contiguous phase shifts on the same frame into a single phase shift or set.</p>
 <p><strong>Scenario 1: PhaseShift + PhaseShift</strong></p>
@@ -884,7 +884,7 @@ waits to one side, after which fold patterns eliminate redundant operations.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousWaits">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldContiguousWaits</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousWaits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldContiguousWaits</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousWaits" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Fold contiguous wait operations on the same frame into a single wait.</p>
 <p><strong>Scenario 1: Wait + Wait</strong></p>

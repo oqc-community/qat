@@ -3,5 +3,5 @@ qat.experimental.frontend.purr module
 
 .. automodule:: qat.experimental.frontend.purr
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_scf.ir.attrs module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.q1_scf.ir.attrs module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -733,7 +733,7 @@ carries no control-flow semantics.</p></li>
 <p>Reference: <a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterDomainAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterDomainAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr" title="qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterDomainAttr</span></code></a></p>
 <p>Linear iteration domain of a <a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.ops.html#qat.experimental.dialect.q1_scf.ir.ops.ForOp" title="qat.experimental.dialect.q1_scf.ir.ops.ForOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForOp</span></code></a>.</p>
 <p>The domain is the affine sequence <code class="docutils literal notranslate"><span class="pre">start,</span> <span class="pre">start</span> <span class="pre">+</span> <span class="pre">step,</span> <span class="pre">...</span></code> truncated to
@@ -759,7 +759,7 @@ semantics.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterDomainAttr.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -808,7 +808,7 @@ if <code class="docutils literal notranslate"><span class="pre">count</span></co
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.attrs.IterParameter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameter" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>The quantity varied across iterations, which also fixes the domain unit.</p>
 <dl class="py attribute">
@@ -835,7 +835,7 @@ if <code class="docutils literal notranslate"><span class="pre">count</span></co
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.attrs.IterParameterAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterParameterAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameterAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterParameterAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameterAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumAttribute</span></code>[<a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameter" title="qat.experimental.dialect.q1_scf.ir.attrs.IterParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterParameter</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">SpacedOpaqueSyntaxAttribute</span></code></p>
 <p>Attribute wrapper carrying an <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.attrs.IterParameter" title="qat.experimental.dialect.q1_scf.ir.attrs.IterParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterParameter</span></code></a>.</p>
 <dl class="py attribute">

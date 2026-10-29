@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.gate.ir.types module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.gate.ir.types module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -720,7 +720,7 @@
 <span id="qat-experimental-dialect-gate-ir-types-module"></span><h1>qat.experimental.dialect.gate.ir.types module<a class="headerlink" href="#module-qat.experimental.dialect.gate.ir.types" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlgorithmicQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlgorithmicQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType" title="qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmicQubitType</span></code></a></p>
 <p>An algorithmic qubit type, assigned at circuit construction time.</p>
 <p>Represents a qubit as it appears in an algorithm, such as a qubit in a source QASM2
@@ -728,7 +728,7 @@ program, with no hardware assignment. Placement maps algorithmic qubits to physi
 qubits.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -742,7 +742,7 @@ qubits.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.types.PhysicalQubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.PhysicalQubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.PhysicalQubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.gate.ir.types.PhysicalQubitType" title="qat.experimental.dialect.gate.ir.types.PhysicalQubitType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalQubitType</span></code></a></p>
 <p>A physical qubit type, assigned after placement.</p>
 <dl class="field-list simple">
@@ -752,7 +752,7 @@ qubits.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.types.PhysicalQubitType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.PhysicalQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.PhysicalQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -783,7 +783,7 @@ Raise a VerifyException otherwise.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.types.QubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.QubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.types.QubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAttribute</span></code></p>
 <p>Abstract base for qubit type.</p>
 <p>Concrete subtypes distinguish algorithmic qubits (pre-placement, directly from the

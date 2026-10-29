@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -720,7 +720,7 @@
 <p>Rewrite patterns for the Pulse-to-Q1 legalisation and lowering stages.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerArithIntegerConstantToMoveOp</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerArithIntegerConstantToMoveOp</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lower <code class="docutils literal notranslate"><span class="pre">arith.constant</span></code> with an integer or index type to <code class="docutils literal notranslate"><span class="pre">q1.ir.move</span></code>.</p>
 <p>An <code class="docutils literal notranslate"><span class="pre">arith.constant</span></code> whose result type is
@@ -762,7 +762,7 @@ range raise <code class="xref py py-class docutils literal notranslate"><span cl
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseSetOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePhaseSetOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseSetOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePhaseSetOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseSetOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Match <code class="docutils literal notranslate"><span class="pre">pulse.phase_set</span></code> and delegate stage policy to <code class="docutils literal notranslate"><span class="pre">rewrite_callable</span></code>.</p>
 <p>The same matcher is used in legalisation and lowering. The callable decides whether the
@@ -782,7 +782,7 @@ rewrite remains in Pulse or emits Q1 instructions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseShiftOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePhaseShiftOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseShiftOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePhaseShiftOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseShiftOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Match <code class="docutils literal notranslate"><span class="pre">pulse.phase_shift</span></code> and delegate stage policy to <code class="docutils literal notranslate"><span class="pre">rewrite_callable</span></code>.</p>
 <p>Mirrors <code class="docutils literal notranslate"><span class="pre">RewritePhaseSetOp</span></code> in structure.</p>
@@ -801,7 +801,7 @@ rewrite remains in Pulse or emits Q1 instructions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePreQ1AcquireOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePreQ1AcquireOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lower <code class="xref py py-class docutils literal notranslate"><span class="pre">PreQ1AcquireOp</span></code> to a Q1 acquire instruction.</p>
 <ul class="simple">
@@ -828,7 +828,7 @@ integer registers. A later register-allocation pass assigns concrete Q1 GPRs.</p
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePulseOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePulseOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePulseOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewritePulseOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePulseOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lowers a <code class="docutils literal notranslate"><span class="pre">pulse.pulse</span></code> op to a Q1 <code class="docutils literal notranslate"><span class="pre">play</span></code> instruction.</p>
 <p>The pattern resolves the pulse’s sampled waveform, registers its real (I) and
@@ -862,7 +862,7 @@ re-comparing sample arrays.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteSquareWaveformPulseOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteSquareWaveformPulseOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteSquareWaveformPulseOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteSquareWaveformPulseOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteSquareWaveformPulseOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Match a square pulse and delegate stage policy to <code class="docutils literal notranslate"><span class="pre">rewrite_callable</span></code>.</p>
 <dl class="py method">
@@ -880,7 +880,7 @@ re-comparing sample arrays.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStartContinuousWaveformOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteStartContinuousWaveformOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStartContinuousWaveformOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteStartContinuousWaveformOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStartContinuousWaveformOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lowers a <code class="docutils literal notranslate"><span class="pre">pulse.start_continuous_waveform</span></code> op to a Q1 AWG offset.</p>
 <p>A continuous waveform is emitted on Q1 hardware by latching a constant AWG
@@ -907,7 +907,7 @@ offset on both output paths. This pattern replaces the pulse op with a
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStopContinuousWaveformOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteStopContinuousWaveformOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStopContinuousWaveformOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteStopContinuousWaveformOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStopContinuousWaveformOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lowers a <code class="docutils literal notranslate"><span class="pre">pulse.stop_continuous_waveform</span></code> op to a Q1 AWG offset reset.</p>
 <p>Stopping a continuous waveform corresponds to clearing the latched AWG offset
@@ -933,7 +933,7 @@ on both output paths, emitted as a <code class="docutils literal notranslate"><s
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteWaitOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteWaitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteWaitOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteWaitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteWaitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lower <code class="docutils literal notranslate"><span class="pre">pulse.wait</span></code> to one or more <code class="docutils literal notranslate"><span class="pre">q1.wait</span></code> instructions.</p>
 <p>The requested duration must be an exact integer number of nanoseconds. Durations that

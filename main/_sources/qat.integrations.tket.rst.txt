@@ -3,5 +3,5 @@ qat.integrations.tket module
 
 .. automodule:: qat.integrations.tket
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

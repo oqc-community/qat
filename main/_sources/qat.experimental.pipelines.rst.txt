@@ -3,8 +3,8 @@ qat.experimental.pipelines package
 
 .. automodule:: qat.experimental.pipelines
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

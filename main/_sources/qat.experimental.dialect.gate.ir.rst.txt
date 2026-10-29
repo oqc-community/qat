@@ -3,8 +3,8 @@ qat.experimental.dialect.gate.ir package
 
 .. automodule:: qat.experimental.dialect.gate.ir
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.executables module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.executables module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -716,7 +716,7 @@
 <span id="qat-executables-module"></span><h1>qat.executables module<a class="headerlink" href="#module-qat.executables" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.executables.AbstractProgram">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractProgram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AbstractProgram" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractProgram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AbstractProgram" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.RehydratableModel" title="qat.utils.pydantic.RehydratableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">RehydratableModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Abstract base class for programs to be executed by an engine.</p>
 <p>Child classes must implement the <a class="reference internal" href="#qat.executables.AbstractProgram.acquire_shapes" title="qat.executables.AbstractProgram.acquire_shapes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">acquire_shapes</span></code></a> property, which returns a
@@ -729,7 +729,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.executables.AbstractProgram.acquire_shapes">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire_shapes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.executables.AbstractProgram.acquire_shapes" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire_shapes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.executables.AbstractProgram.acquire_shapes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -742,7 +742,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.executables.AcquireData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AcquireData" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AcquireData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Holds the information required at runtime surrounding an acquisition.</p>
 <dl class="field-list simple">
@@ -801,7 +801,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.executables.Executable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.Executable" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.Executable" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>]</p>
 <p><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable`s</span> <span class="pre">are</span> <span class="pre">packages</span> <span class="pre">of</span> <span class="pre">instructions</span> <span class="pre">that</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">executed</span> <span class="pre">by</span> <span class="pre">the</span>
 <span class="pre">runtime.</span> <span class="pre">They</span> <span class="pre">contain</span> <span class="pre">a</span> <span class="pre">:class:`Program</span></code>, or a number of :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Program`s to be
@@ -839,7 +839,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.executables.Executable.deserialize">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.Executable.deserialize" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.Executable.deserialize" title="Link to this definition"></a></dt>
 <dd><p>Instantiates a executable from a JSON blob.</p>
 </dd></dl>
 

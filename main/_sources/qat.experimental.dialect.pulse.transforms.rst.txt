@@ -3,8 +3,8 @@ qat.experimental.dialect.pulse.transforms package
 
 .. automodule:: qat.experimental.dialect.pulse.transforms
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

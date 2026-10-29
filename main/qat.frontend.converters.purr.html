@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.frontend.converters.purr module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.frontend.converters.purr module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -718,7 +718,7 @@
 <span id="qat-frontend-converters-purr-module"></span><h1>qat.frontend.converters.purr module<a class="headerlink" href="#module-qat.frontend.converters.purr" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.frontend.converters.purr.HardwareModelMapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareModelMapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legacy_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.converters.purr.HardwareModelMapper" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareModelMapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legacy_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.converters.purr.HardwareModelMapper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Helper class to deal with mapping of PuRR to Pydantic hardware models.</p>
 <p>It offers utilities to validate the physical properties of the hardware models to ensure
@@ -732,7 +732,7 @@ model if possible.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.frontend.converters.purr.HardwareModelMapper.physical_channel_map">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_channel_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.frontend.converters.purr.HardwareModelMapper.physical_channel_map" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_channel_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.frontend.converters.purr.HardwareModelMapper.physical_channel_map" title="Link to this definition"></a></dt>
 <dd><p>Creates a mapping of physical channel full ids from the legacy model to the
 pydantic model, to allow for validation of pulse channel properties.</p>
 </dd></dl>
@@ -753,7 +753,7 @@ model provided to ensure compatibility.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.frontend.converters.purr.PurrConverter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.converters.purr.PurrConverter" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.converters.purr.PurrConverter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A converter for PuRR InstructionBuilders.</p>
 <p>The purpose of this converter is to allow us to accept the PuRR InstructionBuilder API

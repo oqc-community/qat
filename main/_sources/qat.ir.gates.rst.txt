@@ -3,8 +3,8 @@ qat.ir.gates package
 
 .. automodule:: qat.ir.gates
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

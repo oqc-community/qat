@@ -3,5 +3,5 @@ qat.purr.backends.qblox.transport module
 
 .. automodule:: qat.purr.backends.qblox.transport
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

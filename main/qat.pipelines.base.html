@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.base module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.pipelines.base module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -717,7 +717,7 @@
 <span id="qat-pipelines-base-module"></span><h1>qat.pipelines.base module<a class="headerlink" href="#module-qat.pipelines.base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.base.AbstractPipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractPipeline</span></span><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractPipeline</span></span><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>An abstraction of pipelines used in QAT to compile and execute quantum programs.</p>
 <p>Abstractly a pipeline needs to be given a hardware model and some target data that
@@ -732,24 +732,24 @@ needed to define a pipeline.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.AbstractPipeline.model">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.AbstractPipeline.name">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.AbstractPipeline.target_data">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.target_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.base.AbstractPipeline.target_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.base.BasePipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BasePipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.base.BasePipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BasePipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.base.BasePipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.pipelines.base.AbstractPipeline" title="qat.pipelines.base.AbstractPipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPipeline</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>A base implementation of the abstract pipeline that provides access to the components
 of the pipeline.</p>
@@ -779,17 +779,17 @@ different name.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.BasePipeline.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.BasePipeline.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.base.BasePipeline.target_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.target_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.base.BasePipeline.target_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

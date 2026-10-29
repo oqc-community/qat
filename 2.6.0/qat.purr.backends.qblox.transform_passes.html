@@ -339,7 +339,7 @@
 <span id="qat-purr-backends-qblox-transform-passes-module"></span><h1>qat.purr.backends.qblox.transform_passes module<a class="headerlink" href="#module-qat.purr.backends.qblox.transform_passes" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.DesugaringPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DesugaringPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.DesugaringPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DesugaringPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.DesugaringPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></p>
 <p>Transforms syntactic sugars and implicit effects.</p>
 <p>The goal of this pass is to desugar any syntactic and semantic sugars. One of these
@@ -362,7 +362,7 @@ sugars is iteration constructs such as <code class="xref py py-class docutils li
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.RepeatSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.RepeatSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.RepeatSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">
@@ -375,7 +375,7 @@ repeat instructions if none is found.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.ReturnSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ReturnSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ReturnSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.ReturnSanitisation.run">
@@ -386,7 +386,7 @@ repeat instructions if none is found.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.ScopePeeling">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopePeeling</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ScopePeeling" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopePeeling</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ScopePeeling" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></p>
 <p>A transform pass to discard scopes assuming they’ve been identified.</p>
 <p>This pass is particularly useful for the code generator as it helps peel away any
@@ -403,7 +403,7 @@ to lower nested constructs efficiently.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.ScopeSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ScopeSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.purr.backends.qblox.transform_passes.ScopeSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.transform_passes.ScopeSanitisation.run">

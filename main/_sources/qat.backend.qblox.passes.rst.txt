@@ -3,8 +3,8 @@ qat.backend.qblox.passes package
 
 .. automodule:: qat.backend.qblox.passes
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

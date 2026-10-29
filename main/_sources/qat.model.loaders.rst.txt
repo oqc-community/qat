@@ -3,8 +3,8 @@ qat.model.loaders package
 
 .. automodule:: qat.model.loaders
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

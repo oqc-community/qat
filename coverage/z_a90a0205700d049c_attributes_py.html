@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_a90a0205700d049c_interfaces_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -500,7 +500,7 @@
     <p class="pln"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">        <span class="key">if</span> <span class="op">(</span><span class="nam">num_el</span> <span class="op">:=</span> <span class="nam">len</span><span class="op">(</span><span class="nam">elements</span><span class="op">)</span><span class="op">)</span> <span class="op">!=</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">            <span class="nam">parser</span><span class="op">.</span><span class="nam">raise_error</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">                <span class="str">f"Expected two elements when parsing ``pulse.ComplexData``. Found {num_el}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Expected two elements when parsing ``pulse.ComplexData``. Found </span><span class="op">{</span><span class="nam">num_el</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">        <span class="key">return</span> <span class="nam">complex</span><span class="op">(</span><span class="nam">elements</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">,</span> <span class="nam">elements</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t422" href="#t422">422</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -508,7 +508,7 @@
     <p class="pln"><span class="n"><a id="t424" href="#t424">424</a></span><span class="t">        <span class="str">"""Prints the complex parameter, representing the real and imaginary components as a</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t425" href="#t425">425</a></span><span class="t"><span class="str">        two-element tuple."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t426" href="#t426">426</a></span><span class="t">        <span class="key">with</span> <span class="nam">printer</span><span class="op">.</span><span class="nam">in_angle_brackets</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t427" href="#t427">427</a></span><span class="t">            <span class="nam">printer</span><span class="op">.</span><span class="nam">print_string</span><span class="op">(</span><span class="str">f"{self.data.real},{self.data.imag}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t427" href="#t427">427</a></span><span class="t">            <span class="nam">printer</span><span class="op">.</span><span class="nam">print_string</span><span class="op">(</span><span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="op">.</span><span class="nam">real</span><span class="op">}</span><span class="fst">,</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="op">.</span><span class="nam">imag</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t428" href="#t428">428</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t429" href="#t429">429</a></span><span class="t">    <span class="key">def</span> <span class="nam">__eq__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">other</span><span class="op">:</span> <span class="nam">object</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t430" href="#t430">430</a></span><span class="t">        <span class="com"># avoid triggering `float('nan') != float('nan')` inequality</span>&nbsp;</span><span class="r"></span></p>
@@ -677,7 +677,7 @@
     <p class="mis show_mis"><span class="n"><a id="t593" href="#t593">593</a></span><span class="t">                <span class="nam">parsed_key</span> <span class="op">=</span> <span class="nam">int</span><span class="op">(</span><span class="nam">key</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t594" href="#t594">594</a></span><span class="t">            <span class="key">except</span> <span class="op">(</span><span class="nam">ValueError</span><span class="op">,</span> <span class="nam">TypeError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t595" href="#t595">595</a></span><span class="t">                <span class="nam">parser</span><span class="op">.</span><span class="nam">raise_error</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t596" href="#t596">596</a></span><span class="t">                    <span class="str">f"Expected state map keys to be integer keys, got '{key}'."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t596" href="#t596">596</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Expected state map keys to be integer keys, got '</span><span class="op">{</span><span class="nam">key</span><span class="op">}</span><span class="fst">'.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t597" href="#t597">597</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t598" href="#t598">598</a></span><span class="t">            <span class="nam">parsed_dict</span><span class="op">[</span><span class="nam">parsed_key</span><span class="op">]</span> <span class="op">=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t599" href="#t599">599</a></span><span class="t">        <span class="key">return</span> <span class="nam">immutabledict</span><span class="op">(</span><span class="nam">parsed_dict</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -816,7 +816,7 @@
     <p class="pln"><span class="n"><a id="t732" href="#t732">732</a></span><span class="t">            <span class="key">or</span> <span class="op">(</span><span class="num">0.0</span> <span class="op">&lt;</span> <span class="nam">p_min_value</span> <span class="op">&lt;</span> <span class="num">1.0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t733" href="#t733">733</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t734" href="#t734">734</a></span><span class="t">            <span class="key">raise</span> <span class="nam">VerifyException</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t735" href="#t735">735</a></span><span class="t">                <span class="str">f"p_min must be in the range [0, 1], but got {p_min_value}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t735" href="#t735">735</a></span><span class="t">                <span class="fst">f"</span><span class="fst">p_min must be in the range [0, 1], but got </span><span class="op">{</span><span class="nam">p_min_value</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t736" href="#t736">736</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t737" href="#t737">737</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t738" href="#t738">738</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
@@ -840,7 +840,7 @@
             <a class="nav" href="z_a90a0205700d049c_interfaces_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

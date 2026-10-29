@@ -3,5 +3,5 @@ qat.runtime.aggregator module
 
 .. automodule:: qat.runtime.aggregator
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

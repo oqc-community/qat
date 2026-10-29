@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.materialisers.operations.operation_builder module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.system_data.materialisers.operations.operation_builder module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -721,7 +721,7 @@
 <p>Abstract operation-builder contract for canonical per-qubit operation sets.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractOperationBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractOperationBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Contract for constructing qubit-owned canonical operation sets.</p>
 <p>Subclasses implement the operation-construction methods and inherit the
@@ -760,7 +760,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_delay_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_delay_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_delay_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_delay_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_delay_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -770,7 +770,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_had_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_had_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_had_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_had_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_had_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -780,7 +780,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_id_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_id_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_id_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_id_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_id_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -790,7 +790,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_initiate_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_initiate_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_initiate_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_initiate_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_initiate_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -800,7 +800,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_measure_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_measure_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_measure_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_measure_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_measure_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -822,7 +822,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_reset_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_reset_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_reset_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_reset_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_reset_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -832,7 +832,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rx_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_rx_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rx_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_rx_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rx_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -842,7 +842,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_ry_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_ry_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_ry_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_ry_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_ry_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -852,7 +852,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rz_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_rz_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rz_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_rz_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_rz_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -862,7 +862,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_s_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_s_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_s_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_s_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_s_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -872,7 +872,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sdg_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sdg_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sdg_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -882,7 +882,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sx_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sx_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sx_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sx_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sx_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -892,7 +892,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sxdg_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sxdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sxdg_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_sxdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_sxdg_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -902,7 +902,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_t_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_t_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_t_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_t_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_t_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -912,7 +912,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_tdg_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_tdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_tdg_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_tdg_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_tdg_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -922,7 +922,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_two_qubit_operations">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_two_qubit_operations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_two_qubit_operations" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_two_qubit_operations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_two_qubit_operations" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
@@ -932,7 +932,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u1_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u1_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u1_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u1_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u1_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -942,7 +942,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u2_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u2_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u2_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u2_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u2_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -952,7 +952,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_u_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_u_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -962,7 +962,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_x_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_x_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_x_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_x_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_x_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -972,7 +972,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_y_gate">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_y_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_y_gate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_y_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_y_gate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
@@ -982,7 +982,7 @@ template <code class="docutils literal notranslate"><span class="pre">build_sing
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_z_operation">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_z_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_z_operation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_z_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder.make_z_operation" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>

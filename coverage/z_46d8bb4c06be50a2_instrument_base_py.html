@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_f8407489e25bde66_live_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -136,7 +136,7 @@
     <p class="mis show_mis"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">is_connected</span> <span class="op">=</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.id}_{self.name}_{self.address}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">id</span><span class="op">}</span><span class="fst">_</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst">_</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">address</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">    <span class="key">def</span> <span class="nam">__str__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">__repr__</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -164,7 +164,7 @@
     <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">        <span class="key">if</span> <span class="nam">comp</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="str">f"Instrument {component} already exists"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Instrument </span><span class="op">{</span><span class="nam">component</span><span class="op">}</span><span class="fst"> already exists</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">components</span><span class="op">[</span><span class="nam">component</span><span class="op">.</span><span class="nam">id</span><span class="op">]</span> <span class="op">=</span> <span class="nam">component</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -175,7 +175,7 @@
     <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="key">def</span> <span class="nam">lookup_by_name</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">name</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span> <span class="op">-></span> <span class="nam">LeafInstrument</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="nam">comp</span> <span class="op">=</span> <span class="nam">next</span><span class="op">(</span><span class="op">(</span><span class="nam">comp</span> <span class="key">for</span> <span class="nam">comp</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">components</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">comp</span><span class="op">.</span><span class="nam">name</span> <span class="op">==</span> <span class="nam">name</span><span class="op">)</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">comp</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Could not find instrument with name {name}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Could not find instrument with name </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">return</span> <span class="nam">comp</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
@@ -186,7 +186,7 @@
             <a class="nav" href="z_f8407489e25bde66_live_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

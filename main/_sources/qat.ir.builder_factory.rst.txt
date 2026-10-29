@@ -3,5 +3,5 @@ qat.ir.builder\_factory module
 
 .. automodule:: qat.ir.builder_factory
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

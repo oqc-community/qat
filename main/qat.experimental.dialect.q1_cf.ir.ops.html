@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_cf.ir.ops module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.q1_cf.ir.ops module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -735,7 +735,7 @@ four terminators:</p>
 <p>Reference: <a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryPredicateBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryPredicateBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp" title="qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryPredicateBranchOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">HasRegisterConstraints</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Branch on a binary predicate over two operands.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">predicate</span></code> selects the signed/unsigned comparison applied to <code class="docutils literal notranslate"><span class="pre">lhs</span></code>
@@ -796,7 +796,7 @@ branch falls through to <code class="docutils literal notranslate"><span class="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -837,7 +837,7 @@ allocation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.parse">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.parse" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.BinaryPredicateBranchOp.parse" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
@@ -904,7 +904,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JmpBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">successor_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">successor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JmpBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">successor_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">successor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp" title="qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">JmpBranchOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">HasRegisterConstraints</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Unconditional branch to a successor block.</p>
 <p>Carries optional per-successor block arguments. At linearisation to flat
@@ -921,7 +921,7 @@ fall-through block).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -951,7 +951,7 @@ allocation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.parse">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.parse" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.JmpBranchOp.parse" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
@@ -1006,7 +1006,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoopBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoopBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp" title="qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoopBranchOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">HasRegisterConstraints</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Decrement <code class="docutils literal notranslate"><span class="pre">counter</span></code> and branch to <code class="docutils literal notranslate"><span class="pre">body</span></code> while non-zero; else <code class="docutils literal notranslate"><span class="pre">exit</span></code>.</p>
 <p>Lowers to <code class="docutils literal notranslate"><span class="pre">q1.ri.loop</span></code> / <code class="docutils literal notranslate"><span class="pre">q1.rr.loop</span></code> at flat q1.</p>
@@ -1052,7 +1052,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1087,7 +1087,7 @@ allocation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.parse">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.parse" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.parse" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
@@ -1130,7 +1130,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryPredicateBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryPredicateBranchOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp" title="qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnaryPredicateBranchOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">HasRegisterConstraints</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Branch on a unary predicate of a single register.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">predicate</span></code> selects the zero/sign test applied to <code class="docutils literal notranslate"><span class="pre">rs</span></code>. The <code class="docutils literal notranslate"><span class="pre">then</span></code>
@@ -1183,7 +1183,7 @@ branch falls through to <code class="docutils literal notranslate"><span class="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1218,7 +1218,7 @@ allocation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.parse">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.parse" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.parse" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>

@@ -3,5 +3,5 @@ qat.experimental.conversion.pulse\_to\_q1.qblox\_configuration.reconciliation mo
 
 .. automodule:: qat.experimental.conversion.pulse_to_q1.qblox_configuration.reconciliation
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.passes.pass_ordering module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.passes.pass_ordering module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -737,7 +737,7 @@ an official pass grouping enforces its invariants up front rather than failing
 part-way through execution.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.passes.pass_ordering.OrderedPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrderedPass</span></span><a class="headerlink" href="#qat.experimental.passes.pass_ordering.OrderedPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrderedPass</span></span><a class="headerlink" href="#qat.experimental.passes.pass_ordering.OrderedPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Mix-in that lets a <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code> declare ordering constraints.</p>
 <p>Combine it with <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code> on any pass that participates in
@@ -775,7 +775,7 @@ pass.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.passes.pass_ordering.OrderedPassPipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrderedPassPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.passes.pass_ordering.OrderedPassPipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrderedPassPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.passes.pass_ordering.OrderedPassPipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PassPipeline</span></code></p>
 <p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">PassPipeline</span></code> that validates ordering on construction.</p>
 <p>Official pass groupings should return this pipeline so that a mis-ordered or

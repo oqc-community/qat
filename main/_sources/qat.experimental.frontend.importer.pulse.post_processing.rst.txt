@@ -3,5 +3,5 @@ qat.experimental.frontend.importer.pulse.post\_processing module
 
 .. automodule:: qat.experimental.frontend.importer.pulse.post_processing
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

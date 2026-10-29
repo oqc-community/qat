@@ -3,8 +3,8 @@ qat.experimental.system\_data.materialisers.purr.ingress package
 
 .. automodule:: qat.experimental.system_data.materialisers.purr.ingress
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

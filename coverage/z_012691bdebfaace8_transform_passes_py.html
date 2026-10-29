@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_012691bdebfaace8_validation_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -225,7 +225,7 @@
     <p class="pln"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">                <span class="com"># target already validated to be a QuantumComponent during initialisation</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">                <span class="key">if</span> <span class="key">not</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">inst</span><span class="op">.</span><span class="nam">target</span><span class="op">,</span> <span class="nam">inst</span><span class="op">.</span><span class="nam">attribute</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">                    <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">                        <span class="str">f"Attempting to assign {inst.value} to non existing attribute {inst.attribute}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">                        <span class="fst">f"</span><span class="fst">Attempting to assign </span><span class="op">{</span><span class="nam">inst</span><span class="op">.</span><span class="nam">value</span><span class="op">}</span><span class="fst"> to non existing attribute </span><span class="op">{</span><span class="nam">inst</span><span class="op">.</span><span class="nam">attribute</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">                <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">.</span><span class="nam">value</span><span class="op">,</span> <span class="nam">Variable</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -234,13 +234,13 @@
     <p class="mis show_mis"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">        <span class="key">for</span> <span class="op">(</span><span class="nam">target</span><span class="op">,</span> <span class="nam">attr</span><span class="op">)</span><span class="op">,</span> <span class="nam">values</span> <span class="key">in</span> <span class="nam">target_attr2value</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">            <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">values</span><span class="op">)</span> <span class="op">></span> <span class="num">1</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">                    <span class="str">f"Multiple DeviceUpdate instructions attempting to update the same attribute '{attr}' on {target}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Multiple DeviceUpdate instructions attempting to update the same attribute '</span><span class="op">{</span><span class="nam">attr</span><span class="op">}</span><span class="fst">' on </span><span class="op">{</span><span class="nam">target</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t154" href="#t154">154</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t155" href="#t155">155</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t156" href="#t156">156</a></span><span class="t">            <span class="nam">unique_values</span> <span class="op">=</span> <span class="nam">set</span><span class="op">(</span><span class="nam">values</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t157" href="#t157">157</a></span><span class="t">            <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">unique_values</span><span class="op">)</span> <span class="op">></span> <span class="num">1</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                    <span class="str">f"Cannot update the same attribute '{attr}' on {target} with distinct values {unique_values}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Cannot update the same attribute '</span><span class="op">{</span><span class="nam">attr</span><span class="op">}</span><span class="fst">' on </span><span class="op">{</span><span class="nam">target</span><span class="op">}</span><span class="fst"> with distinct values </span><span class="op">{</span><span class="nam">unique_values</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">        <span class="nam">new_instructions</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -262,7 +262,7 @@
             <a class="nav" href="z_012691bdebfaace8_validation_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

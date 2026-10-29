@@ -3,8 +3,8 @@ qat.pipelines.legacy.rtcs package
 
 .. automodule:: qat.pipelines.legacy.rtcs
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

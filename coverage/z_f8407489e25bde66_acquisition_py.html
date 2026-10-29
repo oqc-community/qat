@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_f8407489e25bde66_analysis_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -201,7 +201,7 @@
     <p class="pln"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">other</span><span class="op">,</span> <span class="nam">Acquisition</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">119&#x202F;&#x219B;&#x202F;120</span><span class="annotate long">line 119 didn't jump to line 120 because the condition on line 119 was never true</span></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span><span class="str">f"Can only add acquisitions, got {type(other)}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Can only add acquisitions, got </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">other</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span> <span class="op">==</span> <span class="nam">Acquisition</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">            <span class="key">return</span> <span class="nam">other</span><span class="op">.</span><span class="nam">model_copy</span><span class="op">(</span><span class="nam">deep</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -213,12 +213,12 @@
     <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">index</span> <span class="op">!=</span> <span class="nam">other</span><span class="op">.</span><span class="nam">index</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">130&#x202F;&#x219B;&#x202F;131</span><span class="annotate long">line 130 didn't jump to line 131 because the condition on line 130 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">                <span class="str">f"Expected the same index but got {self.index} != {other.index}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Expected the same index but got </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">index</span><span class="op">}</span><span class="fst"> != </span><span class="op">{</span><span class="nam">other</span><span class="op">.</span><span class="nam">index</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="nam">result</span><span class="op">.</span><span class="nam">index</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">index</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">name</span> <span class="op">!=</span> <span class="nam">other</span><span class="op">.</span><span class="nam">name</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">136&#x202F;&#x219B;&#x202F;137</span><span class="annotate long">line 136 didn't jump to line 137 because the condition on line 136 was never true</span></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Expected the same name but got {self.name} != {other.name}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Expected the same name but got </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst"> != </span><span class="op">{</span><span class="nam">other</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">        <span class="nam">result</span><span class="op">.</span><span class="nam">name</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">name</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">        <span class="nam">scope_data1</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">acquisition</span><span class="op">.</span><span class="nam">scope</span>&nbsp;</span><span class="r"></span></p>
@@ -259,7 +259,7 @@
             <a class="nav" href="z_f8407489e25bde66_analysis_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

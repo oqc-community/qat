@@ -346,7 +346,7 @@
 <span id="qat-purr-compiler-runtime-module"></span><h1>qat.purr.compiler.runtime module<a class="headerlink" href="#module-qat.purr.compiler.runtime" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.CalibrationWithArgs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibrationWithArgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.CalibrationWithArgs" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibrationWithArgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.CalibrationWithArgs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.runtime.QuantumExecutableBlock" title="qat.purr.compiler.runtime.QuantumExecutableBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumExecutableBlock</span></code></a></p>
 <p>Wrapper for a calibration and argument combination.</p>
 <dl class="py method">
@@ -358,7 +358,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.NewQuantumRuntime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.NewQuantumRuntime" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.NewQuantumRuntime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.runtime.QuantumRuntime" title="qat.purr.compiler.runtime.QuantumRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></p>
 <p>Uses the new pass infrastructure.</p>
 <p>Notice how polymorphic calls to XEngine.optimize() and XEngine.validate() are avoided.
@@ -382,7 +382,7 @@ needs to be kept light-weight and technically tractable.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumExecutableBlock">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumExecutableBlock</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumExecutableBlock" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumExecutableBlock</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumExecutableBlock" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Generic executable block that can be run on a quantum runtime.</p>
 <dl class="py method">
@@ -394,7 +394,7 @@ needs to be kept light-weight and technically tractable.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumRuntime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin" title="qat.purr.compiler.metrics.MetricsMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsMixin</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumRuntime.execute">
@@ -405,7 +405,7 @@ results.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumRuntime.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -423,7 +423,7 @@ results.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.RemoteCalibration">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RemoteCalibration</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.RemoteCalibration" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RemoteCalibration</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.RemoteCalibration" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base class for any remote calibration executions.</p>
 <p>These are far more complicated blocks than purely a string of instructions and include

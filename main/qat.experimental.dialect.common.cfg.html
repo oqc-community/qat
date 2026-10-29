@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.common.cfg module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.common.cfg module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -726,7 +726,7 @@ forwarded along each edge, so the trait supplies that missing half and lets
 reachability and predecessor analysis stay dialect-neutral.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.common.cfg.SuccessorOperandsTrait">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SuccessorOperandsTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.common.cfg.SuccessorOperandsTrait" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SuccessorOperandsTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.common.cfg.SuccessorOperandsTrait" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">OpTrait</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Trait exposing a terminator’s successor edges.</p>
 <p>Each edge pairs a successor block with the operand group forwarded to its block
@@ -734,7 +734,7 @@ arguments. A terminator that ends a path, a halt or return, does not carry the t
 is treated as having no successors.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.common.cfg.SuccessorOperandsTrait.successor_edges">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">successor_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.common.cfg.SuccessorOperandsTrait.successor_edges" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">successor_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.common.cfg.SuccessorOperandsTrait.successor_edges" title="Link to this definition"></a></dt>
 <dd><p>Return the <code class="docutils literal notranslate"><span class="pre">(successor,</span> <span class="pre">forwarded</span> <span class="pre">operands)</span></code> edges of <code class="docutils literal notranslate"><span class="pre">op</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

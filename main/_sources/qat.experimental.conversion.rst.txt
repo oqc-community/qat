@@ -3,8 +3,8 @@ qat.experimental.conversion package
 
 .. automodule:: qat.experimental.conversion
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

@@ -3,5 +3,5 @@ qat.experimental.dialect.q1.transforms.verify\_allocation module
 
 .. automodule:: qat.experimental.dialect.q1.transforms.verify_allocation
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

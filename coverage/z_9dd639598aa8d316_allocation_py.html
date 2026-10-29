@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_9dd639598aa8d316_reconciliation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -161,16 +161,16 @@
     <p class="pln"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">sequencer_bank</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">                <span class="str">f"Qblox port {channel_binding.port_id!r} on module "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">                <span class="str">f"{module_location!r} supplies no sequencer bank"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Qblox port </span><span class="op">{</span><span class="nam">channel_binding</span><span class="op">.</span><span class="nam">port_id</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst"> on module </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">module_location</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst"> supplies no sequencer bank</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="nam">available_indices</span> <span class="op">=</span> <span class="nam">sorted</span><span class="op">(</span><span class="nam">set</span><span class="op">(</span><span class="nam">sequencer_bank</span><span class="op">)</span> <span class="op">-</span> <span class="nam">allocated_indices</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">available_indices</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">                <span class="str">f"Qblox port {channel_binding.port_id!r} on module "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">                <span class="str">f"{module_location!r} has no sequencer left for channel "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">                <span class="str">f"{channel_binding.channel_id!r}; its supplied bank "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">                <span class="str">f"{sorted(sequencer_bank)} is fully allocated"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Qblox port </span><span class="op">{</span><span class="nam">channel_binding</span><span class="op">.</span><span class="nam">port_id</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst"> on module </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">module_location</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst"> has no sequencer left for channel </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">channel_binding</span><span class="op">.</span><span class="nam">channel_id</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst">; its supplied bank </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">sorted</span><span class="op">(</span><span class="nam">sequencer_bank</span><span class="op">)</span><span class="op">}</span><span class="fst"> is fully allocated</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">        <span class="key">if</span> <span class="nam">module_configuration</span><span class="op">.</span><span class="nam">module_view</span><span class="op">.</span><span class="nam">kind</span> <span class="op">==</span> <span class="nam">QbloxModuleKind</span><span class="op">.</span><span class="nam">qrc</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">            <span class="com"># A QRC places its readout sequencers on the low indices (0-7) and its</span>&nbsp;</span><span class="r"></span></p>
@@ -198,7 +198,7 @@
             <a class="nav" href="z_9dd639598aa8d316_reconciliation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

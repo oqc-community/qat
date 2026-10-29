@@ -3,8 +3,8 @@ qat.experimental.runtime package
 
 .. automodule:: qat.experimental.runtime
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

@@ -3,8 +3,8 @@ qat.frontend.passes package
 
 .. automodule:: qat.frontend.passes
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

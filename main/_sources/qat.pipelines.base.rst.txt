@@ -3,5 +3,5 @@ qat.pipelines.base module
 
 .. automodule:: qat.pipelines.base
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -3,5 +3,5 @@ qat.experimental.dialect.pulse.transforms.optimize\_contiguous\_squashable\_inst
 
 .. automodule:: qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

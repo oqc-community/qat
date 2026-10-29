@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_5cc8e8238d9e7ab2_qiskit_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -205,8 +205,8 @@
     <p class="run"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">                <span class="key">def</span> <span class="nam">throw_on_invalid_args</span><span class="op">(</span><span class="nam">actual_args</span><span class="op">,</span> <span class="nam">expected_args</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">                    <span class="key">if</span> <span class="nam">actual_args</span> <span class="op">!=</span> <span class="nam">expected_args</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">122&#x202F;&#x219B;&#x202F;123</span><span class="annotate long">line 122 didn't jump to line 123 because the condition on line 122 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">                        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">                            <span class="str">f"{intrinsic_name} has {actual_args} arguments, "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                            <span class="str">f"expected {expected_args}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">                            <span class="fst">f"</span><span class="op">{</span><span class="nam">intrinsic_name</span><span class="op">}</span><span class="fst"> has </span><span class="op">{</span><span class="nam">actual_args</span><span class="op">}</span><span class="fst"> arguments, </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                            <span class="fst">f"</span><span class="fst">expected </span><span class="op">{</span><span class="nam">expected_args</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">                        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">                <span class="nam">args</span><span class="op">:</span> <span class="nam">list</span><span class="op">[</span><span class="nam">Constant</span><span class="op">]</span> <span class="op">=</span> <span class="nam">inst</span><span class="op">.</span><span class="nam">args</span>&nbsp;</span><span class="r"></span></p>
@@ -305,7 +305,7 @@
     <p class="par run show_par"><span class="n"><a id="t221" href="#t221">221</a></span><span class="t">            <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">qir_file</span><span class="op">,</span> <span class="nam">bytes</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">221&#x202F;&#x219B;&#x202F;224</span><span class="annotate long">line 221 didn't jump to line 224 because the condition on line 221 was always true</span></span></p>
     <p class="run"><span class="n"><a id="t222" href="#t222">222</a></span><span class="t">                <span class="nam">mod</span> <span class="op">=</span> <span class="nam">Module</span><span class="op">.</span><span class="nam">from_bitcode</span><span class="op">(</span><span class="nam">Context</span><span class="op">(</span><span class="op">)</span><span class="op">,</span> <span class="nam">qir_file</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t223" href="#t223">223</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t224" href="#t224">224</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Expected type str | bytes, got {type(mod)} instead."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t224" href="#t224">224</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Expected type str | bytes, got </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">mod</span><span class="op">)</span><span class="op">}</span><span class="fst"> instead.</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t225" href="#t225">225</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t226" href="#t226">226</a></span><span class="t">            <span class="nam">entry_point</span> <span class="op">=</span> <span class="nam">next</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">                <span class="nam">iter</span><span class="op">(</span><span class="nam">filter</span><span class="op">(</span><span class="key">lambda</span> <span class="nam">fnc</span><span class="op">:</span> <span class="nam">is_entry_point</span><span class="op">(</span><span class="nam">fnc</span><span class="op">)</span><span class="op">,</span> <span class="nam">mod</span><span class="op">.</span><span class="nam">functions</span><span class="op">)</span><span class="op">)</span><span class="op">,</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
@@ -344,7 +344,7 @@
             <a class="nav" href="z_5cc8e8238d9e7ab2_qiskit_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

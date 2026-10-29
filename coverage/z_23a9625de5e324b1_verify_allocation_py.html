@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_8f8cef896c05c176_ops_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -112,8 +112,8 @@
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t"><span class="op">)</span> <span class="op">-></span> <span class="nam">str</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="str">"""Build a readable allocation error for a value inside a sequence."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="key">return</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">        <span class="str">f"Sequence {sequence.channel_id.data!r}: {value_type} {idx} of operation "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="str">f"{op_name!r} is {issue}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">        <span class="fst">f"</span><span class="fst">Sequence </span><span class="op">{</span><span class="nam">sequence</span><span class="op">.</span><span class="nam">channel_id</span><span class="op">.</span><span class="nam">data</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">value_type</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">idx</span><span class="op">}</span><span class="fst"> of operation </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="fst">f"</span><span class="op">{</span><span class="nam">op_name</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst"> is </span><span class="op">{</span><span class="nam">issue</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -142,7 +142,7 @@
     <p class="pln"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">            <span class="nam">op_name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">            <span class="nam">value_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">            <span class="nam">idx</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">            <span class="str">f"a virtual Q1 register (inf_gpr_{~reg_type.index.data})"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">            <span class="fst">f"</span><span class="fst">a virtual Q1 register (inf_gpr_</span><span class="op">{</span><span class="op">~</span><span class="nam">reg_type</span><span class="op">.</span><span class="nam">index</span><span class="op">.</span><span class="nam">data</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">    <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
@@ -217,8 +217,8 @@
     <p class="mis show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">        <span class="key">if</span> <span class="nam">all_errors</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">            <span class="nam">error_report</span> <span class="op">=</span> <span class="str">"\n"</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">all_errors</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">            <span class="key">raise</span> <span class="nam">PassFailedException</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">                <span class="str">f"Register allocation verification failed. Found {len(all_errors)} "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">                <span class="str">f"issue(s):\n{error_report}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Register allocation verification failed. Found </span><span class="op">{</span><span class="nam">len</span><span class="op">(</span><span class="nam">all_errors</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">                <span class="fst">f"</span><span class="fst">issue(s):\n</span><span class="op">{</span><span class="nam">error_report</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
@@ -229,7 +229,7 @@
             <a class="nav" href="z_8f8cef896c05c176_ops_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

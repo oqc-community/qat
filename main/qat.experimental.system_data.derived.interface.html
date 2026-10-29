@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.derived.interface module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.system_data.derived.interface module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-experimental-system-data-derived-interface-module"></span><h1>qat.experimental.system_data.derived.interface module<a class="headerlink" href="#module-qat.experimental.system_data.derived.interface" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.derived.interface.DerivedViewInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DerivedViewInterface</span></span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DerivedViewInterface</span></span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TParent</span></code>]</p>
 <p>A view derived from an upstream data source.</p>
 <p>The type parameter <code class="docutils literal notranslate"><span class="pre">_TParent</span></code> declares what this view is derived from. That may be
@@ -735,7 +735,7 @@ subclass for views that sit further down the derivation chain.</p>
 <p>and must implement <a class="reference internal" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive" title="qat.experimental.system_data.derived.interface.DerivedViewInterface.derive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derive()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.derived.interface.DerivedViewInterface.derive">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive" title="Link to this definition"></a></dt>
 <dd><p>Construct this view from its upstream parent.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

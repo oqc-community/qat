@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_012691bdebfaace8_builders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -108,7 +108,7 @@
     <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">version</span> <span class="op">=</span> <span class="nam">version</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.make}-{self.version if self.version is not None else 'latest'}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">make</span><span class="op">}</span><span class="fst">-</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">version</span> <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">version</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="str">'latest'</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="op">@</span><span class="nam">staticmethod</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="key">def</span> <span class="nam">with_version</span><span class="op">(</span><span class="nam">version</span><span class="op">:</span> <span class="nam">str</span> <span class="op">=</span> <span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -161,7 +161,7 @@
     <p class="mis show_mis"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">    <span class="nam">model</span> <span class="op">=</span> <span class="nam">get_verification_model</span><span class="op">(</span><span class="nam">qpu_type</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="key">if</span> <span class="nam">model</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="str">f"Cannot verify instructions, {qpu_type} isn't a valid QPU version."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="fst">f"</span><span class="fst">Cannot verify instructions, </span><span class="op">{</span><span class="nam">qpu_type</span><span class="op">}</span><span class="fst"> isn't a valid QPU version.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">    <span class="nam">engine</span><span class="op">:</span> <span class="nam">VerificationEngine</span> <span class="op">=</span> <span class="nam">model</span><span class="op">.</span><span class="nam">get_engine</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -184,7 +184,7 @@
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">qpu_type</span><span class="op">,</span> <span class="nam">QPUVersion</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">            <span class="str">f"{qpu_type} is not a QPU version, can't find verification engine."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">            <span class="fst">f"</span><span class="op">{</span><span class="nam">qpu_type</span><span class="op">}</span><span class="fst"> is not a QPU version, can't find verification engine.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">    <span class="key">if</span> <span class="nam">qpu_type</span><span class="op">.</span><span class="nam">make</span> <span class="op">==</span> <span class="nam">Lucy</span><span class="op">.</span><span class="nam">__name__</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -227,11 +227,11 @@
     <p class="pln"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">        <span class="nam">circuit_duration</span> <span class="op">=</span> <span class="nam">max</span><span class="op">(</span><span class="nam">durations</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">f"The circuit duration is {circuit_duration / 1e-6} microseconds."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="fst">f"</span><span class="fst">The circuit duration is </span><span class="op">{</span><span class="nam">circuit_duration</span> <span class="op">/</span> <span class="num">1e-6</span><span class="op">}</span><span class="fst"> microseconds.</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="key">if</span> <span class="nam">circuit_duration</span> <span class="op">></span> <span class="nam">self</span><span class="op">.</span><span class="nam">max_circuit_duration</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">            <span class="key">raise</span> <span class="nam">VerificationError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">                <span class="str">f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Circuit duration exceeds maximum allowed. Duration </span><span class="op">{</span><span class="nam">circuit_duration</span><span class="op">}</span><span class="fst">, max: </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">max_circuit_duration</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t152" href="#t152">152</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -253,7 +253,7 @@
             <a class="nav" href="z_012691bdebfaace8_builders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

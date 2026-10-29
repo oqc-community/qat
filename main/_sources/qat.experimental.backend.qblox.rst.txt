@@ -3,8 +3,8 @@ qat.experimental.backend.qblox package
 
 .. automodule:: qat.experimental.backend.qblox
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

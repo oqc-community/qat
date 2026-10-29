@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.passes.purr.transform module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.runtime.passes.purr.transform module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-runtime-passes-purr-transform-module"></span><h1>qat.runtime.passes.purr.transform module<a class="headerlink" href="#module-qat.runtime.passes.purr.transform" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.passes.purr.transform.QiskitErrorMitigation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitErrorMitigation</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitErrorMitigation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitErrorMitigation</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitErrorMitigation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Implements readout error mitigation for legacy Qiskit engines.</p>
 <p>Because the legacy Qiskit engine returns results in a format that is not consistent with
@@ -783,7 +783,7 @@ configuration.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.passes.purr.transform.QiskitSimplifyResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitSimplifyResults</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitSimplifyResults" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitSimplifyResults</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitSimplifyResults" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Strips away randomly generated names.</p>
 <p>This is the same as the <cite>simplify_results</cite> function in <code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsTransform</span></code>.</p>
@@ -804,7 +804,7 @@ configuration.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.passes.purr.transform.QiskitStripMetadata">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitStripMetadata</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitStripMetadata" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitStripMetadata</span></span><a class="headerlink" href="#qat.runtime.passes.purr.transform.QiskitStripMetadata" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Detects if Qiskit is returning meta data associated with the simulation, and trims it
 away if so.</p>

@@ -3,8 +3,8 @@ qat.experimental.dialect.results.transforms package
 
 .. automodule:: qat.experimental.dialect.results.transforms
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

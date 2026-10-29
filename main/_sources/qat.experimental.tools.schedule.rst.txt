@@ -3,8 +3,8 @@ qat.experimental.tools.schedule package
 
 .. automodule:: qat.experimental.tools.schedule
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

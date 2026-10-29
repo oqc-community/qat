@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_ec6d2e434f841852_execution_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -217,7 +217,7 @@
     <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="key">if</span> <span class="nam">connection</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">                <span class="str">f"Provided argument `connection` is {connection}. Will overwrite "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Provided argument `connection` is </span><span class="op">{</span><span class="nam">connection</span><span class="op">}</span><span class="fst">. Will overwrite </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">                <span class="str">"sequencer's connections"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">            <span class="nam">module</span><span class="op">.</span><span class="nam">disconnect_outputs</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -229,7 +229,7 @@
     <p class="pln"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">                <span class="str">"specified"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">f"Calibrating LO leakage on module {module}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Calibrating LO leakage on module </span><span class="op">{</span><span class="nam">module</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">        <span class="nam">offset_config</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">calibrate_lo_leakage</span><span class="op">(</span><span class="nam">module</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">        <span class="nam">mixer_configs</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">        <span class="key">for</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">sequencers</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -240,7 +240,7 @@
     <p class="run"><span class="n"><a id="t156" href="#t156">156</a></span><span class="t">        <span class="key">if</span> <span class="nam">connection</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t157" href="#t157">157</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">                <span class="str">"Mixer calibration finished. Resetting sequencer connections for module "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                <span class="str">f"{module.slot_idx}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">module</span><span class="op">.</span><span class="nam">slot_idx</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">            <span class="nam">module</span><span class="op">.</span><span class="nam">disconnect_outputs</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -251,7 +251,7 @@
     <p class="mis show_mis"><span class="n"><a id="t167" href="#t167">167</a></span><span class="t">        <span class="key">pass</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t169" href="#t169">169</a></span><span class="t">    <span class="key">def</span> <span class="nam">calibrate_sideband</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">sequencer</span><span class="op">:</span> <span class="nam">Sequencer</span><span class="op">,</span> <span class="nam">connection</span><span class="op">:</span> <span class="nam">str</span> <span class="op">=</span> <span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">f"Calibrating sidebands on sequencer {sequencer}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Calibrating sidebands on sequencer </span><span class="op">{</span><span class="nam">sequencer</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t">        <span class="nam">sequencer</span><span class="op">.</span><span class="nam">sideband_cal</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t172" href="#t172">172</a></span><span class="t">        <span class="nam">sequencer</span><span class="op">.</span><span class="nam">arm_sequencer</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">        <span class="nam">sequencer</span><span class="op">.</span><span class="nam">start_sequencer</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -644,7 +644,7 @@
             <a class="nav" href="z_ec6d2e434f841852_execution_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

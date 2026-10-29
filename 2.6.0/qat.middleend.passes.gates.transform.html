@@ -340,7 +340,7 @@
 <span id="qat-middleend-passes-gates-transform-module"></span><h1>qat.middleend.passes.gates.transform module<a class="headerlink" href="#module-qat.middleend.passes.gates.transform" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.Decompose2QToCNOTs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Decompose2QToCNOTs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Decompose2QToCNOTs" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Decompose2QToCNOTs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Decompose2QToCNOTs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through the list of gates and decomposes any two-qubit gate down to CNOTs.</p>
 <p>This applies to any 2Q gate with the exception of ECR, <span class="math notranslate nohighlight">\(ZX(\pi/4)\)</span> and
@@ -363,13 +363,13 @@ appear sequentially.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.DecomposeToNativeGates">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecomposeToNativeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">native_gates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.gates.transform.DecomposeToNativeGates" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecomposeToNativeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">native_gates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.gates.transform.DecomposeToNativeGates" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through the list of gates and decomposes gate into a native gate set.</p>
 <p>Default native gates are <code class="xref py py-class docutils literal notranslate"><span class="pre">Z</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">X_pi_2</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">ZX_pi_4</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates"></span><strong>native_gates</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.GateBase" title="qat.ir.gates.base.GateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GateBase</span></code></a>]]</span>) – A list of native gates to decompose to.</p>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates"></span><strong>native_gates</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.GateBase" title="qat.ir.gates.base.GateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GateBase</span></code></a>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A list of native gates to decompose to.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -386,7 +386,7 @@ appear sequentially.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.DecomposeToPulses">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecomposeToPulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decompositions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.gates.transform.DecomposeToPulses" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DecomposeToPulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decompositions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.gates.transform.DecomposeToPulses" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>A simple pass proof-of-concept pass that decomposes gates to pulse instructions.</p>
 <p>Each native gate can be written a sequence of pulse instructions. This pass decomposes
@@ -418,7 +418,7 @@ pass to more effeciently decompose instructions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.RemoveRedundantSWAPs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RemoveRedundantSWAPs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.RemoveRedundantSWAPs" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RemoveRedundantSWAPs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.RemoveRedundantSWAPs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Indentifies redundant SWAPs at the beginning and the end of a circuit, and removes
 them. This pass is designed to be used before routing.</p>
@@ -442,7 +442,7 @@ potentially reduce the overall 2Q-gate count.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.SequentialEndMeasurements">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequentialEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SequentialEndMeasurements" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequentialEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SequentialEndMeasurements" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Finds all end measurements and enforces that they happen at different times.</p>
 <p>Bubbles end-measurements to the end of the instruction list, and adds a barrier between
@@ -456,7 +456,7 @@ them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.Squash1QGates">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Squash1QGates</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Squash1QGates" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Squash1QGates</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Squash1QGates" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Squashes consecutive 1Q qubits into a single <span class="math notranslate nohighlight">\(U(\theta, \phi, \lambda)\)</span> gate.</p>
 <p>Iterates through the list of instructions, looking for series of 1Q gates that are not
@@ -482,7 +482,7 @@ will later be composed into native gates.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.Squash2QGates">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Squash2QGates</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Squash2QGates" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Squash2QGates</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.Squash2QGates" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Squashes consecutive 1Q and 2Q qubits into a single gate.</p>
 <p>Iterates through the list of instructions, looking for consecutive 1Q and 2Q gates that
@@ -497,7 +497,7 @@ will later be composed into native gates.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.SquashCNOTs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquashCNOTs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SquashCNOTs" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquashCNOTs</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SquashCNOTs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through a list of gates and removes redundant CNOTs.</p>
 <p>If two CNOTs that share the same target and control qubits appear sequentially [note
@@ -521,7 +521,7 @@ build on this more.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.StaggeredEndMeasurements">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StaggeredEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.StaggeredEndMeasurements" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StaggeredEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.StaggeredEndMeasurements" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Finds all end measurements, and staggers their timings so that no Qubits with
 couplings have measurements occur at the same time.</p>
@@ -536,7 +536,7 @@ to effeciently bundle together non-coupled Qubits.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.gates.transform.SyncEndMeasurements">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SyncEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SyncEndMeasurements" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SyncEndMeasurements</span></span><a class="headerlink" href="#qat.middleend.passes.gates.transform.SyncEndMeasurements" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Finds and synchronizes all end-circuit measurements to happen at the same time.</p>
 <p>Bubbles end-measurements to the end of the instruction list, and adds a barrier before

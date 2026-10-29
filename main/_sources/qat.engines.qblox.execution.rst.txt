@@ -3,5 +3,5 @@ qat.engines.qblox.execution module
 
 .. automodule:: qat.engines.qblox.execution
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

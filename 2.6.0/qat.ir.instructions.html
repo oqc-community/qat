@@ -337,7 +337,7 @@
 <span id="qat-ir-instructions-module"></span><h1>qat.ir.instructions module<a class="headerlink" href="#module-qat.ir.instructions" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Assign">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Assign" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Assign" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Assigns a value to a variable.</p>
 <p>This is used to assign some value (e.g. the results from an acquisition) to a variable.
@@ -385,7 +385,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.BinaryOperator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.BinaryOperator" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.BinaryOperator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
 <p>Binary operator, such as <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">!=</span> <span class="pre">y</span></code> etc.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -412,7 +412,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Delay">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Delay" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Delay" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Instructs a quantum target to do nothing for a fixed time.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -429,7 +429,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.EndRepeat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndRepeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.EndRepeat" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndRepeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.EndRepeat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -445,7 +445,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Equals">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Equals" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Equals" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -461,7 +461,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.FrequencySet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencySet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.FrequencySet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencySet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.FrequencySet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Set the frequency of a pulse channel.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -483,7 +483,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.FrequencyShift">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.FrequencyShift" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.FrequencyShift" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Change the frequency of a pulse channel.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -505,7 +505,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.GreaterOrEqualThan">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GreaterOrEqualThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.GreaterOrEqualThan" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GreaterOrEqualThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.GreaterOrEqualThan" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -521,7 +521,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.GreaterThan">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GreaterThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.GreaterThan" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GreaterThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.GreaterThan" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -537,7 +537,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Instruction" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Instruction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel" title="qat.utils.pydantic.AllowExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllowExtraFieldsModel</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -545,12 +545,12 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction.head">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.head" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.head" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction.instr_type">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instr_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.instructions.Instruction.instr_type" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instr_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.instructions.Instruction.instr_type" title="Link to this definition"></a></dt>
 <dd><p>Returns the type of the instruction, which is the class name.</p>
 </dd></dl>
 
@@ -562,19 +562,19 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction.number_of_instructions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.number_of_instructions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.number_of_instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction.tail">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.tail" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.tail" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -592,7 +592,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.head">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.head" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.head" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -608,19 +608,19 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.number_of_instructions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.number_of_instructions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.number_of_instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.tail">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.tail" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.tail" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Jump">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Jump" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Jump" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Classic jump instruction, should be linked to label with an optional condition.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -645,14 +645,14 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Jump.target">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.Jump.target" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.Jump.target" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Label">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Label" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Label" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Label to apply to a line of code.</p>
 <p>Used as anchors for other instructions like jumps.</p>
@@ -673,14 +673,14 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instructions.Label.with_random_name">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_random_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Label.with_random_name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_random_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Label.with_random_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.LessOrEqualThan">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LessOrEqualThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.LessOrEqualThan" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LessOrEqualThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.LessOrEqualThan" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -696,7 +696,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.LessThan">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LessThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.LessThan" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LessThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.LessThan" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -712,13 +712,13 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.LoopCount">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoopCount</span></span><a class="headerlink" href="#qat.ir.instructions.LoopCount" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoopCount</span></span><a class="headerlink" href="#qat.ir.instructions.LoopCount" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.NotEquals">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.NotEquals" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.NotEquals" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -734,7 +734,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.PhaseReset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseReset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseReset" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseReset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseReset" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.PhaseSet" title="qat.ir.instructions.PhaseSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseSet</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -755,7 +755,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.PhaseSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Sets the phase for a pulse channel.</p>
 <p>This sets the absolute phase of an NCO, unlike the <a class="reference internal" href="#qat.ir.instructions.PhaseShift" title="qat.ir.instructions.PhaseShift"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code></a>, which changes
@@ -779,7 +779,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.PhaseShift">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseShift" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseShift" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>A PhaseShift instruction is used to change the phase of waveforms sent down the pulse
 channel.</p>
@@ -802,7 +802,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Plus">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Plus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Plus" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Plus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Plus" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.BinaryOperator" title="qat.ir.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -818,7 +818,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.QuantumInstruction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstruction" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstruction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Any node that deals particularly with quantum operations.</p>
 <p>All quantum operations must have some sort of target on the quantum computer, such as a
@@ -840,7 +840,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.QuantumInstruction.target">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.QuantumInstruction.target" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.QuantumInstruction.target" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -852,7 +852,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.QuantumInstructionBlock">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstructionBlock" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstructionBlock" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a>, <a class="reference internal" href="#qat.ir.instructions.InstructionBlock" title="qat.ir.instructions.InstructionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBlock</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -876,7 +876,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instructions.QuantumInstructionBlock.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstructionBlock.model_post_init" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstructionBlock.model_post_init" title="Link to this definition"></a></dt>
 <dd><p>This function is meant to behave like a BaseModel method to initialize private attributes.</p>
 <p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
 <dl class="field-list simple">
@@ -900,7 +900,7 @@ context: The context.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Repeat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Repeat" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Repeat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Global meta-instruction that applies to the entire list of instructions.</p>
 <p>Repeat value of the current operations, also known as shots.</p>
@@ -923,7 +923,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Reset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Reset" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Reset" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Resets this qubit to its starting state.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -938,7 +938,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Reset.qubit_target">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubit_target</span></span><a class="headerlink" href="#qat.ir.instructions.Reset.qubit_target" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubit_target</span></span><a class="headerlink" href="#qat.ir.instructions.Reset.qubit_target" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -948,7 +948,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.Reset.target">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.Reset.target" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.instructions.Reset.target" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -960,7 +960,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.ResultsProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.ResultsProcessing" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.ResultsProcessing" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>A meta-instruction that stores how the results are processed.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -987,7 +987,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Return">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Return" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Return" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>A statement defining what to return from a quantum execution.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1009,7 +1009,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Synchronize">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Synchronize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Synchronize" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Synchronize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Synchronize" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Tells the QPU to wait for all the target channels to be free before continuing
 execution on any of them.</p>
@@ -1037,7 +1037,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instructions.Variable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Variable" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Variable" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>States that this value is actually a variable that should be fetched instead.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1067,7 +1067,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instructions.Variable.with_random_name">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_random_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Variable.with_random_name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_random_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Variable.with_random_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

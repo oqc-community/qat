@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_fb98db554169c69c_arg_format_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -242,7 +242,7 @@
     <p class="mis show_mis"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">m</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">                <span class="str">"Invalid operation name. Expected format: "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">                <span class="str">f"q1.&lt;format>.&lt;mnemonic>, but got: {self.name}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">                <span class="fst">f"</span><span class="fst">q1.&lt;format>.&lt;mnemonic>, but got: </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t163" href="#t163">163</a></span><span class="t">        <span class="key">return</span> <span class="nam">m</span><span class="op">.</span><span class="nam">group</span><span class="op">(</span><span class="num">2</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -293,7 +293,7 @@
     <p class="mis show_mis"><span class="n"><a id="t209" href="#t209">209</a></span><span class="t">        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="nam">SSAValue</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t210" href="#t210">210</a></span><span class="t">            <span class="nam">t</span> <span class="op">=</span> <span class="nam">arg</span><span class="op">.</span><span class="nam">type</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t211" href="#t211">211</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">t</span><span class="op">,</span> <span class="nam">WithArgument</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t212" href="#t212">212</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Unexpected register type {t}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t212" href="#t212">212</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Unexpected register type </span><span class="op">{</span><span class="nam">t</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t213" href="#t213">213</a></span><span class="t">            <span class="key">return</span> <span class="nam">t</span><span class="op">.</span><span class="nam">print_arg</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t">        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="nam">StringAttr</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t215" href="#t215">215</a></span><span class="t">            <span class="key">return</span> <span class="nam">arg</span><span class="op">.</span><span class="nam">data</span>&nbsp;</span><span class="r"></span></p>
@@ -324,7 +324,7 @@
     <p class="pln"><span class="n"><a id="t240" href="#t240">240</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t241" href="#t241">241</a></span><span class="t"><span class="str">        :returns: Bare instruction text, or ``None`` to suppress emission entirely.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t242" href="#t242">242</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t243" href="#t243">243</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.assembly_mnemonic()} {self.print_args()}"</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t243" href="#t243">243</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">assembly_mnemonic</span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">print_args</span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t244" href="#t244">244</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t245" href="#t245">245</a></span><span class="t">    <span class="key">def</span> <span class="nam">_build_comment</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">ctx</span><span class="op">:</span> <span class="nam">EmissionContext</span><span class="op">)</span> <span class="op">-></span> <span class="nam">str</span> <span class="op">|</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">        <span class="str">"""Return the comment text to append to the instruction, or ``None``.</span>&nbsp;</span><span class="r"></span></p>
@@ -365,7 +365,7 @@
     <p class="mis show_mis"><span class="n"><a id="t281" href="#t281">281</a></span><span class="t">        <span class="nam">comment</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_build_comment</span><span class="op">(</span><span class="nam">ctx</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t282" href="#t282">282</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">comment</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t283" href="#t283">283</a></span><span class="t">            <span class="key">return</span> <span class="nam">instruction</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t284" href="#t284">284</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{instruction} # {comment}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t284" href="#t284">284</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">instruction</span><span class="op">}</span><span class="fst"> # </span><span class="op">{</span><span class="nam">comment</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t285" href="#t285">285</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t286" href="#t286">286</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t287" href="#t287">287</a></span><span class="t"><span class="key">class</span> <span class="nam">Q1RegAllocOperation</span><span class="op">(</span><span class="nam">HasRegisterConstraints</span><span class="op">,</span> <span class="nam">IRDLOperation</span><span class="op">,</span> <span class="nam">ABC</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -1303,7 +1303,7 @@
             <a class="nav" href="z_fb98db554169c69c_arg_format_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

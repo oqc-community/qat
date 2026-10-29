@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.results.ir.attributes module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.results.ir.attributes module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,7 +722,7 @@
 <p>This includes attributes that model post-selection predicates.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntegerStatePredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntegerStatePredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr" title="qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr</span></code></a></p>
 <p>Models a predicate for post selecting results based on an integer state.</p>
 <p>This attribute is used to filter results based on a specific integer state value. It is
@@ -755,7 +755,7 @@ the record being post-selected out of the results collection.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -774,7 +774,7 @@ the record being post-selected out of the results collection.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectPredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectPredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Models a predicate for post selecting results.</p>
 <p>Eventually, this class could be extended to provide a lowering hook.</p>
@@ -788,7 +788,7 @@ the record being post-selected out of the results collection.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordFieldAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordFieldAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordFieldAttr</span></code></a></p>
 <p>Models a field in a record in the results dialect, to be used by records and
 collections of records.</p>
@@ -812,7 +812,7 @@ collections of records.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -836,7 +836,7 @@ collections of records.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordSchemaAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordSchemaAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr" title="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordSchemaAttr</span></code></a></p>
 <p>Models the schema of a record in the results dialect, to be used by records and
 collections of records.</p>
@@ -871,7 +871,7 @@ key and type of each field in the record.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 

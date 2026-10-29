@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-experimental-system-data-pulse-post-processing-module"></span><h1>qat.experimental.system_data.pulse.post_processing module<a class="headerlink" href="#module-qat.experimental.system_data.pulse.post_processing" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.DiscriminateData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminateData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_centroids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminateData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_centroids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The max-likelihood payload a channel is calibrated with.</p>
 <dl class="field-list simple">
@@ -753,7 +753,7 @@ discriminator labels a shot by the <strong>position</strong> of the centroid it 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_disallowed_states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_channel_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_discriminate_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_disallowed_states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_channel_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_discriminate_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Post-processing configuration derived from a <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code>.</p>
 <p>A discriminator only assigns an IQ value to its nearest calibrated centroid,
@@ -791,7 +791,7 @@ anything to post-select out.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive" title="Link to this definition"></a></dt>
 <dd><p>Builds the post-processing configuration from a canonical hardware model.</p>
 <p>Walks all qubits and their modes, keyed directly by <code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code>. Several
 modes may share a channel, and a channel resolves to exactly one max-likelihood

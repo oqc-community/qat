@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.loaders.update module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.model.loaders.update module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -718,13 +718,13 @@
 <span id="qat-model-loaders-update-module"></span><h1>qat.model.loaders.update module<a class="headerlink" href="#module-qat.model.loaders.update" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.loaders.update.ModelUpdateChecker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelUpdateChecker</span></span><a class="headerlink" href="#qat.model.loaders.update.ModelUpdateChecker" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelUpdateChecker</span></span><a class="headerlink" href="#qat.model.loaders.update.ModelUpdateChecker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mixin for model loaders that adds an interface for checking if models are up-to-
 date for models that are expected to evolve within its lifetime.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.loaders.update.ModelUpdateChecker.is_up_to_date">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_up_to_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.loaders.update.ModelUpdateChecker.is_up_to_date" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_up_to_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.loaders.update.ModelUpdateChecker.is_up_to_date" title="Link to this definition"></a></dt>
 <dd><p>Used to check if the model is up-to-date.</p>
 <p>To be implemented by subclasses.</p>
 <dl class="field-list simple">

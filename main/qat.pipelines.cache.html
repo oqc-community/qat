@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.cache module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.pipelines.cache module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -717,13 +717,13 @@
 <span id="qat-pipelines-cache-module"></span><h1>qat.pipelines.cache module<a class="headerlink" href="#module-qat.pipelines.cache" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompilePipelineCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompilePipelineCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.CompilePipeline" title="qat.pipelines.pipeline.CompilePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilePipeline</span></code></a></p>
 <p>Accesses a cached full <code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>, allowing it to be recognised and treated as
 only a <code class="xref py py-class docutils literal notranslate"><span class="pre">CompilePipeline</span></code>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.backend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><span class="pre">BaseBackend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.backend" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><span class="pre">BaseBackend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.backend" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -735,34 +735,34 @@ different name.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.frontend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frontend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend" title="qat.frontend.base.BaseFrontend"><span class="pre">BaseFrontend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.frontend" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frontend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend" title="qat.frontend.base.BaseFrontend"><span class="pre">BaseFrontend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.frontend" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.middleend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">middleend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.middleend.base.html#qat.middleend.base.BaseMiddleend" title="qat.middleend.base.BaseMiddleend"><span class="pre">BaseMiddleend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.middleend" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">middleend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.middleend.base.html#qat.middleend.base.BaseMiddleend" title="qat.middleend.base.BaseMiddleend"><span class="pre">BaseMiddleend</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.middleend" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.CompilePipelineCache.target_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.target_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.cache.CompilePipelineCache.target_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExecutePipelineCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExecutePipelineCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.ExecutePipeline" title="qat.pipelines.pipeline.ExecutePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutePipeline</span></code></a></p>
 <p>Accesses a cached full <code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>, allowing it to be recognised and treated as
 only an <code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutePipeline</span></code>.</p>
@@ -775,28 +775,28 @@ different name.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache.engine">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><span class="pre">NativeEngine</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.engine" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><span class="pre">NativeEngine</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.engine" title="Link to this definition"></a></dt>
 <dd><p>Returns the engine within the runtime.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.model" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache.runtime">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">runtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.runtime.base.html#qat.runtime.base.BaseRuntime" title="qat.runtime.base.BaseRuntime"><span class="pre">BaseRuntime</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.runtime" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">runtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.runtime.base.html#qat.runtime.base.BaseRuntime" title="qat.runtime.base.BaseRuntime"><span class="pre">BaseRuntime</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.runtime" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.cache.ExecutePipelineCache.target_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.target_data" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><span class="pre">TargetData</span></a></em><a class="headerlink" href="#qat.pipelines.cache.ExecutePipelineCache.target_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

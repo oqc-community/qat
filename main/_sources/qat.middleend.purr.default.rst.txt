@@ -3,5 +3,5 @@ qat.middleend.purr.default module
 
 .. automodule:: qat.middleend.purr.default
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

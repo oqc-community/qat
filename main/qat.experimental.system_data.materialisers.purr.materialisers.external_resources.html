@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.materialisers.purr.materialisers.external_resources module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.system_data.materialisers.purr.materialisers.external_resources module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -725,19 +725,23 @@ register references to the same external hardware resource without rebuilding du
 canonical entries.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExternalResourceRegistry</span></span><a class="headerlink" href="#qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExternalResourceRegistry</span></span><a class="headerlink" href="#qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Deduplicating registry keyed by external resource id.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry.register">
-<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry.register" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.purr.materialisers.external_resources.ExternalResourceRegistry.register" title="Link to this definition"></a></dt>
 <dd><p>Register or merge an external resource definition by id.</p>
-<p>If the id is already known, fields are merged deterministically:
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<p>If the id is already known, fields are merged deterministically:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">object_type</span></code> keeps the first non-empty value.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">attributes</span></code> keep first-write per key.</p></li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

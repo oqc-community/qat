@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_12211c50e1eb0c51_hardware_model_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -146,7 +146,7 @@
     <p class="run"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.__class__.__name__}({self.uuid})"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">__class__</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">uuid</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">    <span class="key">def</span> <span class="nam">__str__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">__repr__</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -249,7 +249,7 @@
     <p class="run"><span class="n"><a id="t165" href="#t165">165</a></span><span class="t">        <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__init_subclass__</span><span class="op">(</span><span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t166" href="#t166">166</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">pulse_channel_check</span><span class="op">.</span><span class="nam">search</span><span class="op">(</span><span class="nam">cls</span><span class="op">.</span><span class="nam">__name__</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t167" href="#t167">167</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t">                <span class="str">f"The class name '{cls.__name__}' must contain `PulseChannel` at the end."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t">                <span class="fst">f"</span><span class="fst">The class name '</span><span class="op">{</span><span class="nam">cls</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">' must contain `PulseChannel` at the end.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t169" href="#t169">169</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
@@ -344,14 +344,14 @@
     <p class="pln"><span class="n"><a id="t260" href="#t260">260</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t262" href="#t262">262</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t263" href="#t263">263</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t263" href="#t263">263</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">__class__</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">(@Q</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">auxiliary_qubit</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t266" href="#t266">266</a></span><span class="t"><span class="key">class</span> <span class="nam">CrossResonanceCancellationPulseChannel</span><span class="op">(</span><span class="nam">QubitPulseChannel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t">    <span class="nam">auxiliary_qubit</span><span class="op">:</span> <span class="nam">QubitId</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t269" href="#t269">269</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">        <span class="key">return</span> <span class="str">f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">__class__</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">(@Q</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">auxiliary_qubit</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t"><span class="key">class</span> <span class="nam">DDropResetQubitPulseChannel</span><span class="op">(</span><span class="nam">QubitPulseChannel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -499,7 +499,7 @@
     <p class="run"><span class="n"><a id="t415" href="#t415">415</a></span><span class="t">    <span class="key">def</span> <span class="nam">validate_channels_qubit_mapping</span><span class="op">(</span><span class="nam">cls</span><span class="op">,</span> <span class="nam">channels</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t">        <span class="key">for</span> <span class="nam">aux_qubit_id</span><span class="op">,</span> <span class="nam">pulse_channel</span> <span class="key">in</span> <span class="nam">channels</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">            <span class="key">assert</span> <span class="nam">aux_qubit_id</span> <span class="op">==</span> <span class="nam">pulse_channel</span><span class="op">.</span><span class="nam">auxiliary_qubit</span><span class="op">,</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">                <span class="str">f"Mismatch in mapping for qubit id in {channels}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Mismatch in mapping for qubit id in </span><span class="op">{</span><span class="nam">channels</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">        <span class="key">return</span> <span class="nam">channels</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -622,7 +622,7 @@
             <a class="nav" href="z_12211c50e1eb0c51_hardware_model_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

@@ -3,5 +3,5 @@ qat.utils.units module
 
 .. automodule:: qat.utils.units
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

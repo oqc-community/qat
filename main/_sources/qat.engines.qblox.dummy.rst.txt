@@ -3,5 +3,5 @@ qat.engines.qblox.dummy module
 
 .. automodule:: qat.engines.qblox.dummy
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

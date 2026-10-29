@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.error_mitigation module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.model.error_mitigation module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -717,7 +717,7 @@
 <span id="qat-model-error-mitigation-module"></span><h1>qat.model.error_mitigation module<a class="headerlink" href="#module-qat.model.error_mitigation" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ErrorMitigation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ErrorMitigation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ErrorMitigation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
 <p>A collection of error mitigation strategies. Currently, this holds a single
 mitigation strategy, but this can be expanded in the future as we add more error
@@ -733,7 +733,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ErrorMitigation.is_enabled">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_enabled</span></span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation.is_enabled" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_enabled</span></span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation.is_enabled" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -744,7 +744,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ErrorMitigation.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.model.error_mitigation.ErrorMitigation.qubits" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -756,7 +756,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ReadoutMitigation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadoutMitigation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadoutMitigation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -804,12 +804,12 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ReadoutMitigation.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation.qubits" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.error_mitigation.ReadoutMitigation.validate_linear">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation.validate_linear" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.error_mitigation.ReadoutMitigation.validate_linear" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

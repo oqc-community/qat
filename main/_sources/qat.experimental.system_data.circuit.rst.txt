@@ -3,8 +3,8 @@ qat.experimental.system\_data.circuit package
 
 .. automodule:: qat.experimental.system_data.circuit
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

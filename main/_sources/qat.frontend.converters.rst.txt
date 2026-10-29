@@ -3,8 +3,8 @@ qat.frontend.converters package
 
 .. automodule:: qat.frontend.converters
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

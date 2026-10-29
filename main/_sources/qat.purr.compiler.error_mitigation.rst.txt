@@ -3,8 +3,8 @@ qat.purr.compiler.error\_mitigation package
 
 .. automodule:: qat.purr.compiler.error_mitigation
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

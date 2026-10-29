@@ -3,8 +3,8 @@ qat.experimental.conversion.pulse\_to\_q1 package
 
 .. automodule:: qat.experimental.conversion.pulse_to_q1
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -717,7 +717,7 @@
 <span id="qat-model-target-data-module"></span><h1>qat.model.target_data module<a class="headerlink" href="#module-qat.model.target_data" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractTargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractTargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
 <p>Data related to a general target machine.</p>
 <dl class="field-list simple">
@@ -741,7 +741,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.from_yaml">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.from_yaml" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.from_yaml" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -751,7 +751,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.max_shots">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_shots" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_shots" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -762,7 +762,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.warn_on_max_shots">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">warn_on_max_shots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.warn_on_max_shots" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">warn_on_max_shots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.warn_on_max_shots" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -795,17 +795,21 @@ qubits to passively reset.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.model.target_data.DefaultTargetData">
 <span class="sig-name descname"><span class="pre">DefaultTargetData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DefaultTargetData" title="Link to this definition"></a></dt>
-<dd><p>Returns a default TargetData instance.
-:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+<dd><p>Returns a default TargetData instance.</p>
 <div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 3.3.0: </span>This will be removed in version 4.0.0.
 Use <a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-func docutils literal notranslate"><span class="pre">TargetData()</span></code></a> instead.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
 <p>Device-related target description.</p>
 <dl class="field-list simple">
@@ -833,7 +837,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.clock_cycle">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.clock_cycle" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.clock_cycle" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -879,11 +883,11 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.random">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.random" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.random" title="Link to this definition"></a></dt>
 <dd><p>Build a randomized device description for testing and demos.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.model.target_data.DeviceDescription.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional seed used to make the generated values reproducible.</p>
+<dd class="field-odd"><p><span class="target" id="qat.model.target_data.DeviceDescription.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional seed used to make the generated values reproducible.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <a class="reference internal" href="#qat.model.target_data.DeviceDescription" title="qat.model.target_data.DeviceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeviceDescription</span></code></a> with randomized, valid hardware limits.</p>
@@ -915,7 +919,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.QubitDescription">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.QubitDescription" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.QubitDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.target_data.DeviceDescription" title="qat.model.target_data.DeviceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeviceDescription</span></code></a></p>
 <p>Qubit-related target description.</p>
 <dl class="field-list simple">
@@ -940,13 +944,13 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.QubitDescription.random">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.QubitDescription.random" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.QubitDescription.random" title="Link to this definition"></a></dt>
 <dd><p>Build a randomized qubit description for testing and demos.</p>
 <p>This method starts from <a class="reference internal" href="#qat.model.target_data.DeviceDescription.random" title="qat.model.target_data.DeviceDescription.random"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DeviceDescription.random()</span></code></a> and adds a
 randomized <code class="docutils literal notranslate"><span class="pre">passive_reset_time</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.model.target_data.QubitDescription.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.QubitDescription.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional seed used to make the generated values reproducible.</p>
+<dd class="field-odd"><p><span class="target" id="qat.model.target_data.QubitDescription.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.QubitDescription.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional seed used to make the generated values reproducible.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A <a class="reference internal" href="#qat.model.target_data.QubitDescription" title="qat.model.target_data.QubitDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">QubitDescription</span></code></a> instance with randomized valid fields.</p>
@@ -958,7 +962,7 @@ randomized <code class="docutils literal notranslate"><span class="pre">passive_
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.ResonatorDescription">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResonatorDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.ResonatorDescription" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResonatorDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.ResonatorDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.target_data.DeviceDescription" title="qat.model.target_data.DeviceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeviceDescription</span></code></a></p>
 <p>Resonator-related target description.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -975,7 +979,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.target_data.AbstractTargetData" title="qat.model.target_data.AbstractTargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractTargetData</span></code></a></p>
 <p>Data related to a general target machine.</p>
 <dl class="field-list simple">
@@ -1006,12 +1010,12 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.clock_cycle">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.clock_cycle" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.clock_cycle" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.create_with">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.create_with" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.create_with" title="Link to this definition"></a></dt>
 <dd><p>Returns a default TargetData instance, allowing configuration over user-level
 parameters.</p>
 <div class="deprecated">
@@ -1036,13 +1040,17 @@ qubits to passively reset.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.default">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.default" title="Link to this definition"></a></dt>
-<dd><p>Returns a default TargetData instance.
-:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.default" title="Link to this definition"></a></dt>
+<dd><p>Returns a default TargetData instance.</p>
 <div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 3.3.0: </span>This method will be removed in version 4.0.0.
 Use <a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-func docutils literal notranslate"><span class="pre">TargetData()</span></code></a> instead.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1052,7 +1060,7 @@ Use <a class="reference internal" href="#qat.model.target_data.TargetData" title
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.instruction_memory_size">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instruction_memory_size</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.instruction_memory_size" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instruction_memory_size</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.instruction_memory_size" title="Link to this definition"></a></dt>
 <dd><div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 3.3.0: </span>This property will be removed in version 4.0.0.
 Use <a class="reference internal" href="#qat.model.target_data.TargetData.QUBIT_DATA" title="qat.model.target_data.TargetData.QUBIT_DATA"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TargetData.QUBIT_DATA</span></code></a> (then
@@ -1070,13 +1078,13 @@ Use <a class="reference internal" href="#qat.model.target_data.TargetData.QUBIT_
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.random">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.random" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.random" title="Link to this definition"></a></dt>
 <dd><p>Build randomized target data for testing and synthetic examples.</p>
 <p>When <code class="docutils literal notranslate"><span class="pre">seed</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a seed is generated and reused for both qubit
 and resonator descriptions so they remain clock-cycle compatible.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.model.target_data.TargetData.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional seed used to make the generated values reproducible.</p>
+<dd class="field-odd"><p><span class="target" id="qat.model.target_data.TargetData.random.params.seed"></span><strong>seed</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.random.params.seed">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional seed used to make the generated values reproducible.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>

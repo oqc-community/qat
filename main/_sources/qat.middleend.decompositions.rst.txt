@@ -3,8 +3,8 @@ qat.middleend.decompositions package
 
 .. automodule:: qat.middleend.decompositions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

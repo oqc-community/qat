@@ -3,8 +3,8 @@ qat.experimental.dialect.common package
 
 .. automodule:: qat.experimental.dialect.common
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

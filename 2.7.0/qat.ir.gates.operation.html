@@ -347,7 +347,7 @@
 <span id="qat-ir-gates-operation-module"></span><h1>qat.ir.gates.operation module<a class="headerlink" href="#module-qat.ir.gates.operation" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.operation.Barrier">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Barrier" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Barrier" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.QubitInstruction" title="qat.ir.gates.base.QubitInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QubitInstruction</span></code></a></p>
 <p>A barrier is a software construct that serves two purposes:
 #. Instructs the compiler to not optimize across the barrier (e.g. squashing of gates)
@@ -371,7 +371,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.operation.Measure">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Measure" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Measure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.QubitInstruction" title="qat.ir.gates.base.QubitInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QubitInstruction</span></code></a></p>
 <p>Instructs a measurement to be taken on the given qubit.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -401,14 +401,14 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.operation.Measure.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.operation.Measure.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.operation.Measure.qubits" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.operation.Reset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Reset" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.operation.Reset" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.QubitInstruction" title="qat.ir.gates.base.QubitInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QubitInstruction</span></code></a></p>
 <p>Instructs a qubit to be reset to it’s lowest energy (<span class="math notranslate nohighlight">\(|0&gt;\)</span>) state.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -428,7 +428,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.operation.Reset.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.operation.Reset.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.operation.Reset.qubits" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

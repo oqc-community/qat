@@ -347,7 +347,7 @@
 <p>Contains elementary IR units for waveforms, including waveform types and pulses.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel" title="qat.utils.pydantic.AllowExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllowExtraFieldsModel</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -361,7 +361,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform.name">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.name" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
@@ -373,7 +373,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.BlackmanWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlackmanWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlackmanWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A Blackman-window shaped pulse.</p>
 <p>The envelope is:</p>
@@ -420,7 +420,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.CosWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CosWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.CosWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CosWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.CosWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A cosine-oscillating envelope.</p>
 <div class="math notranslate nohighlight">
@@ -464,7 +464,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.DragGaussianWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DragGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DragGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A complex Gaussian envelope with an in-built first-order DRAG correction.</p>
 <p>The envelope is (when <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>):</p>
@@ -521,7 +521,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.ExtraSoftSquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtraSoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtraSoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A heavily softened normalised square pulse with a <code class="docutils literal notranslate"><span class="pre">2×rise</span></code> inset.</p>
 <p>The raw envelope is:</p>
@@ -568,7 +568,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianSquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A flat-top pulse with Gaussian-shaped rise and fall flanks.</p>
 <p>The envelope is:</p>
@@ -623,7 +623,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A standard Gaussian envelope pulse.</p>
 <p>The envelope is:</p>
@@ -665,7 +665,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianZeroEdgeWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianZeroEdgeWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianZeroEdgeWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A Gaussian pulse optionally normalised to be exactly zero at its edges.</p>
 <p>The envelope is:</p>
@@ -713,7 +713,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Pulse" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Pulse" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
 <p>Instructs a pulse channel to send a waveform.</p>
 <p>The intention of the waveform (e.g. a drive or measure pulse) can be specified using the
@@ -735,12 +735,12 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.pulse_channel">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pulse_channel</span></span><a class="headerlink" href="#qat.ir.waveforms.Pulse.pulse_channel" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pulse_channel</span></span><a class="headerlink" href="#qat.ir.waveforms.Pulse.pulse_channel" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.target">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.waveforms.Pulse.target" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#qat.ir.waveforms.Pulse.target" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -750,7 +750,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.validate_duration">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Pulse.validate_duration" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Pulse.validate_duration" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -762,7 +762,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.RoundedSquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RoundedSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RoundedSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A square pulse with <code class="docutils literal notranslate"><span class="pre">erf</span></code>-shaped (S-curve) rise and fall.</p>
 <p>The envelope uses a pair of error-function steps:</p>
@@ -813,7 +813,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SampledWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SampledWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
 <p>A waveform defined by an arbitrary complex array rather than an analytic function.</p>
 <p>Use this class when the pulse envelope is provided as pre-computed
@@ -835,7 +835,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.duration">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.duration" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.duration" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -858,7 +858,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SechWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SechWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SechWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SechWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SechWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A hyperbolic-secant (sech) pulse envelope.</p>
 <p>The envelope is:</p>
@@ -908,7 +908,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SetupHoldWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SetupHoldWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SetupHoldWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A two-level rectangular pulse: a high-amplitude <em>setup</em> portion
 followed by a lower-amplitude <em>hold</em> portion.</p>
@@ -951,7 +951,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SinWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SinWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SinWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SinWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SinWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A sine-oscillating envelope.</p>
 <div class="math notranslate nohighlight">
@@ -998,7 +998,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SoftSquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A square pulse with <code class="docutils literal notranslate"><span class="pre">tanh</span></code>-shaped rise and fall edges.</p>
 <p>The envelope is:</p>
@@ -1046,7 +1046,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SofterGaussianWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A Gaussian envelope normalised so the minimum is zero and peak is one.</p>
 <p>Uses the same underlying
@@ -1089,7 +1089,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SofterSquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A normalised double-<code class="docutils literal notranslate"><span class="pre">tanh</span></code> square pulse with extra edge softening.</p>
 <p>The raw envelope is:</p>
@@ -1136,7 +1136,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SquareWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A flat (rectangular) pulse.</p>
 <p>The envelope is uniform across the entire <code class="docutils literal notranslate"><span class="pre">width</span></code>.</p>
@@ -1173,7 +1173,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
 <p>A time-dependent complex signal with a specific shape.</p>
 <p>The envelope shape of the waveform will be calibrated to
@@ -1235,7 +1235,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.duration">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.Waveform.duration" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.Waveform.duration" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

@@ -3,8 +3,8 @@ qat.experimental.system\_data.materialisers.purr.extensions package
 
 .. automodule:: qat.experimental.system_data.materialisers.purr.extensions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_scf.transforms.lower_scf module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.q1_scf.transforms.lower_scf module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -750,7 +750,7 @@ patterns raise <code class="xref py py-class docutils literal notranslate"><span
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.transforms.lower_scf.ForLowering">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.ForLowering" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.ForLowering" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lower <code class="docutils literal notranslate"><span class="pre">scf.for</span></code> to <code class="docutils literal notranslate"><span class="pre">q1_scf.for</span></code>.
 The iteration count <code class="docutils literal notranslate"><span class="pre">ceil((ub</span> <span class="pre">-</span> <span class="pre">lb)</span> <span class="pre">/</span> <span class="pre">step)</span></code> is materialised as a <code class="docutils literal notranslate"><span class="pre">q1.ir.move</span></code>
@@ -798,7 +798,7 @@ q1_scf.for %n : !q1.reg {
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.transforms.lower_scf.IfLowering">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IfLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.IfLowering" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IfLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.IfLowering" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Stub for <code class="docutils literal notranslate"><span class="pre">scf.if</span></code> → <code class="docutils literal notranslate"><span class="pre">q1_scf.if</span></code> lowering.</p>
 <p>Not yet implemented.</p>
@@ -817,7 +817,7 @@ q1_scf.for %n : !q1.reg {
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerScfToQ1ScfPass</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerScfToQ1ScfPass</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Lower every <code class="docutils literal notranslate"><span class="pre">scf</span></code> operation in the module to its <code class="docutils literal notranslate"><span class="pre">q1_scf</span></code> equivalent.</p>
 <p>Currently only <code class="docutils literal notranslate"><span class="pre">scf.for</span></code> is fully implemented.  <code class="docutils literal notranslate"><span class="pre">scf.if</span></code> and <code class="docutils literal notranslate"><span class="pre">scf.while</span></code>
@@ -841,7 +841,7 @@ raise <code class="xref py py-class docutils literal notranslate"><span class="p
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.transforms.lower_scf.WhileLowering">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WhileLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.WhileLowering" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WhileLowering</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.transforms.lower_scf.WhileLowering" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Stub for <code class="docutils literal notranslate"><span class="pre">scf.while</span></code> → <code class="docutils literal notranslate"><span class="pre">q1_scf.while</span></code> lowering.</p>
 <p>Not yet implemented.</p>

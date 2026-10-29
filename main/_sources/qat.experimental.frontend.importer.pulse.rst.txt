@@ -3,8 +3,8 @@ qat.experimental.frontend.importer.pulse package
 
 .. automodule:: qat.experimental.frontend.importer.pulse
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

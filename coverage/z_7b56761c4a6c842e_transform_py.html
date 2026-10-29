@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_4f8f9bae01ae2046_qasm_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -193,7 +193,7 @@
     <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">                <span class="nam">qasm_string</span> <span class="op">=</span> <span class="nam">qasm2</span><span class="op">.</span><span class="nam">dumps</span><span class="op">(</span><span class="nam">optimized_circuits</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">            <span class="key">except</span> <span class="nam">TranspilerError</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="str">f"Qiskit transpile pass failed. {str(e)}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Qiskit transpile pass failed. </span><span class="op">{</span><span class="nam">str</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="key">return</span> <span class="nam">qasm_string</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -309,14 +309,14 @@
     <p class="pln"><span class="n"><a id="t225" href="#t225">225</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t226" href="#t226">226</a></span><span class="t">        <span class="key">if</span> <span class="nam">acquire_mode</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">226&#x202F;&#x219B;&#x202F;227</span><span class="annotate long">line 226 didn't jump to line 227 because the condition on line 226 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t228" href="#t228">228</a></span><span class="t">                <span class="str">f"Post-processing output variable {pp.output_variable} is not "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t228" href="#t228">228</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Post-processing output variable </span><span class="op">{</span><span class="nam">pp</span><span class="op">.</span><span class="nam">output_variable</span><span class="op">}</span><span class="fst"> is not </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t229" href="#t229">229</a></span><span class="t">                <span class="str">"associated with any acquire output variable. It will be ignored."</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t230" href="#t230">230</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t231" href="#t231">231</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t232" href="#t232">232</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t233" href="#t233">233</a></span><span class="t">        <span class="key">if</span> <span class="nam">pp</span><span class="op">.</span><span class="nam">process_type</span> <span class="op">==</span> <span class="nam">PostProcessType</span><span class="op">.</span><span class="nam">DOWN_CONVERT</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t234" href="#t234">234</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t235" href="#t235">235</a></span><span class="t">                <span class="str">f"Post-processing instruction {pp} is invalid because it has a "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t235" href="#t235">235</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Post-processing instruction </span><span class="op">{</span><span class="nam">pp</span><span class="op">}</span><span class="fst"> is invalid because it has a </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t236" href="#t236">236</a></span><span class="t">                <span class="str">"DOWN_CONVERT process type, which is not supported. It will be ignored."</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t237" href="#t237">237</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t238" href="#t238">238</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
@@ -327,7 +327,7 @@
     <p class="pln"><span class="n"><a id="t243" href="#t243">243</a></span><span class="t">            <span class="key">and</span> <span class="nam">len</span><span class="op">(</span><span class="nam">pp</span><span class="op">.</span><span class="nam">axes</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t244" href="#t244">244</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t245" href="#t245">245</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">                <span class="str">f"Post-processing instruction {pp} is invalid because it has a TIME "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Post-processing instruction </span><span class="op">{</span><span class="nam">pp</span><span class="op">}</span><span class="fst"> is invalid because it has a TIME </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t247" href="#t247">247</a></span><span class="t">                <span class="str">"axis but the associated acquire instruction has an INTEGRATOR mode. "</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t248" href="#t248">248</a></span><span class="t">                <span class="str">"It will be ignored."</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t249" href="#t249">249</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -339,7 +339,7 @@
     <p class="pln"><span class="n"><a id="t255" href="#t255">255</a></span><span class="t">            <span class="key">and</span> <span class="nam">len</span><span class="op">(</span><span class="nam">pp</span><span class="op">.</span><span class="nam">axes</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t256" href="#t256">256</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t257" href="#t257">257</a></span><span class="t">            <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t">                <span class="str">f"Post-processing instruction {pp} is invalid because it has a "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Post-processing instruction </span><span class="op">{</span><span class="nam">pp</span><span class="op">}</span><span class="fst"> is invalid because it has a </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t259" href="#t259">259</a></span><span class="t">                <span class="str">"SEQUENCE axis but the associated acquire instruction has an "</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t260" href="#t260">260</a></span><span class="t">                <span class="str">"SCOPE mode. It will be ignored."</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -358,7 +358,7 @@
             <a class="nav" href="z_4f8f9bae01ae2046_qasm_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

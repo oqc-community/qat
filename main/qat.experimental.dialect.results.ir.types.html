@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.results.ir.types module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.results.ir.types module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,7 +722,7 @@
 collect and manipulate.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.RecordType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.RecordType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.RecordType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></p>
 <p>A type that carries a results record that can be added to a results collection.</p>
 <p>This is used to represent a single record of results, e.g., from a single shot. It has
@@ -738,7 +738,7 @@ in the record.</p>
 <p>Initializes a record type with a schema.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.RecordType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.RecordType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.RecordType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -757,7 +757,7 @@ in the record.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsArrayType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsArrayType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsArrayType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType" title="qat.experimental.dialect.results.ir.types.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a></p>
 <p>A type that represents an array of results, which can be added to and filtered with
 given operations.</p>
@@ -778,7 +778,7 @@ runtime-dynamic size.</p></li>
 <p>Initializes an array type with element type and size.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsArrayType.dynamic_size">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType.dynamic_size" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType.dynamic_size" title="Link to this definition"></a></dt>
 <dd><p>Construct a <a class="reference internal" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType" title="qat.experimental.dialect.results.ir.types.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a> with a dynamic size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -789,7 +789,7 @@ runtime-dynamic size.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsArrayType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsArrayType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -813,7 +813,7 @@ runtime-dynamic size.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsCollectionType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsCollectionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsCollectionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a></p>
 <p>A type that represents a collection of results, which can be added to and filtered
 with given operations.</p>
@@ -840,7 +840,7 @@ runtime-dynamic size.</p></li>
 <p>Initializes a collection type with schema and size.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsCollectionType.dynamic_size">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType.dynamic_size" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType.dynamic_size" title="Link to this definition"></a></dt>
 <dd><p>Construct a <a class="reference internal" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> with a dynamic size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -851,7 +851,7 @@ runtime-dynamic size.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.types.ResultsCollectionType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.types.ResultsCollectionType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 

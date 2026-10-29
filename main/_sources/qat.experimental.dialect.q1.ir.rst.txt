@@ -3,8 +3,8 @@ qat.experimental.dialect.q1.ir package
 
 .. automodule:: qat.experimental.dialect.q1.ir
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

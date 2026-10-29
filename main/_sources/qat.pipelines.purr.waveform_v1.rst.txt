@@ -3,8 +3,8 @@ qat.pipelines.purr.waveform\_v1 package
 
 .. automodule:: qat.pipelines.purr.waveform_v1
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

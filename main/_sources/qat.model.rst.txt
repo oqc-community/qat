@@ -3,8 +3,8 @@ qat.model package
 
 .. automodule:: qat.model
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

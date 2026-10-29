@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.waveform_v1.purr.codegen module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.backend.waveform_v1.purr.codegen module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-backend-waveform-v1-purr-codegen-module"></span><h1>qat.backend.waveform_v1.purr.codegen module<a class="headerlink" href="#module-qat.backend.waveform_v1.purr.codegen" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.purr.codegen.WaveformContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Used for waveform code generation for a particular pulse channel.</p>
 <p>This can be considered to be the dynamical state of a pulse channel which evolves as the
@@ -734,12 +734,12 @@ circuit progresses.</p>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.purr.codegen.WaveformContext.buffer">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">buffer</span></span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext.buffer" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">buffer</span></span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext.buffer" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.purr.codegen.WaveformContext.physical_channel">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_channel</span></span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext.physical_channel" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_channel</span></span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformContext.physical_channel" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -788,7 +788,7 @@ upconversion to the target frequency if specified.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.purr.codegen.WaveformV1Backend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBackend</span></code></a>[<a class="reference internal" href="qat.backend.waveform.executable.html#qat.backend.waveform.executable.WaveformProgram" title="qat.backend.waveform.executable.WaveformProgram"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformProgram</span></code></a>], <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.InvokerMixin" title="qat.core.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
 <p>Target-machine code generation from an IR for targets that only require the explicit
 waveforms.</p>
@@ -857,7 +857,7 @@ for each instruction.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.purr.codegen.WaveformV1Backend.create_pulse_channel_buffer">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_pulse_channel_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend.create_pulse_channel_buffer" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_pulse_channel_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend.create_pulse_channel_buffer" title="Link to this definition"></a></dt>
 <dd><p>Creates a buffer of waveforms for a single pulse channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

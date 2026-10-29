@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_edbb70af27df68b8_post_processing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -839,7 +839,7 @@
     <p class="pln"><span class="n"><a id="t755" href="#t755">755</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t756" href="#t756">756</a></span><span class="t">        <span class="nam">frame</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_frames</span><span class="op">.</span><span class="nam">get_by_name</span><span class="op">(</span><span class="nam">frame_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t757" href="#t757">757</a></span><span class="t">        <span class="key">if</span> <span class="nam">frame</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t758" href="#t758">758</a></span><span class="t">            <span class="key">raise</span> <span class="nam">KeyError</span><span class="op">(</span><span class="str">f"Frame '{frame_name}' not found in environment."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t758" href="#t758">758</a></span><span class="t">            <span class="key">raise</span> <span class="nam">KeyError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Frame '</span><span class="op">{</span><span class="nam">frame_name</span><span class="op">}</span><span class="fst">' not found in environment.</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t759" href="#t759">759</a></span><span class="t">        <span class="key">return</span> <span class="nam">frame</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t760" href="#t760">760</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t761" href="#t761">761</a></span><span class="t">    <span class="key">def</span> <span class="nam">_update_frame</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">frame_name</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">new_frame</span><span class="op">:</span> <span class="nam">SSAValue</span><span class="op">[</span><span class="nam">FrameType</span><span class="op">]</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -858,7 +858,7 @@
     <p class="pln"><span class="n"><a id="t774" href="#t774">774</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t775" href="#t775">775</a></span><span class="t">        <span class="nam">waveform</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_waveforms</span><span class="op">.</span><span class="nam">get_by_name</span><span class="op">(</span><span class="nam">waveform_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t776" href="#t776">776</a></span><span class="t">        <span class="key">if</span> <span class="nam">waveform</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t777" href="#t777">777</a></span><span class="t">            <span class="key">raise</span> <span class="nam">KeyError</span><span class="op">(</span><span class="str">f"Waveform '{waveform_name}' not found in environment."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t777" href="#t777">777</a></span><span class="t">            <span class="key">raise</span> <span class="nam">KeyError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Waveform '</span><span class="op">{</span><span class="nam">waveform_name</span><span class="op">}</span><span class="fst">' not found in environment.</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t778" href="#t778">778</a></span><span class="t">        <span class="key">return</span> <span class="nam">waveform</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t779" href="#t779">779</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t780" href="#t780">780</a></span><span class="t">    <span class="key">def</span> <span class="nam">_create_record_op</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Operation</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -879,7 +879,7 @@
             <a class="nav" href="z_edbb70af27df68b8_post_processing_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.instrument.base module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.instrument.base module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -717,7 +717,7 @@
 <span id="qat-instrument-base-module"></span><h1>qat.instrument.base module<a class="headerlink" href="#module-qat.instrument.base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.CompositeInstrument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompositeInstrument</span></span><a class="headerlink" href="#qat.instrument.base.CompositeInstrument" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompositeInstrument</span></span><a class="headerlink" href="#qat.instrument.base.CompositeInstrument" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">LInstr</span></code>], <a class="reference internal" href="#qat.instrument.base.InstrumentConcept" title="qat.instrument.base.InstrumentConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentConcept</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.instrument.base.CompositeInstrument.add">
@@ -726,7 +726,7 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.instrument.base.CompositeInstrument.components">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">LInstr</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.instrument.base.CompositeInstrument.components" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">components</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">LInstr</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.instrument.base.CompositeInstrument.components" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -741,7 +741,7 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.instrument.base.CompositeInstrument.is_connected">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_connected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.instrument.base.CompositeInstrument.is_connected" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_connected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.instrument.base.CompositeInstrument.is_connected" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -758,15 +758,15 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.ConfigInstrumentBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConfigInstrumentBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cinstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.ConfigInstrumentBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConfigInstrumentBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cinstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.ConfigInstrumentBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.instrument.base.InstrumentBuilder" title="qat.instrument.base.InstrumentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentBuilder</span></code></a></p>
 <p>Builds an InstrumentConcept object representing an arbitrary fleet of leaf
 instruments defined as a list of config dicts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.instrument.base.ConfigInstrumentBuilder.params.cinstr_type"></span><strong>cinstr_type</strong><a class="paramlink headerlink reference internal" href="#qat.instrument.base.ConfigInstrumentBuilder.params.cinstr_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>]</span>) – type of Composite Instrument to build</p></li>
-<li><p><span class="target" id="qat.instrument.base.ConfigInstrumentBuilder.params.linstr_type"></span><strong>linstr_type</strong><a class="paramlink headerlink reference internal" href="#qat.instrument.base.ConfigInstrumentBuilder.params.linstr_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>]</span>) – type of Leaf Instrument to build</p></li>
+<li><p><span class="target" id="qat.instrument.base.ConfigInstrumentBuilder.params.cinstr_type"></span><strong>cinstr_type</strong><a class="paramlink headerlink reference internal" href="#qat.instrument.base.ConfigInstrumentBuilder.params.cinstr_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – type of Composite Instrument to build</p></li>
+<li><p><span class="target" id="qat.instrument.base.ConfigInstrumentBuilder.params.linstr_type"></span><strong>linstr_type</strong><a class="paramlink headerlink reference internal" href="#qat.instrument.base.ConfigInstrumentBuilder.params.linstr_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – type of Leaf Instrument to build</p></li>
 </ul>
 </dd>
 </dl>
@@ -784,7 +784,7 @@ instruments defined as a list of config dicts.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.CsvInstrumentBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CsvInstrumentBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cinstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.CsvInstrumentBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CsvInstrumentBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cinstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linstr_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.CsvInstrumentBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.instrument.base.InstrumentBuilder" title="qat.instrument.base.InstrumentBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentBuilder</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.instrument.base.CsvInstrumentBuilder.build">
@@ -808,11 +808,11 @@ arbitrary fleet of leaf instruments defined as CSV.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.InstrumentBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentBuilder</span></span><a class="headerlink" href="#qat.instrument.base.InstrumentBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentBuilder</span></span><a class="headerlink" href="#qat.instrument.base.InstrumentBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.instrument.base.InstrumentBuilder.build">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.InstrumentBuilder.build" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.InstrumentBuilder.build" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">CInstr</span></code>, bound= <a class="reference internal" href="#qat.instrument.base.CompositeInstrument" title="qat.instrument.base.CompositeInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompositeInstrument</span></code></a>)</span></p>
@@ -824,7 +824,7 @@ arbitrary fleet of leaf instruments defined as CSV.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.InstrumentConcept">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentConcept</span></span><a class="headerlink" href="#qat.instrument.base.InstrumentConcept" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentConcept</span></span><a class="headerlink" href="#qat.instrument.base.InstrumentConcept" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.engines.native.html#qat.engines.native.ConnectionMixin" title="qat.engines.native.ConnectionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionMixin</span></code></a></p>
 <p>The component interface, it defines what an instrument is and what APIs through which
 customer code can interact with.</p>
@@ -852,7 +852,7 @@ customer code can interact with.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.InstrumentModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.InstrumentModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstrumentModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.InstrumentModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Used to parse JSON/CSV entries.</p>
 <p>An instrument has an id, name, and IP address</p>
@@ -885,11 +885,11 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.instrument.base.LeafInstrument">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafInstrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.LeafInstrument" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafInstrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.instrument.base.LeafInstrument" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.instrument.base.InstrumentConcept" title="qat.instrument.base.InstrumentConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentConcept</span></code></a></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.instrument.base.LeafInstrument.is_connected">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_connected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.instrument.base.LeafInstrument.is_connected" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_connected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.instrument.base.LeafInstrument.is_connected" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

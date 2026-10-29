@@ -3,5 +3,5 @@ qat.backend.qblox.passes.analysis module
 
 .. automodule:: qat.backend.qblox.passes.analysis
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

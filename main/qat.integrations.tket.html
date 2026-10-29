@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -718,7 +718,7 @@
 <span id="qat-integrations-tket-module"></span><h1>qat.integrations.tket module<a class="headerlink" href="#module-qat.integrations.tket" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></p>
 <p>Assembles a TKET circuit using the InstructionBuilder interface.</p>
 <dl class="py method">
@@ -827,7 +827,7 @@ full detail.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketBuilder.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Qubit</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.integrations.tket.TketBuilder.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Qubit</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.integrations.tket.TketBuilder.qubits" title="Link to this definition"></a></dt>
 <dd><p>Returns the list of qubits, sorted by index.</p>
 </dd></dl>
 
@@ -845,7 +845,7 @@ full detail.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketOptimisationHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketOptimisationHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketOptimisationHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketOptimisationHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketOptimisationHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Helper class to run pydantic tket optimizations.</p>
 <dl class="py method">
@@ -872,7 +872,7 @@ full detail.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketToQatIRConverter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketToQatIRConverter</span></span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketToQatIRConverter</span></span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Converts a Tket circuit into Qat IR.</p>
 <p>Essentially the “parser” for Tket circuits.</p>
@@ -902,7 +902,7 @@ registers, and might give undesired behaviour if used outside of this use case.<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketToQatIRConverter.convert_parameter">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter.convert_parameter" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter.convert_parameter" title="Link to this definition"></a></dt>
 <dd><p>A parameter stored in a Tket operation is in units of <span class="math notranslate nohighlight">\(\pi\)</span>.</p>
 <p>Parameters are returned as a string expression, e.g. sometimes containing
 multiplication and division. These expressions are parsed using sympy.</p>

@@ -3,8 +3,8 @@ qat.experimental.system\_data.pulse package
 
 .. automodule:: qat.experimental.system_data.pulse
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

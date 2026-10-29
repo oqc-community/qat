@@ -3,8 +3,8 @@ qat.experimental.conversion.pulse package
 
 .. automodule:: qat.experimental.conversion.pulse
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

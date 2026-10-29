@@ -3,8 +3,8 @@ qat.engines package
 
 .. automodule:: qat.engines
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

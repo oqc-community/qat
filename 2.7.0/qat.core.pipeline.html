@@ -345,14 +345,14 @@
 <span id="qat-core-pipeline-module"></span><h1>qat.core.pipeline module<a class="headerlink" href="#module-qat.core.pipeline" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.EngineSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EngineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EngineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Stores a set of engines, allowing identification by name.</p>
 <p>Also stores corresponding loaders which can be used to update the models within engines
 for engines that have a <code class="xref py py-class docutils literal notranslate"><span class="pre">RequiresHardwareModelMixin</span></code> mixin.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.EngineSet.from_descriptions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_descriptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet.from_descriptions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_descriptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet.from_descriptions" title="Link to this definition"></a></dt>
 <dd><p>Creates an <a class="reference internal" href="#qat.core.pipeline.EngineSet" title="qat.core.pipeline.EngineSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineSet</span></code></a> from a list of engine descriptions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -388,7 +388,7 @@ for engines that have a <code class="xref py py-class docutils literal notransla
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareLoaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareLoaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.clear_cache">
@@ -397,7 +397,7 @@ for engines that have a <code class="xref py py-class docutils literal notransla
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.from_descriptions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loader_descriptions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.from_descriptions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loader_descriptions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.from_descriptions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -419,7 +419,7 @@ for engines that have a <code class="xref py py-class docutils literal notransla
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.models_up_to_date">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">models_up_to_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.models_up_to_date" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">models_up_to_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.models_up_to_date" title="Link to this definition"></a></dt>
 <dd><p>Checks if all models are up-to-date, for loaders that implement
 <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelUpdateChecker</span></code>.</p>
 </dd></dl>
@@ -445,7 +445,7 @@ for engines that have a <code class="xref py py-class docutils literal notransla
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compile_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineManager" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compile_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A manager for pipelines, storing compilation and execution pipelines.</p>
 <p>Currently, pipelines are catergorised by their type (or the type produced by
@@ -473,19 +473,19 @@ retreiving the correct pipeline given the task.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager.default_compile_pipeline">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_compile_pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.default_compile_pipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_compile_pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.default_compile_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Returns the name of the default compile pipeline.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager.default_execute_pipeline">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_execute_pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.default_execute_pipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_execute_pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.default_execute_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Returns the name of the default execute pipeline.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager.from_descriptions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compile_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_engines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineManager.from_descriptions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compile_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_engines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineManager.from_descriptions" title="Link to this definition"></a></dt>
 <dd><p>Creates a PipelineManager from a list of pipeline descriptions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -518,13 +518,13 @@ retreiving the correct pipeline given the task.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager.list_compile_pipelines">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_compile_pipelines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.list_compile_pipelines" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_compile_pipelines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.list_compile_pipelines" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of compile pipeline names.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineManager.list_execute_pipelines">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_execute_pipelines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.list_execute_pipelines" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_execute_pipelines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.core.pipeline.PipelineManager.list_execute_pipelines" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of execute pipeline names.</p>
 </dd></dl>
 
@@ -542,9 +542,9 @@ retreiving the correct pipeline given the task.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.core.pipeline.PipelineManager.remove.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineManager.remove.params.pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPipeline</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The pipeline to remove, either by name or instance.</p></li>
-<li><p><span class="target" id="qat.core.pipeline.PipelineManager.remove.params.compile"></span><strong>compile</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineManager.remove.params.compile">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – Determines if the pipeline should be removed from compile pipelines.
+<li><p><span class="target" id="qat.core.pipeline.PipelineManager.remove.params.compile"></span><strong>compile</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineManager.remove.params.compile">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Determines if the pipeline should be removed from compile pipelines.
 If None, the manager will decide given the pipeline type.</p></li>
-<li><p><span class="target" id="qat.core.pipeline.PipelineManager.remove.params.execute"></span><strong>execute</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineManager.remove.params.execute">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – Determines if the pipeline should be removed from execute pipelines.
+<li><p><span class="target" id="qat.core.pipeline.PipelineManager.remove.params.execute"></span><strong>execute</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineManager.remove.params.execute">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Determines if the pipeline should be removed from execute pipelines.
 If None, the manager will decide given the pipeline type.</p></li>
 </ul>
 </dd>
@@ -565,7 +565,7 @@ default, it will be both.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet.add">
@@ -583,13 +583,13 @@ default, it will be both.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet.default">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineSet.default" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.core.pipeline.PipelineSet.default" title="Link to this definition"></a></dt>
 <dd><p>Returns the name of the current default pipeline.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet.from_descriptions">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_descriptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_engines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet.from_descriptions" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_descriptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_engines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet.from_descriptions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

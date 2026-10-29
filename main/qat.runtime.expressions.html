@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.expressions module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.runtime.expressions module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -732,7 +732,7 @@ by these expressions, which can be used to represent parameterised analytical pu
 in compiled programs.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.BinaryExpression">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.BinaryExpression" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.BinaryExpression" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>A representation of a binary operation on two nodes, which might be literals,
 variables, or nested expressions.</p>
@@ -755,7 +755,7 @@ validated to form a valid model.</p>
 <dd><p>Evaluate the expression, resolving free variables from params.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.BinaryExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.BinaryExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values to use for evaluation.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.BinaryExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.BinaryExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dictionary of variable values to use for evaluation.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
@@ -791,7 +791,7 @@ validated to form a valid model.</p>
 values, evaluate immediately and return a <a class="reference internal" href="#qat.runtime.expressions.Literal" title="qat.runtime.expressions.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.BinaryExpression.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.BinaryExpression.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values used for simplification, optional.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.BinaryExpression.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.BinaryExpression.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dictionary of variable values used for simplification, optional.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.runtime.expressions.Variable" title="qat.runtime.expressions.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.Literal" title="qat.runtime.expressions.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.UnaryExpression" title="qat.runtime.expressions.UnaryExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnaryExpression</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.BinaryExpression" title="qat.runtime.expressions.BinaryExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryExpression</span></code></a></span></p>
@@ -803,7 +803,7 @@ values, evaluate immediately and return a <a class="reference internal" href="#q
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.BinaryOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.BinaryOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.BinaryOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>Binary operators supported in expressions.</p>
 <p>For now, this only includes basic arithmetic operators, but we can easily expand this
@@ -854,7 +854,7 @@ in the future.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.Literal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Literal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Literal" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Literal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Literal" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>A concrete numeric constant wrapped for use inside an expression tree.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -898,7 +898,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParameterisedWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParameterisedWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
 <p>Represents an analytical waveform that is parameterised by a set of parameters,
 including runtime expressions.</p>
@@ -935,7 +935,7 @@ params.</p>
 <p>Returns a sampled representation of the waveform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values to use for evaluation, optional.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dictionary of variable values to use for evaluation, optional.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a></span></p>
@@ -976,7 +976,7 @@ params.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RuntimeExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RuntimeExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
 <p>Represents an expression that can be evaluated at runtime.</p>
 <p>It is expected to return a value of a given type when evaluated.</p>
@@ -1024,7 +1024,7 @@ validated to form a valid model.</p>
 This is to be done by the consumer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.RuntimeExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.RuntimeExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values to use for evaluation, optional.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.RuntimeExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.RuntimeExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dictionary of variable values to use for evaluation, optional.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
@@ -1055,7 +1055,7 @@ This is to be done by the consumer.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.UnaryExpression">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.UnaryExpression" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.UnaryExpression" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>An expression that applies a unary operator to a single operand.</p>
 <dl class="field-list simple">
@@ -1076,7 +1076,7 @@ validated to form a valid model.</p>
 <dd><p>Evaluate the expression, resolving free variables from params.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.UnaryExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.UnaryExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional dict of variable values to use for evaluation.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.UnaryExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.UnaryExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional dict of variable values to use for evaluation.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
@@ -1106,7 +1106,7 @@ validated to form a valid model.</p>
 <dd><p>Recursively simplify the expression.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.UnaryExpression.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.UnaryExpression.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values used for simplification, optional.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.UnaryExpression.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.UnaryExpression.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Dictionary of variable values used for simplification, optional.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.runtime.expressions.Variable" title="qat.runtime.expressions.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.Literal" title="qat.runtime.expressions.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.UnaryExpression" title="qat.runtime.expressions.UnaryExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnaryExpression</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.BinaryExpression" title="qat.runtime.expressions.BinaryExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryExpression</span></code></a></span></p>
@@ -1118,7 +1118,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.UnaryOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.UnaryOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.UnaryOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>Unary operators supported in expressions.</p>
 <p>This only includes a basic subset of operators, but we can easily expand this in the
@@ -1163,7 +1163,7 @@ future.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.Variable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Variable" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Variable" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>A named and typed variable representing a runtime argument.</p>
 <dl class="field-list simple">
@@ -1184,7 +1184,7 @@ validated to form a valid model.</p>
 <dd><p>Evaluate the variable, fetching the value from params.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.Variable.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.Variable.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional dict of variable values to use for evaluation.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.Variable.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.Variable.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional dict of variable values to use for evaluation.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
@@ -1205,7 +1205,7 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.expressions.Variable.name_must_be_nonempty">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name_must_be_nonempty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Variable.name_must_be_nonempty" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name_must_be_nonempty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.Variable.name_must_be_nonempty" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
@@ -1219,7 +1219,7 @@ validated to form a valid model.</p>
 <dd><p>Simplifies a variable by replacing it with a literal if the value is known.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.Variable.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.Variable.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional dict of variable values to use for simplification.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.Variable.simplify.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.Variable.simplify.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional dict of variable values to use for simplification.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.runtime.expressions.Variable" title="qat.runtime.expressions.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> | <a class="reference internal" href="#qat.runtime.expressions.Literal" title="qat.runtime.expressions.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a></span></p>
@@ -1236,7 +1236,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.VariableType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VariableType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.VariableType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VariableType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.VariableType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>Supported types for program variables.</p>
 <p>This includes standard numeric types, but also domain-specific types such as Phase and

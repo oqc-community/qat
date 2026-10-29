@@ -3,5 +3,5 @@ qat.experimental.dialect.gate.ir.types module
 
 .. automodule:: qat.experimental.dialect.gate.ir.types
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

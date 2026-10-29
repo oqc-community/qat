@@ -3,8 +3,8 @@ qat.purr.compiler.experimental package
 
 .. automodule:: qat.purr.compiler.experimental
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

@@ -3,8 +3,8 @@ qat.experimental.system\_data.canonical package
 
 .. automodule:: qat.experimental.system_data.canonical
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

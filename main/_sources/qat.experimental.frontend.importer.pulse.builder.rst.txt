@@ -3,5 +3,5 @@ qat.experimental.frontend.importer.pulse.builder module
 
 .. automodule:: qat.experimental.frontend.importer.pulse.builder
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

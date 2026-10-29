@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_012691bdebfaace8_optimisers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -106,7 +106,7 @@
     <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">        <span class="nam">missing_fields</span> <span class="op">=</span> <span class="op">[</span><span class="nam">val</span> <span class="key">for</span> <span class="nam">val</span> <span class="key">in</span> <span class="nam">snake_cased_flags</span> <span class="key">if</span> <span class="nam">val</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">hint_names</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">        <span class="key">if</span> <span class="nam">any</span><span class="op">(</span><span class="nam">missing_fields</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">23&#x202F;&#x219B;&#x202F;24</span><span class="annotate long">line 23 didn't jump to line 24 because the condition on line 23 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">                <span class="str">f"CompilationMetrics is missing type hints for {', '.join(missing_fields)}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">                <span class="fst">f"</span><span class="fst">CompilationMetrics is missing type hints for </span><span class="op">{</span><span class="str">', '</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">missing_fields</span><span class="op">)</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">        <span class="key">return</span> <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__new__</span><span class="op">(</span><span class="nam">mcs</span><span class="op">,</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">inheritance</span><span class="op">,</span> <span class="nam">attributes</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -173,7 +173,7 @@
     <p class="mis show_mis"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">other</span><span class="op">,</span> <span class="nam">type</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">                <span class="str">"Argument other must be of type Compilation metrics, not of type: "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">                <span class="str">f"{type(other)}"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">                <span class="fst">f"</span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">other</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">        <span class="key">for</span> <span class="nam">metric</span> <span class="key">in</span> <span class="nam">other</span><span class="op">.</span><span class="nam">_target_metrics</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">get_metric</span><span class="op">(</span><span class="nam">metric</span><span class="op">)</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -212,7 +212,7 @@
     <p class="mis show_mis"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">compilation_metrics</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">f"Enabling metrics with flags: {str(enabled_metrics)}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Enabling metrics with flags: </span><span class="op">{</span><span class="nam">str</span><span class="op">(</span><span class="nam">enabled_metrics</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">compilation_metrics</span><span class="op">.</span><span class="nam">enable</span><span class="op">(</span><span class="nam">enabled_metrics</span><span class="op">,</span> <span class="nam">overwrite</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
@@ -223,7 +223,7 @@
             <a class="nav" href="z_012691bdebfaace8_optimisers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

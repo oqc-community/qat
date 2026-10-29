@@ -3,5 +3,5 @@ qat.pipelines.purr.sweep.compile module
 
 .. automodule:: qat.pipelines.purr.sweep.compile
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

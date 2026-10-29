@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -728,7 +728,7 @@ a dynamic value. <code class="docutils literal notranslate"><span class="pre">Q1
 <code class="docutils literal notranslate"><span class="pre">pulse.phase_shift</span></code> operand upstream of both stages.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.phase.PhaseLegalisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseLegalisation</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.phase.PhaseLegalisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseLegalisation</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.phase.PhaseLegalisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Callable strategy that canonicalises a <code class="docutils literal notranslate"><span class="pre">pulse.phase_set</span></code> or <code class="docutils literal notranslate"><span class="pre">pulse.phase_shift</span></code>
 operand to the <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2π)</span></code> radian range and replaces the op with an equivalent Pulse op
@@ -740,7 +740,7 @@ before this stage runs.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.phase.PhaseLowering">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseLowering</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.phase.PhaseLowering" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseLowering</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.phase.PhaseLowering" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Callable strategy for the lowering stage.</p>
 <p>Lowering is distinct from legalisation. Canonical Pulse constants map to immediate Q1

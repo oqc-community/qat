@@ -3,8 +3,8 @@ qat.experimental.conversion.pulse\_to\_q1.qblox\_configuration package
 
 .. automodule:: qat.experimental.conversion.pulse_to_q1.qblox_configuration
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

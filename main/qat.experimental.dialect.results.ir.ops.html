@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.results.ir.ops module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.results.ir.ops module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,7 +722,7 @@
 collections of results.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.CreateOp" title="qat.experimental.dialect.results.ir.ops.CreateOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creates a value of a results type from provided values and an optional size.</p>
 <p>The semantics are determined by the result type:</p>
@@ -785,7 +785,7 @@ tuples, or arrays for collections).</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.for_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_array" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_array" title="Link to this definition"></a></dt>
 <dd><p>Create an empty <code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -803,7 +803,7 @@ dynamic SSA value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.for_collection_from_arrays">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_collection_from_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrays</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_collection_from_arrays" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_collection_from_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrays</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_collection_from_arrays" title="Link to this definition"></a></dt>
 <dd><p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code> from keyed arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -821,7 +821,7 @@ equal size, and all of type <code class="xref py py-class docutils literal notra
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.for_empty_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_empty_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_empty_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_empty_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_empty_collection" title="Link to this definition"></a></dt>
 <dd><p>Create an empty <code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -839,7 +839,7 @@ or a dynamic SSA value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.for_record">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_record" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_record" title="Link to this definition"></a></dt>
 <dd><p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code> from keys and values.</p>
 <p>The result schema is derived from the keys and value types.</p>
 <dl class="field-list simple">
@@ -857,7 +857,7 @@ or a dynamic SSA value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.for_tuple">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_tuple" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">for_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.for_tuple" title="Link to this definition"></a></dt>
 <dd><p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">TupleType</span></code> from values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -871,7 +871,7 @@ or a dynamic SSA value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.CreateOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.CreateOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -937,7 +937,7 @@ the result of the operation.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtractOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtractOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp" title="qat.experimental.dialect.results.ir.ops.ExtractOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtractOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Extracts a value from a results container.</p>
 <p>The extraction semantics are determined by the container type and selectors:</p>
@@ -968,14 +968,14 @@ and <code class="docutils literal notranslate"><span class="pre">index</span></c
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.container"></span><strong>container</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.container">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The container to extract from.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.result_type"></span><strong>result_type</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.result_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAttribute</span></code></span>) – Explicit result type for the extraction.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional key selector.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional index selector.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional key selector.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.ExtractOp.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional index selector.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.array_from_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">array_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.array_from_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">array_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.array_from_collection" title="Link to this definition"></a></dt>
 <dd><p>Extract a full field array from a collection by key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -998,7 +998,7 @@ and <code class="docutils literal notranslate"><span class="pre">index</span></c
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1039,7 +1039,7 @@ thus cannot be discarded by transformations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.record_from_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.record_from_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.record_from_collection" title="Link to this definition"></a></dt>
 <dd><p>Extract a full record from a collection by index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1064,7 +1064,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_array" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_array" title="Link to this definition"></a></dt>
 <dd><p>Extract an element value from an array by index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1075,7 +1075,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_collection" title="Link to this definition"></a></dt>
 <dd><p>Extract a field value from a collection by key and index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1086,7 +1086,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_record">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_record" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_from_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ExtractOp.value_from_record" title="Link to this definition"></a></dt>
 <dd><p>Extract a field value from a record by key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1105,7 +1105,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.GroupEntriesOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GroupEntriesOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.GroupEntriesOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GroupEntriesOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.GroupEntriesOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.GroupEntriesOp" title="qat.experimental.dialect.results.ir.ops.GroupEntriesOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupEntriesOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Groups entries in a record into a single entry, producing a tuple of those entries,
 ordered by the given keys, with the tuple stored with a provided key in the record.</p>
@@ -1154,7 +1154,7 @@ desired to promote proper dataflow semantics.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.GroupEntriesOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1219,7 +1219,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.MapOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MapOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_collection_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.MapOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MapOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_collection_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.MapOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.MapOp" title="qat.experimental.dialect.results.ir.ops.MapOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Maps a transformation over a record to a collection of records, producing a new
 collection of records.</p>
@@ -1279,7 +1279,7 @@ record into a new record.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.MapOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.MapOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.MapOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1336,7 +1336,7 @@ the MapOp.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.PostSelectOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">predicates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.PostSelectOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">predicates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.PostSelectOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.PostSelectOp" title="qat.experimental.dialect.results.ir.ops.PostSelectOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Filters a results collection based on a given predicate, producing a new collection
 that only includes records satisfying the predicate.</p>
@@ -1380,7 +1380,7 @@ classical control flow, given hardware compatibility.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.PostSelectOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.PostSelectOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.PostSelectOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1433,7 +1433,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ReduceOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReduceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ReduceOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReduceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ReduceOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.ReduceOp" title="qat.experimental.dialect.results.ir.ops.ReduceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Reduces a record, down to a subset of the entries in the record, producing a new
 record.</p>
@@ -1483,7 +1483,7 @@ record.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.ReduceOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ReduceOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.ReduceOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1542,7 +1542,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.StoreOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StoreOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StoreOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp" title="qat.experimental.dialect.results.ir.ops.StoreOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">StoreOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Stores a value into a results container at a given index.</p>
 <p>The semantics are determined by the container and value types:</p>
@@ -1574,7 +1574,7 @@ type must match the array element type. No <code class="docutils literal notrans
 <li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.StoreOp.params.container"></span><strong>container</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp.params.container">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The container to store into (collection or array).</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.StoreOp.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The index at which to store the value.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.StoreOp.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The value to store.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.StoreOp.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Optional key for storing a value by key in a collection.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ops.StoreOp.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ops.StoreOp.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional key for storing a value by key in a collection.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1592,7 +1592,7 @@ type must match the array element type. No <code class="docutils literal notrans
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.StoreOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1630,7 +1630,7 @@ thus cannot be discarded by transformations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.StoreOp.record_in_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_in_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.record_in_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_in_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.record_in_collection" title="Link to this definition"></a></dt>
 <dd><p>Store a full record into a collection at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1668,7 +1668,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.StoreOp.value_in_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_in_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_array" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_in_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_array" title="Link to this definition"></a></dt>
 <dd><p>Store a value into an array at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1686,7 +1686,7 @@ by the operation definition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.StoreOp.value_in_collection">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_in_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_collection" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value_in_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_collection" title="Link to this definition"></a></dt>
 <dd><p>Store a field value into a collection at <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1713,7 +1713,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.YieldOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">YieldOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.YieldOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">YieldOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.YieldOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.ops.YieldOp" title="qat.experimental.dialect.results.ir.ops.YieldOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">YieldOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Yields a record from a region, which can be used to produce a new collection of
 records.</p>
@@ -1738,7 +1738,7 @@ new collection of records. The yielded record must be of type RecordType.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ops.YieldOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.YieldOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ops.YieldOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 

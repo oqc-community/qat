@@ -3,8 +3,8 @@ qat.experimental.analysis package
 
 .. automodule:: qat.experimental.analysis
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

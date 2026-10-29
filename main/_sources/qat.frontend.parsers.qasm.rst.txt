@@ -3,8 +3,8 @@ qat.frontend.parsers.qasm package
 
 .. automodule:: qat.frontend.parsers.qasm
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

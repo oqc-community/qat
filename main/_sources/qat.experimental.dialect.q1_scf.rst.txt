@@ -3,8 +3,8 @@ qat.experimental.dialect.q1\_scf package
 
 .. automodule:: qat.experimental.dialect.q1_scf
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

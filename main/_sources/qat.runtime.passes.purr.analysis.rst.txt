@@ -3,5 +3,5 @@ qat.runtime.passes.purr.analysis module
 
 .. automodule:: qat.runtime.passes.purr.analysis
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

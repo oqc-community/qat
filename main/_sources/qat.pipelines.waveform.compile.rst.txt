@@ -3,5 +3,5 @@ qat.pipelines.waveform.compile module
 
 .. automodule:: qat.pipelines.waveform.compile
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

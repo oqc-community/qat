@@ -347,7 +347,7 @@
 <p>Implements IR transformation passes that happen in the middleend.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.AcquireSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.AcquireSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.AcquireSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Sanitises the <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instruction to separate the <code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code> from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions.</p>
@@ -372,7 +372,7 @@ delay into two instructions for the first acquire that acts on the channel.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.BatchedShots">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BatchedShots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.BatchedShots" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BatchedShots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.BatchedShots" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Determines how shots should be grouped when the total number of acquisitions exceeds
 the maximum allowed.</p>
@@ -433,7 +433,7 @@ the results manager might not necessarily be passed along.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.EndOfTaskResetSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndOfTaskResetSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EndOfTaskResetSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndOfTaskResetSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EndOfTaskResetSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Checks for a reset on each active qubit at the end of a task, and adds Reset
 operations if not found.</p>
@@ -467,7 +467,7 @@ the QPU.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluateWaveforms">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_shapes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_ignored_shapes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_shapes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_ignored_shapes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Evaluates the amplitudes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform`s</span> <span class="pre">within</span> <span class="pre">:class:`Pulse</span></code> instructions,
 replacing them with a <code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code> and accounting for the scale of the pulse
@@ -484,9 +484,9 @@ This pass evaluates pulses early in the compilation pipeline.</p>
 which is required to extract the scale factor of pulse channels.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.params.target_data"></span><strong>target_data</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.params.target_data">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></span>) – Target-related information, which is used to extract the sample
 time of the pulse channels.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.params.ignored_shapes"></span><strong>ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.params.ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>]]</span>) – A list of pulse shapes that are not evaluated to a custom
+<li><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.params.ignored_shapes"></span><strong>ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.params.ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A list of pulse shapes that are not evaluated to a custom
 pulse, defaults to <cite>[PulseShapeType.SQUARE]</cite>.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.params.acquire_ignored_shapes"></span><strong>acquire_ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.params.acquire_ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>]]</span>) – A list of pulse shapes that are not evaluated to a
+<li><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.params.acquire_ignored_shapes"></span><strong>acquire_ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.params.acquire_ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – A list of pulse shapes that are not evaluated to a
 custom pulse for <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> filters, defaults to <cite>[]</cite>.</p></li>
 </ul>
 </dd>
@@ -521,7 +521,7 @@ implementation.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.FreqShiftSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FreqShiftSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FreqShiftSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Looks for any active frequency shift pulse channels in the hardware model and adds
 square pulses for the duration.</p>
@@ -541,7 +541,7 @@ instructions.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.FreqShiftSanitisation.add_freq_shift_to_ir">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_freq_shift_to_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_shift_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation.add_freq_shift_to_ir" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_freq_shift_to_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_shift_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation.add_freq_shift_to_ir" title="Link to this definition"></a></dt>
 <dd><p>Adds frequency shift instructions to the instruction builder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -552,7 +552,7 @@ instructions.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.FreqShiftSanitisation.get_active_freq_shift_pulse_channels">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_active_freq_shift_pulse_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation.get_active_freq_shift_pulse_channels" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_active_freq_shift_pulse_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.FreqShiftSanitisation.get_active_freq_shift_pulse_channels" title="Link to this definition"></a></dt>
 <dd><p>Returns all active frequency shift pulse channels found in the hardware model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -581,7 +581,7 @@ instructions.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Removes instructions that act on inactive pulse channels.</p>
 <p>Many channels that aren’t actually needed to execute the program contain instructions,
@@ -615,7 +615,7 @@ to be stored in the results manager.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InitialPhaseResetSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InitialPhaseResetSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InitialPhaseResetSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InitialPhaseResetSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InitialPhaseResetSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Checks if every active pulse channel has a phase reset in the beginning.</p>
 <div class="admonition warning">
@@ -632,7 +632,7 @@ pass.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InsertPreSelectionMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InsertPreSelectionMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Insert a pre-selection measurement inside the shot loop.</p>
 <p>For each active qubit with <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> set, this pass
@@ -676,7 +676,7 @@ so that newly-active measure/acquire channels are not stripped.</p>
 <li><p><span class="target" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span>) – The instruction builder holding the current IR.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager containing
 <a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults" title="qat.middleend.passes.analysis.ActivePulseChannelResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelResults</span></code></a>.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – The compiler configuration.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The compiler configuration.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -692,7 +692,7 @@ so that newly-active measure/acquire channels are not stripped.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionGranularitySanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Rounds the durations of quantum instructions so they are multiples of the clock
 cycle.</p>
@@ -734,7 +734,7 @@ it up to the nearest integer multiple. Furthemore, it will assume that
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionLengthSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionLengthSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionLengthSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionLengthSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionLengthSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Checks if quantum instructions are too long and splits if necessary.</p>
 <dl class="field-list simple">
@@ -765,7 +765,7 @@ pass.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.LowerSyncsToDelays">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerSyncsToDelays</span></span><a class="headerlink" href="#qat.middleend.passes.transform.LowerSyncsToDelays" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerSyncsToDelays</span></span><a class="headerlink" href="#qat.middleend.passes.transform.LowerSyncsToDelays" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Lowers <code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code> instructions to <code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code> instructions with static
 times.</p>
@@ -800,7 +800,7 @@ instruction.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.MeasurePhaseResetSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasurePhaseResetSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.MeasurePhaseResetSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasurePhaseResetSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.MeasurePhaseResetSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Adds a phase reset before every measure pulse.</p>
 <dl class="field-list simple">
@@ -818,7 +818,7 @@ qubits on the QPU.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PhaseOptimisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PhaseOptimisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PhaseOptimisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through the list of instructions and compresses contiguous
 <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions.</p>
@@ -841,7 +841,7 @@ optimisation.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PhaseOptimisationHandler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisationHandler</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PhaseOptimisationHandler" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisationHandler</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PhaseOptimisationHandler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PhaseOptimisationHandler.run">
@@ -852,7 +852,7 @@ optimisation.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PopulateWaveformSampleTime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateWaveformSampleTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateWaveformSampleTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Populates instructions within the IR with the sample time from their coupled physical
 channel.</p>
@@ -881,7 +881,7 @@ qubits on the QPU.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PostProcessingSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PostProcessingSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PostProcessingSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation" title="qat.frontend.passes.transform.PostProcessingSanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessingSanitisation</span></code></a></p>
 <p>Checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code> instructions that follow an acquisition are
 suitable for the acquisition mode, and removes them if not.</p>
@@ -1015,7 +1015,7 @@ suitable for the acquisition mode, and removes them if not.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Adds repeat counts and repetition periods to <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code> instructions.</p>
 <p>If none is found, a repeat instruction is added.</p>
@@ -1038,7 +1038,7 @@ suitable for the acquisition mode, and removes them if not.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatTranslation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatTranslation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatTranslation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatTranslation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatTranslation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Transform <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code> instructions so that they are replaced with:</p>
 <p><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Assign</span></code>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">Label</span></code> instructions at the start,
@@ -1060,7 +1060,7 @@ and <code class="xref py py-class docutils literal notranslate"><span class="pre
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatTranslationHandler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatTranslationHandler</span></span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatTranslationHandler" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatTranslationHandler</span></span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatTranslationHandler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Handler used by PydRepeatTranslation to manage the translation of Repeat and
 EndRepeat instructions.</p>
@@ -1080,7 +1080,7 @@ translation.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ResetTransformation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetTransformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetTransformation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetTransformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetTransformation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.middleend.passes.transform.ResetsToDelays" title="qat.middleend.passes.transform.ResetsToDelays"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResetsToDelays</span></code></a></p>
 <p>Transforms <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> operations to pulsed definitions of reset.</p>
 <p>A general reset pass, which transforms resets into pulses/delays depending on the reset
@@ -1123,7 +1123,7 @@ guaranteed to last for the same duration.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetTransformation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetTransformation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetTransformation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetTransformation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.transform.ResetTransformation.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetTransformation.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – The compiler configuration.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.ResetTransformation.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetTransformation.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler configuration.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1136,7 +1136,7 @@ guaranteed to last for the same duration.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ResetsToDelays">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetsToDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetsToDelays" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetsToDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetsToDelays" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Transforms <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> operations to :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Delay`s.</p>
 <p>Note that the delays do not necessarily agree with the granularity of the underlying
@@ -1171,7 +1171,7 @@ the QPU.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – The compiler configuration.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler configuration.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1184,7 +1184,7 @@ the QPU.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ReturnSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.ReturnSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.ReturnSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Squashes all <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code> instructions into a single one.</p>
 <p>Adds a <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code>
@@ -1203,7 +1203,7 @@ with all acquisitions if none is found.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ScopeSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.ScopeSanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.ScopeSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Bubbles up all sweeps and repeats to the beginning of the list and adds delimiter
 instructions to the repeats and sweeps signifying the end of their scopes.</p>
@@ -1227,7 +1227,7 @@ instruction for each <code class="xref py py-class docutils literal notranslate"
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.SquashDelaysOptimisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquashDelaysOptimisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.SquashDelaysOptimisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquashDelaysOptimisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.SquashDelaysOptimisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Looks for consecutive <code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code> instructions on a pulse channel and squashes
 them into a single instruction.</p>
@@ -1258,7 +1258,7 @@ optimisation.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.SynchronizeTask">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SynchronizeTask</span></span><a class="headerlink" href="#qat.middleend.passes.transform.SynchronizeTask" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SynchronizeTask</span></span><a class="headerlink" href="#qat.middleend.passes.transform.SynchronizeTask" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Synchronizes all active pulse channels in a task.</p>
 <p>Adds a synchronize to the end of the instruction list for all active pulse channels,

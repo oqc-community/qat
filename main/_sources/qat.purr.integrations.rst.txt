@@ -3,8 +3,8 @@ qat.purr.integrations package
 
 .. automodule:: qat.purr.integrations
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

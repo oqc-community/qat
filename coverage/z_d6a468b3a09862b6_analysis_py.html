@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_d6a468b3a09862b6_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -180,9 +180,9 @@
     <p class="pln"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">            <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">devices</span><span class="op">)</span> <span class="op">></span> <span class="num">1</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">97&#x202F;&#x219B;&#x202F;98</span><span class="annotate long">line 97 didn't jump to line 98 because the condition on line 97 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">                    <span class="str">f"Multiple targets found with pulse channel {target}: "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Multiple targets found with pulse channel </span><span class="op">{</span><span class="nam">target</span><span class="op">}</span><span class="fst">: </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">                    <span class="op">+</span> <span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="op">[</span><span class="nam">str</span><span class="op">(</span><span class="nam">device</span><span class="op">)</span> <span class="key">for</span> <span class="nam">device</span> <span class="key">in</span> <span class="nam">devices</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">                    <span class="op">+</span> <span class="str">f". Defaulting to the first quantum device found, {devices[0]}."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">                    <span class="op">+</span> <span class="fst">f"</span><span class="fst">. Defaulting to the first quantum device found, </span><span class="op">{</span><span class="nam">devices</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">}</span><span class="fst">.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">            <span class="nam">device</span> <span class="op">=</span> <span class="nam">devices</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -195,7 +195,7 @@
     <p class="mis show_mis"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">                <span class="nam">result</span><span class="op">.</span><span class="nam">unassigned</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">target</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">        <span class="nam">phys_q_indices</span> <span class="op">=</span> <span class="nam">sorted</span><span class="op">(</span><span class="nam">result</span><span class="op">.</span><span class="nam">physical_qubit_indices</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">f"Physical qubits used in this circuit: {phys_q_indices}"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Physical qubits used in this circuit: </span><span class="op">{</span><span class="nam">phys_q_indices</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">        <span class="nam">met_mgr</span><span class="op">.</span><span class="nam">record_metric</span><span class="op">(</span><span class="nam">MetricsType</span><span class="op">.</span><span class="nam">PhysicalQubitIndices</span><span class="op">,</span> <span class="nam">phys_q_indices</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">        <span class="nam">res_mgr</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="nam">result</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -209,7 +209,7 @@
             <a class="nav" href="z_d6a468b3a09862b6_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

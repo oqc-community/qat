@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -749,7 +749,7 @@ this pass only ever has to recognise canonical constant operands. The requiremen
 enforced by the pipeline builder via <code class="xref py py-meth docutils literal notranslate"><span class="pre">required_predecessors()</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveformsAsSamples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveformsAsSamples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Evaluate analytical waveform ops into constant sampled waveforms.</p>
 <p>For every <code class="xref py py-class docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code> op with all-constant operands, the

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.gate.ir package &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.experimental.dialect.gate.ir package &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,7 +722,7 @@
 (algorithmic qubits mapped to physical qubits) and then lowered to pulses.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AlgorithmicQubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlgorithmicQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AlgorithmicQubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlgorithmicQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AlgorithmicQubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.types.html#qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType" title="qat.experimental.dialect.gate.ir.types.AlgorithmicQubitType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmicQubitType</span></code></a></p>
 <p>An algorithmic qubit type, assigned at circuit construction time.</p>
 <p>Represents a qubit as it appears in an algorithm, such as a qubit in a source QASM2
@@ -730,7 +730,7 @@ program, with no hardware assignment. Placement maps algorithmic qubits to physi
 qubits.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AlgorithmicQubitType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AlgorithmicQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AlgorithmicQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -744,7 +744,7 @@ qubits.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocateAlgorithmicQubitOp</span></span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocateAlgorithmicQubitOp</span></span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateAlgorithmicQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateAlgorithmicQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateAlgorithmicQubitOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateQubitOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateQubitOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Allocates a new algorithmic qubit, initialised to the <a href="#id1"><span class="problematic" id="id2">|</span></a>0⟩ state.</p>
 <p>An algorithmic qubit is a qubit as written in the source program, before placement.
@@ -752,7 +752,7 @@ Compiling a program starts by allocating its qubits with this op.</p>
 <p>Allocates an algorithmic qubit.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateAlgorithmicQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -785,7 +785,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocatePhysicalQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocatePhysicalQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocatePhysicalQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocatePhysicalQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocatePhysicalQubitOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateQubitOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateQubitOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Allocates a new physical qubit, initialised to the <a href="#id3"><span class="problematic" id="id4">|</span></a>0⟩ state.</p>
 <dl class="field-list simple">
@@ -795,7 +795,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocatePhysicalQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -828,7 +828,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocateQubitOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocateQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateQubitOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocateQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateQubitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.AllocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllocateQubitOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Allocates a new qubit of any qubit type, initialised to the <a href="#id5"><span class="problematic" id="id6">|</span></a>0⟩ state.</p>
 <p>The result type says whether the qubit is algorithmic or physical.
@@ -843,7 +843,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.AllocateQubitOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.AllocateQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -876,7 +876,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.BarrierOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BarrierOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.BarrierOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BarrierOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.BarrierOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.BarrierOp" title="qat.experimental.dialect.gate.ir.ops.BarrierOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">BarrierOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Optimisation barrier across a set of qubits.</p>
 <p>Stops optimisations moving operations on these qubits across the barrier. It carries no
@@ -895,7 +895,7 @@ Takes a variadic set of distinct qubits and returns each one unchanged.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.BarrierOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.BarrierOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.BarrierOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -934,7 +934,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.CXOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CXOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CXOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CXOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CXOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CXOp" title="qat.experimental.dialect.gate.ir.ops.CXOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CXOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CliffordDirectionalTwoQubitGate" title="qat.experimental.dialect.gate.ir.ops.CliffordDirectionalTwoQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CliffordDirectionalTwoQubitGate</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.DirectionalTwoQubitGate" title="qat.experimental.dialect.gate.ir.ops.DirectionalTwoQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">DirectionalTwoQubitGate</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.TwoQubitGate" title="qat.experimental.dialect.gate.ir.ops.TwoQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">TwoQubitGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The controlled-X (CNOT) gate.</p>
 <p>Builds the gate. Each result has the type of its qubit.</p>
@@ -948,7 +948,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.CXOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CXOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CXOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -999,7 +999,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.CZOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CZOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CZOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CZOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CZOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CZOp" title="qat.experimental.dialect.gate.ir.ops.CZOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CZOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CliffordTwoQubitGate" title="qat.experimental.dialect.gate.ir.ops.CliffordTwoQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CliffordTwoQubitGate</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.TwoQubitGate" title="qat.experimental.dialect.gate.ir.ops.TwoQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">TwoQubitGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The controlled-Z gate.</p>
 <p>Builds the gate. Each result has the type of its qubit.</p>
@@ -1013,7 +1013,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.CZOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CZOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CZOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1064,7 +1064,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.CliffordTrait">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CliffordTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CliffordTrait" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CliffordTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.CliffordTrait" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">OpTrait</span></code></p>
 <p>A trait that signifies every instance of the operation is a Clifford gate.</p>
 <p>Passes use it to ask whether a gate is Clifford without listing gates.</p>
@@ -1072,7 +1072,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.DeallocateQubitOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeallocateQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.DeallocateQubitOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeallocateQubitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.DeallocateQubitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.DeallocateQubitOp" title="qat.experimental.dialect.gate.ir.ops.DeallocateQubitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeallocateQubitOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Ends the lifetime of a qubit.</p>
 <p>Consumes the qubit and returns nothing. Use it for a qubit that is not measured, so its
@@ -1087,7 +1087,7 @@ chain of values has an explicit end. The verifier does not require one.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.DeallocateQubitOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.DeallocateQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.DeallocateQubitOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1120,7 +1120,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.HOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.HOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.HOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.HOp" title="qat.experimental.dialect.gate.ir.ops.HOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CliffordOneQubitGate" title="qat.experimental.dialect.gate.ir.ops.CliffordOneQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CliffordOneQubitGate</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.OneQubitGate" title="qat.experimental.dialect.gate.ir.ops.OneQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneQubitGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The Hadamard gate.</p>
 <dl class="field-list simple">
@@ -1130,7 +1130,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.HOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.HOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.HOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1169,7 +1169,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.IdentityOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IdentityOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.IdentityOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IdentityOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.IdentityOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.IdentityOp" title="qat.experimental.dialect.gate.ir.ops.IdentityOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">IdentityOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Identity gate — passes the qubit state through unchanged.</p>
 <p>Used as a canonical no-op placeholder, e.g. after gate cancellation leaves a qubit with
@@ -1187,7 +1187,7 @@ an empty operation sequence before dead-qubit elimination runs.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.IdentityOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.IdentityOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.IdentityOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1226,7 +1226,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.MeasureOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasureOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.MeasureOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasureOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.MeasureOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.MeasureOp" title="qat.experimental.dialect.gate.ir.ops.MeasureOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Measures a single qubit.</p>
 <p>Consumes the qubit and returns the outcome as an <code class="docutils literal notranslate"><span class="pre">i1</span></code>.</p>
@@ -1243,7 +1243,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.MeasureOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.MeasureOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.MeasureOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1282,7 +1282,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.PhysicalQubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.PhysicalQubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalQubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.PhysicalQubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.types.html#qat.experimental.dialect.gate.ir.types.PhysicalQubitType" title="qat.experimental.dialect.gate.ir.types.PhysicalQubitType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalQubitType</span></code></a></p>
 <p>A physical qubit type, assigned after placement.</p>
 <dl class="field-list simple">
@@ -1292,7 +1292,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.PhysicalQubitType.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.PhysicalQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.PhysicalQubitType.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL attribute definition.</p>
 </dd></dl>
 
@@ -1323,7 +1323,7 @@ Raise a VerifyException otherwise.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.QubitType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.QubitType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.QubitType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAttribute</span></code></p>
 <p>Abstract base for qubit type.</p>
 <p>Concrete subtypes distinguish algorithmic qubits (pre-placement, directly from the
@@ -1339,7 +1339,7 @@ expressed as a type-level rewrite without any structural change to the circuit o
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.RZOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RZOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.RZOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RZOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.RZOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.RZOp" title="qat.experimental.dialect.gate.ir.ops.RZOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.OneAngleGate" title="qat.experimental.dialect.gate.ir.ops.OneAngleGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneAngleGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A rotation about the Z axis by <code class="docutils literal notranslate"><span class="pre">theta</span></code>.</p>
 <p>Builds the gate. The result has the type of the qubit.</p>
@@ -1353,7 +1353,7 @@ expressed as a type-level rewrite without any structural change to the circuit o
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.RZOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.RZOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.RZOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1398,7 +1398,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.ResetOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.ResetOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.ResetOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.ResetOp" title="qat.experimental.dialect.gate.ir.ops.ResetOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResetOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Resets a qubit to the <a href="#id7"><span class="problematic" id="id8">|</span></a>0⟩ state.</p>
 <p><code class="docutils literal notranslate"><span class="pre">MeasureOp</span></code> consumes its qubit, so a measured qubit cannot be reset.</p>
@@ -1415,7 +1415,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.ResetOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.ResetOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.ResetOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1454,7 +1454,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.U3Op">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">U3Op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.U3Op" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">U3Op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.U3Op" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.U3Op" title="qat.experimental.dialect.gate.ir.ops.U3Op"><code class="xref py py-class docutils literal notranslate"><span class="pre">U3Op</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.ThreeAngleGate" title="qat.experimental.dialect.gate.ir.ops.ThreeAngleGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThreeAngleGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The general single-qubit gate U3(theta, phi, lambda).</p>
 <p>Builds the gate. The result has the type of the qubit.</p>
@@ -1470,7 +1470,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.U3Op.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.U3Op.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.U3Op.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
@@ -1527,7 +1527,7 @@ by the operation definition.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.XOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">XOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.XOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">XOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.XOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.XOp" title="qat.experimental.dialect.gate.ir.ops.XOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">XOp</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.CliffordOneQubitGate" title="qat.experimental.dialect.gate.ir.ops.CliffordOneQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CliffordOneQubitGate</span></code></a>, <a class="reference internal" href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.OneQubitGate" title="qat.experimental.dialect.gate.ir.ops.OneQubitGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneQubitGate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The Pauli-X gate.</p>
 <dl class="field-list simple">
@@ -1537,7 +1537,7 @@ by the operation definition.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.gate.ir.XOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.XOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.gate.ir.XOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 

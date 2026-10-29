@@ -3,8 +3,8 @@ qat.pipelines.legacy package
 
 .. automodule:: qat.pipelines.legacy
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

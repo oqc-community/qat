@@ -3,5 +3,5 @@ qat.model.loaders.purr.rtcs module
 
 .. automodule:: qat.model.loaders.purr.rtcs
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

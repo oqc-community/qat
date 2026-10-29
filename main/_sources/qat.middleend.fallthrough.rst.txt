@@ -3,5 +3,5 @@ qat.middleend.fallthrough module
 
 .. automodule:: qat.middleend.fallthrough
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

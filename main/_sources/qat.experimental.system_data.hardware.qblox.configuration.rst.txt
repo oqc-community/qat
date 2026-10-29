@@ -3,5 +3,5 @@ qat.experimental.system\_data.hardware.qblox.configuration module
 
 .. automodule:: qat.experimental.system_data.hardware.qblox.configuration
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Readout Post-Processing &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>Readout Post-Processing &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -781,7 +781,7 @@ ResultTransform
 <h3><a class="toc-backref" href="#id7" role="doc-backlink">Step 1 — Equalise</a><a class="headerlink" href="#step-1-equalise" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.measure.Equalise">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Equalise" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Equalise" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Apply an affine transform in the IQ (complex) plane to readout data.</p>
 <p>This is the first stage of the granular post-processing pipeline.</p>
@@ -834,7 +834,7 @@ validated to form a valid model.</p>
 <h3><a class="toc-backref" href="#id8" role="doc-backlink">Step 2 — Discriminate</a><a class="headerlink" href="#step-2-discriminate" title="Link to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.measure.Discriminate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Discriminate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Discriminate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Discriminate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Discriminate" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>Discriminate equalised values to integer state keys.</p>
 <p>For the linear-map path a sign-based threshold comparison is used:
@@ -883,7 +883,7 @@ exclusive.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearMapToRealMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearMapToRealMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a></p>
 <p>Threshold-based discriminator using a calibrated complex-to-real projection.</p>
 <p>Projects each complex IQ readout onto a real value via:</p>
@@ -918,7 +918,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaxLikelihoodMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaxLikelihoodMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a></p>
 <p>Maximum likelihood discriminator for qubit measurement results.</p>
 <p>Each shot is assigned to the state <code class="docutils literal notranslate"><span class="pre">k</span></code> with the highest normalised likelihood:</p>
@@ -1001,7 +1001,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.post_processing.MLDiscriminateParams">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MLDiscriminateParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MLDiscriminateParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams" title="Link to this definition"></a></dt>
 <dd><p>IQ-plane centroid for a single measurement outcome.</p>
 <p>Each <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams" title="qat.model.post_processing.MLDiscriminateParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLDiscriminateParams</span></code></a> entry represents one possible measurement outcome.
 The integer output value and disallowed flag are encoded by the <strong>dict key</strong>

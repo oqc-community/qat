@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_14784ff12ae3d610_materialise_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -145,7 +145,7 @@
     <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">        <span class="str">"""Create a standard unsupported-source error payload."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">        <span class="key">return</span> <span class="nam">cls</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">            <span class="str">f"Unsupported source type: {source_type}"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">            <span class="fst">f"</span><span class="fst">Unsupported source type: </span><span class="op">{</span><span class="nam">source_type</span><span class="op">}</span><span class="fst">"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">            <span class="nam">source_type</span><span class="op">=</span><span class="nam">source_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">            <span class="nam">source_version</span><span class="op">=</span><span class="nam">source_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">            <span class="nam">details</span><span class="op">=</span><span class="op">{</span><span class="str">"supported_sources"</span><span class="op">:</span> <span class="nam">supported_sources</span><span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -169,7 +169,7 @@
     <p class="pln"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">        <span class="str">"""Create a standard unsupported-source-version error."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">        <span class="key">return</span> <span class="nam">cls</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">            <span class="op">(</span><span class="str">f"Unsupported source version '{source_version}' for source '{source_type}'."</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">            <span class="op">(</span><span class="fst">f"</span><span class="fst">Unsupported source version '</span><span class="op">{</span><span class="nam">source_version</span><span class="op">}</span><span class="fst">' for source '</span><span class="op">{</span><span class="nam">source_type</span><span class="op">}</span><span class="fst">'.</span><span class="fst">"</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">            <span class="nam">source_type</span><span class="op">=</span><span class="nam">source_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">            <span class="nam">source_version</span><span class="op">=</span><span class="nam">source_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">            <span class="nam">details</span><span class="op">=</span><span class="op">{</span><span class="str">"supported_versions"</span><span class="op">:</span> <span class="nam">supported_versions</span><span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -206,8 +206,8 @@
     <p class="pln"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">        <span class="key">return</span> <span class="nam">cls</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">            <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                <span class="str">f"Source integrity verification failed during '{check}' "</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">                <span class="str">f"for source '{source_type}' version '{source_version}'."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Source integrity verification failed during '</span><span class="op">{</span><span class="nam">check</span><span class="op">}</span><span class="fst">' </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">                <span class="fst">f"</span><span class="fst">for source '</span><span class="op">{</span><span class="nam">source_type</span><span class="op">}</span><span class="fst">' version '</span><span class="op">{</span><span class="nam">source_version</span><span class="op">}</span><span class="fst">'.</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">            <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">            <span class="nam">source_type</span><span class="op">=</span><span class="nam">source_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="nam">source_version</span><span class="op">=</span><span class="nam">source_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -241,7 +241,7 @@
             <a class="nav" href="z_14784ff12ae3d610_materialise_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-28 16:37 +0000
+            created at 2026-10-29 13:40 +0000
         </p>
     </div>
 </footer>

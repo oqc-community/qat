@@ -3,5 +3,5 @@ qat.model.validators module
 
 .. automodule:: qat.model.validators
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

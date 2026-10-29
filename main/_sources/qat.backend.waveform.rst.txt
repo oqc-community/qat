@@ -3,8 +3,8 @@ qat.backend.waveform package
 
 .. automodule:: qat.backend.waveform
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

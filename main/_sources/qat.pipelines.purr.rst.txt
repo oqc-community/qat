@@ -3,8 +3,8 @@ qat.pipelines.purr package
 
 .. automodule:: qat.pipelines.purr
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

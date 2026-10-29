@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.core.pass_base module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.purr.core.pass_base module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -718,7 +718,7 @@
 <span id="qat-purr-core-pass-base-module"></span><h1>qat.purr.core.pass_base module<a class="headerlink" href="#module-qat.purr.core.pass_base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.AnalysisPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.AnalysisPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.AnalysisPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.core.pass_base.PassInfoMixin" title="qat.purr.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
 <p>Base class of all passes that compute some form of analysis on the IR.</p>
 <p>The IR is imperatively left intact.</p>
@@ -731,7 +731,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.InvokerMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InvokerMixin</span></span><a class="headerlink" href="#qat.purr.core.pass_base.InvokerMixin" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InvokerMixin</span></span><a class="headerlink" href="#qat.purr.core.pass_base.InvokerMixin" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Useful for compilation (global design-wise) stages/phases that are meant to invoke
 some arbitrary formation of passes in the form of a pipeline.</p>
@@ -743,7 +743,7 @@ stages is likely to shift as QAT matures.</p>
 validates its analyses results, and uses those results for its purpose.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.InvokerMixin.build_pass_pipeline">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.InvokerMixin.build_pass_pipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.InvokerMixin.build_pass_pipeline" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.core.pass_base.PassManager" title="qat.purr.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
@@ -760,20 +760,20 @@ validates its analyses results, and uses those results for its purpose.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.PassConcept">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassConcept</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassConcept" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassConcept</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassConcept" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Base class describing the abstraction of a pass.</p>
 <p>See PassManager.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.PassConcept.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.PassConcept.run" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.PassConcept.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.PassInfoMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassInfoMixin</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassInfoMixin" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassInfoMixin</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassInfoMixin" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Base mixin specifying pass identification mechanism. A pass has an id and name.</p>
 <p>Such identification is loosely specified as it related closely to how passes and their
@@ -793,7 +793,7 @@ results are managed throughout their lifecycle.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.PassManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassManager</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassManager" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassManager</span></span><a class="headerlink" href="#qat.purr.core.pass_base.PassManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.core.pass_base.PassInfoMixin" title="qat.purr.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
 <p>Represents a sequential composite of passes, which can be composites themselves.
 Although not explicitly specified, the pass manager is best modelled as a DAG that acts
@@ -844,7 +844,7 @@ by the opensource community.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.PassModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pass_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.PassModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pass_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.core.pass_base.PassModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.core.pass_base.PassConcept" title="qat.purr.core.pass_base.PassConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassConcept</span></code></a></p>
 <p>Implements the polymorphic pass API. A wrapper for any object providing a run()
 method that accepts some unit of IR as well as a ResultManager.</p>
@@ -858,7 +858,7 @@ method that accepts some unit of IR as well as a ResultManager.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.TransformPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TransformPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.TransformPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TransformPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.TransformPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.core.pass_base.PassInfoMixin" title="qat.purr.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
 <p>Base class for all passes that mutate the QatIR in-place.</p>
 <dl class="py method">
@@ -870,7 +870,7 @@ method that accepts some unit of IR as well as a ResultManager.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.core.pass_base.ValidationPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidationPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.ValidationPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidationPass</span></span><a class="headerlink" href="#qat.purr.core.pass_base.ValidationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.core.pass_base.PassInfoMixin" title="qat.purr.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
 <p>Base class for all passes that verify or run some form of check (i.e semantics,
 legalisation, …) on the IR.</p>

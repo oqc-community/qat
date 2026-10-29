@@ -3,8 +3,8 @@ qat.experimental.middleend package
 
 .. automodule:: qat.experimental.middleend
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

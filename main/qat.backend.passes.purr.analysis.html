@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.passes.purr.analysis module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.backend.passes.purr.analysis module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-backend-passes-purr-analysis-module"></span><h1>qat.backend.passes.purr.analysis module<a class="headerlink" href="#module-qat.backend.passes.purr.analysis" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.BindingPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingPass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_uneven_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingPass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_uneven_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Builds binding of variables, instructions, and a view of variables from/to scopes.</p>
 <p>Variables are implicitly declared in sweep instructions and are ultimately read from
@@ -741,7 +741,7 @@ instead of raising a <code class="xref py py-class docutils literal notranslate"
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_uneven</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_uneven</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
 <dd><p>Given a sequence of numbers (typically having been generated from
 <code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced, in
 which case returns an IterBound instance holding the start, step, end, and count of
@@ -781,7 +781,7 @@ case the spacing is not checked and the step is None).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.BindingResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoping_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bound_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_data_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoping_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bound_results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_data_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.BindingResult.acquire_data_map">
@@ -807,7 +807,7 @@ case the spacing is not checked and the step is None).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.CFGPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CFGPass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.CFGPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CFGPass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.CFGPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.CFGPass.run">
@@ -826,7 +826,7 @@ case the spacing is not checked and the step is None).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.CFGResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CFGResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.CFGResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CFGResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.CFGResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.CFGResult.cfg">
@@ -837,7 +837,7 @@ case the spacing is not checked and the step is None).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IntermediateFrequencyAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IntermediateFrequencyAnalysis" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IntermediateFrequencyAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Adapted from
 <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies" title="qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies()</span></code></a>.</p>
@@ -871,7 +871,7 @@ as information of pulse channels are needed.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IntermediateFrequencyResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IntermediateFrequencyResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IntermediateFrequencyResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IntermediateFrequencyResult.frequencies">
@@ -882,7 +882,7 @@ as information of pulse channels are needed.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IterBound">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IterBound" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IterBound" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IterBound.astype">
@@ -913,7 +913,7 @@ as information of pulse channels are needed.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.LifetimePass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LifetimePass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.LifetimePass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LifetimePass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.LifetimePass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>The end goal of this pass is to facilitate sequencer allocation on the control
 hardware. Much like classical register allocation techniques, this pass is intended to
@@ -949,7 +949,7 @@ allows allocation to be represented as a graph coloring.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.PulseChannelTimeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseChannelTimeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_positions=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_positions=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.PulseChannelTimeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseChannelTimeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_positions=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_positions=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.PulseChannelTimeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Timeline analysis for instructions on a pulse channel.</p>
 <p>Imagine the timeline for a pulse channel, with an instruction that occurs over samples
@@ -986,7 +986,7 @@ allows allocation to be represented as a graph coloring.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.ReadWriteResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadWriteResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inits=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reads=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.ReadWriteResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadWriteResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inits=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reads=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.ReadWriteResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.ReadWriteResult.inits">
@@ -1007,7 +1007,7 @@ allows allocation to be represented as a graph coloring.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.ScopingResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scope2symbols=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol2scopes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.ScopingResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scope2symbols=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol2scopes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.ScopingResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.ScopingResult.scope2symbols">
@@ -1023,7 +1023,7 @@ allows allocation to be represented as a graph coloring.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TILegalisationPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TILegalisationPass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TILegalisationPass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>An instruction is legal if it has a direct equivalent in the programming model
 implemented by the control stack. The notion of “legal” is highly determined by the
@@ -1047,7 +1047,7 @@ and materialises its intention.</p>
 </div></blockquote>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TILegalisationPass.decompose_freq">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompose_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass.decompose_freq" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompose_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass.decompose_freq" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1065,14 +1065,14 @@ and materialises its intention.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TILegalisationPass.transform_amp">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass.transform_amp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TILegalisationPass.transform_amp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TimelineAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysis</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysis" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysis</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Analyses the timeline of each pulse channel.</p>
 <p>Takes the instruction list for each pulse channel retrieved from the the partitioned
@@ -1089,7 +1089,7 @@ pass.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TimelineAnalysis.durations_as_samples">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">durations_as_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysis.durations_as_samples" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">durations_as_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysis.durations_as_samples" title="Link to this definition"></a></dt>
 <dd><p>Converts a list of durations into a number of samples.</p>
 </dd></dl>
 
@@ -1113,7 +1113,7 @@ pass.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TimelineAnalysisResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysisResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_duration=0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysisResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysisResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_duration=0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TimelineAnalysisResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <p>Stores the timeline analysis for all pulse channels.</p>
 <dl class="field-list simple">
@@ -1136,7 +1136,7 @@ channels.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TriagePass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriagePass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TriagePass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriagePass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TriagePass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Builds a view of instructions per quantum target AOT.</p>
 <p>Builds selections of instructions useful for subsequent analysis/transform passes, for
@@ -1160,7 +1160,7 @@ in the legacy code.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TriageResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeats=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_updates=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantum_instructions=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_targets=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TriageResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeats=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_updates=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantum_instructions=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_targets=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.TriageResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.TriageResult.acquire_map">

@@ -347,7 +347,7 @@
 <span id="qat-ir-gates-gates-1q-module"></span><h1>qat.ir.gates.gates_1q module<a class="headerlink" href="#module-qat.ir.gates.gates_1q" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Gate1Q">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Gate1Q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Gate1Q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.gates.base.html#qat.ir.gates.base.GateBase" title="qat.ir.gates.base.GateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GateBase</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Base gate for single qubit operations.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -356,7 +356,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Gate1Q.matrix">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -372,14 +372,14 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Gate1Q.qubits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q.qubits" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Gate1Q.qubits" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Hadamard">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hadamard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Hadamard" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hadamard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Hadamard" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the Hadamard gate <span class="math notranslate nohighlight">\(H\)</span>.</p>
 <p>Matrix representation:</p>
@@ -391,7 +391,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Hadamard.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Hadamard.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Hadamard.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -404,7 +404,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Id">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Id" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Id" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>The identity gate for a single qubit.</p>
 <p>Matrix representation:</p>
@@ -421,7 +421,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Id.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Id.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Id.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -434,7 +434,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Phase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Phase" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Phase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>The <span class="math notranslate nohighlight">\({\rm Phase}(\theta)\)</span> gate for some rotation angle <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
 <p>Equivalent to the <span class="math notranslate nohighlight">\(Rz(\theta)\)</span> gate up to a global rotation. Matrix
@@ -455,7 +455,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Phase.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Phase.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Phase.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -473,7 +473,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Rx">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rx" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rx" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>The <span class="math notranslate nohighlight">\(R_{x}(\theta) = e^{-i\theta X/2}\)</span> gate for some rotation angle
 <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
@@ -497,7 +497,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Rx.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rx.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rx.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -515,7 +515,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Ry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Ry" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Ry" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>The <span class="math notranslate nohighlight">\(R_{y}(\theta) = e^{-i\theta Y/2}\)</span> gate for some rotation angle
 <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
@@ -539,7 +539,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Ry.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Ry.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Ry.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -557,7 +557,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Rz">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rz" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rz" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>The <span class="math notranslate nohighlight">\(R_{z}(\theta) = e^{-i\theta Z/2}\)</span> gate for some rotation angle
 <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
@@ -581,7 +581,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Rz.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rz.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Rz.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -599,7 +599,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.S">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">S</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.S" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">S</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.S" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the <span class="math notranslate nohighlight">\(S\)</span> gate.</p>
 <p>This gate is identical to the <span class="math notranslate nohighlight">\(R_{z}(\pi/2)\)</span> gate up to global phase. Matrix
@@ -612,7 +612,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.S.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.S.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.S.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -625,7 +625,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Sdg">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Sdg" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Sdg" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the adjoint of the <span class="math notranslate nohighlight">\(S\)</span> gate, <span class="math notranslate nohighlight">\(S^{\dagger}\)</span>.</p>
 <p>This gate is identical to the <span class="math notranslate nohighlight">\(R_{z}(-\pi/2)\)</span> gate up to global phase. Matrix
@@ -638,7 +638,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Sdg.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Sdg.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Sdg.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -651,7 +651,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.T">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.T" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.T" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the <span class="math notranslate nohighlight">\(T\)</span> gate.</p>
 <p>This gate is identical to the <span class="math notranslate nohighlight">\(R_{z}(\pi/4)\)</span> gate up to global phase. Matrix
@@ -664,7 +664,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.T.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.T.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.T.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -677,7 +677,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Tdg">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Tdg" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Tdg" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the adjoint of the <span class="math notranslate nohighlight">\(T\)</span> gate, <span class="math notranslate nohighlight">\(T^{\dagger}\)</span>.</p>
 <p>This gate is identical to the <span class="math notranslate nohighlight">\(R_{z}(-\pi/4)\)</span> gate up to global phase. Matrix
@@ -690,7 +690,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Tdg.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Tdg.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Tdg.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -703,7 +703,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.U">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">U</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.U" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">U</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.U" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the <span class="math notranslate nohighlight">\(U(\theta, \phi, \lambda)\)</span> rotation gate defined by three
 rotation angles.</p>
@@ -733,7 +733,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.U.from_matrix">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.U.from_matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.U.from_matrix" title="Link to this definition"></a></dt>
 <dd><p>Returns a <span class="math notranslate nohighlight">\(U(\theta, \phi, \lambda)\)</span> gate directly from a 1Q matrix.</p>
 <p>Determines the angles using simple algebra.</p>
 </dd></dl>
@@ -745,7 +745,7 @@ validated to form a valid model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.U.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.U.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.U.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -768,7 +768,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.X">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.X" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.X" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the Pauli-X gate.</p>
 <p>Matrix representation:</p>
@@ -785,7 +785,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.X.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.X.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.X.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -798,7 +798,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Y">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Y" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Y" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the Pauli-Y gate.</p>
 <p>Matrix representation:</p>
@@ -815,7 +815,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Y.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Y.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Y.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -828,7 +828,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Z">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Z" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.gates.gates_1q.Z" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.gates.gates_1q.Gate1Q" title="qat.ir.gates.gates_1q.Gate1Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate1Q</span></code></a></p>
 <p>Implements the Pauli-Z gate.</p>
 <p>Matrix representation:</p>
@@ -845,7 +845,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.gates.gates_1q.Z.matrix">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Z.matrix" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#qat.ir.gates.gates_1q.Z.matrix" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

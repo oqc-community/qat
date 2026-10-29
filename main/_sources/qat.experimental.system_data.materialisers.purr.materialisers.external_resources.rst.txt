@@ -3,5 +3,5 @@ qat.experimental.system\_data.materialisers.purr.materialisers.external\_resourc
 
 .. automodule:: qat.experimental.system_data.materialisers.purr.materialisers.external_resources
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

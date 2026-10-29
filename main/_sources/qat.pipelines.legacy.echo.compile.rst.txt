@@ -3,5 +3,5 @@ qat.pipelines.legacy.echo.compile module
 
 .. automodule:: qat.pipelines.legacy.echo.compile
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

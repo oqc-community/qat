@@ -3,5 +3,5 @@ qat.model.post\_processing module
 
 .. automodule:: qat.model.post_processing
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

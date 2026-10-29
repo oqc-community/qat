@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.purr.sweep.flattener module &mdash; qat-compiler 3.0.0.post430.dev20261028162641 documentation</title>
+  <title>qat.pipelines.purr.sweep.flattener module &mdash; qat-compiler 3.0.0.post431.dev20261029132931 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,7 +719,7 @@
 <span id="qat-pipelines-purr-sweep-flattener-module"></span><h1>qat.pipelines.purr.sweep.flattener module<a class="headerlink" href="#module-qat.pipelines.purr.sweep.flattener" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.DeviceAssignSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceAssignSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assigns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.DeviceAssignSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceAssignSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assigns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.DeviceAssignSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains a set of device assignments to be applied to a builder.</p>
 <dl class="py method">
@@ -741,7 +741,7 @@ loader that is not shared with any other pipeline.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.SweepFlattener">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SweepFlattener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepFlattener" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SweepFlattener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepFlattener" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Extracts sweeps and device assigns from a builder, and acts as a factory for creating
 a set of new builder that is free of sweeps and device assigns.</p>
@@ -774,7 +774,7 @@ compiling the builders (if any).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.SweepInstance">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SweepInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_assigns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepInstance" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SweepInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_assigns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepInstance" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains a single instance of a sweep, with the variable names and values.</p>
 <dl class="py attribute">
@@ -789,7 +789,7 @@ compiling the builders (if any).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.SweepInstance.has_device_assigns">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_device_assigns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepInstance.has_device_assigns" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_device_assigns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.SweepInstance.has_device_assigns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -801,7 +801,7 @@ compiling the builders (if any).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.VariableAccessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VariableAccessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.VariableAccessor" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VariableAccessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.VariableAccessor" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains the information needed to access a variable instance in an instruction
 builder.</p>
@@ -812,12 +812,12 @@ builder.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.flattener.VariableAccessor.create_accessors">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_accessors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.VariableAccessor.create_accessors" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_accessors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.flattener.VariableAccessor.create_accessors" title="Link to this definition"></a></dt>
 <dd><p>Creates a list of VariableAccessors for the given instruction, looking for
 variables with the given names.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[VariableAccessor]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#qat.pipelines.purr.sweep.flattener.VariableAccessor" title="qat.pipelines.purr.sweep.flattener.VariableAccessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableAccessor</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>

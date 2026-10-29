@@ -3,8 +3,8 @@ qat.experimental.waveforms.shapes package
 
 .. automodule:: qat.experimental.waveforms.shapes
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
