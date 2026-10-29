@@ -2,8 +2,8 @@ name: 'Testing action'
 description: 'Github Action to run unit tests in a poetry project'
 inputs:
   python-version:
-    required: true
-    description: "Python version to run tests with"
+    required: false
+    description: "Python version to run tests with. Defaults to the one in .github/.python-version"
   codebase:
     required: true
     description: "Path to the codebase to test, relative to the repository root"
@@ -34,6 +34,7 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
+        python-version-file: .github/.python-version
         cache: 'poetry'
 
     - name: Install dependencies

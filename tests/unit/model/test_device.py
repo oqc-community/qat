@@ -197,12 +197,8 @@ class TestDevicesValidation:
             with pytest.raises(ValidationError, match=r"must be >=0"):
                 pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
-    def test_qubit_pulse_channel_access(self, seed, py_version):
+    def test_qubit_pulse_channel_access(self, seed):
         hw = generate_hw_model(8, seed=seed)
-        if py_version >= (3, 11):
-            match_str = "object has no setter"
-        else:
-            match_str = "can't set attribute"
 
         for qubit in hw.qubits.values():
             assert isinstance(qubit.drive_pulse_channel, DrivePulseChannel)
@@ -218,7 +214,7 @@ class TestDevicesValidation:
                 assert isinstance(crc_pulse_channel, CrossResonanceCancellationPulseChannel)
 
             # No setter for the pulse channel attribute.
-            with pytest.raises(AttributeError, match=match_str):
+            with pytest.raises(AttributeError, match="object has no setter"):
                 qubit.drive_pulse_channel = DrivePulseChannel()
 
     def test_qubit_pair(self, seed):

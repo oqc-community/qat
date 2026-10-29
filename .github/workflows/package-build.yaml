@@ -27,7 +27,6 @@ on:
 run-name: Units tests for QAT at ${{ github.ref }}
 
 env:
-  PYTHON_VERSION: '3.10'
   POETRY_VERSION: "2.1.4"
 
 jobs:
@@ -52,7 +51,7 @@ jobs:
         uses: actions/setup-python@v7
         id: setup-python
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .github/.python-version
 
       - name: Install Poetry
         run: |
@@ -110,55 +109,6 @@ jobs:
         run: |
           ignore_args=(
             --ignore-vuln CVE-2025-71176
-            # Pillow vulnerability, requires python 3.11+
-            # TODO(COMPILER-1509): Update pillow and remove ignores when python 3.10 is dropped.
-            --ignore-vuln CVE-2026-112895
-            --ignore-vuln CVE-2026-112400
-            --ignore-vuln CVE-2026-112397
-            --ignore-vuln CVE-2026-112896
-            --ignore-vuln CVE-2026-112897
-            --ignore-vuln CVE-2026-112395
-            --ignore-vuln CVE-2026-112404
-            --ignore-vuln CVE-2026-112899
-            --ignore-vuln CVE-2026-112402
-            --ignore-vuln CVE-2026-112900
-            --ignore-vuln CVE-2026-112893
-            --ignore-vuln CVE-2026-112392
-            --ignore-vuln CVE-2026-112891
-            --ignore-vuln CVE-2026-112405
-            --ignore-vuln CVE-2026-112390
-            --ignore-vuln CVE-2026-112401
-            --ignore-vuln CVE-2026-112901
-            --ignore-vuln CVE-2026-112391
-            --ignore-vuln CVE-2026-112894
-            --ignore-vuln CVE-2026-112406
-            --ignore-vuln CVE-2026-112399
-            --ignore-vuln CVE-2026-112892
-            --ignore-vuln CVE-2026-112393
-            --ignore-vuln CVE-2026-112396
-            --ignore-vuln CVE-2026-96638
-            --ignore-vuln CVE-2026-96641
-            --ignore-vuln CVE-2026-96640
-            --ignore-vuln CVE-2026-96642
-            --ignore-vuln CVE-2026-96639
-            --ignore-vuln CVE-2026-96643
-            --ignore-vuln CVE-2026-96637
-            --ignore-vuln CVE-2026-96644
-            --ignore-vuln CVE-2026-96778
-            --ignore-vuln CVE-2026-96636
-            --ignore-vuln CVE-2026-114501
-            --ignore-vuln CVE-2026-112398
-            --ignore-vuln GHSA-78g4-xqwv-q3g8
-            --ignore-vuln PYSEC-2026-4327
-            --ignore-vuln PYSEC-2026-4332
-            # Filelock vulnerability, requires python 3.11+
-            # TODO(COMPILER-1509): Update filelock and remove ignores when python 3.10 is dropped.
-            --ignore-vuln CVE-2026-112906
-            --ignore-vuln CVE-2026-112940
-            --ignore-vuln CVE-2026-112914
-            --ignore-vuln CVE-2026-112913
-            --ignore-vuln CVE-2026-112937
-            --ignore-vuln CVE-2026-112907
           )
           poetry run pip-audit "${ignore_args[@]}"
 
@@ -210,17 +160,23 @@ jobs:
       - uses: ./.github/actions/testing-action
         id: pytest
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
           codebase: legacy
           pytest-args: "-n auto --legacy-only"
 
+  python-matrix:
+    name: Python versions
+    uses: ./.github/workflows/python-matrix.yaml
+    with:
+      repository: ${{ inputs.repository }}
+
   unit-tests:
     name: Stable Unit Tests
+    needs: python-matrix
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.10", "3.11", "3.12"]
+        python: ${{ fromJSON(needs.python-matrix.outputs.versions) }}
     # Due to using a matrix, the outputs of the latest job will overwrite the outputs of all previous jobs.
     # Dynamic outputs is currently not supported in GitHub Actions, so we cannot capture the results of each Python version separately.
     # See: https://github.com/actions/runner/pull/2477
@@ -251,7 +207,6 @@ jobs:
       - uses: ./.github/actions/testing-action
         id: pytest
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
           codebase: experimental
           pytest-args: "-n auto --experimental-only --cov=src/qat/experimental --cov-fail-under=98 --cov-report=markdown:$GITHUB_STEP_SUMMARY"
 
@@ -267,7 +222,6 @@ jobs:
       - uses: ./.github/actions/testing-action
         id: pytest
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
           codebase: notebooks
           pytest-args: "-n auto notebooks/ipynb --nbmake"
 
@@ -296,7 +250,7 @@ jobs:
         uses: actions/setup-python@v7
         id: setup-python
         with:
-          python-version: "3.10"
+          python-version-file: .github/.python-version
 
       - name: Install Poetry
         run: |
@@ -359,7 +313,7 @@ jobs:
         uses: actions/setup-python@v7
         id: setup-python
         with:
-          python-version: "3.10"
+          python-version-file: .github/.python-version
           cache: "poetry"
 
       - name: Install dependancies

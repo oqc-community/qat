@@ -29,8 +29,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Sequence
+from typing import Self
 
-from typing_extensions import Self
 from xdsl.backend.register_allocatable import RegisterAllocatableOperation
 from xdsl.backend.register_allocator import BlockAllocator
 from xdsl.ir import Attribute, Block, BlockArgument, Operation, Region, SSAValue

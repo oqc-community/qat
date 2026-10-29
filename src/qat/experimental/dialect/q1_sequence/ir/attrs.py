@@ -20,8 +20,8 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from functools import partial
+from typing import Self
 
-from typing_extensions import Self
 from xdsl.dialects.builtin import (
     ArrayAttr,
     BoolAttr,

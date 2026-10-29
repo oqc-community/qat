@@ -1,0 +1,31 @@
+name: Python matrix
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        type: string
+        required: false
+        default: ""
+        description: "Repository to read the versions from. Defaults to the calling repository"
+    outputs:
+      versions:
+        description: "JSON array of supported Python versions, for use with fromJSON in a matrix"
+        value: ${{ jobs.python-matrix.outputs.versions }}
+
+jobs:
+  python-matrix:
+    name: Python versions
+    runs-on: ubuntu-24.04
+    outputs:
+      versions: ${{ steps.matrix.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+          sparse-checkout: .github/python-versions.json
+          sparse-checkout-cone-mode: false
+
+      - name: Read Python versions
+        id: matrix
+        run: echo "versions=$(jq -c . .github/python-versions.json)" >> "$GITHUB_OUTPUT"

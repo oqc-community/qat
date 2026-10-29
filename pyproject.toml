@@ -5,7 +5,7 @@ name = "qat-compiler"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 license = "BSD-3-Clause"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.13"
 dynamic = ["dependencies", "version"]
 authors = [
   { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },

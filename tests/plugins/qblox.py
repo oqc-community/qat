@@ -1,24 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-import warnings
-
 import numpy as np
 import pytest
-
-# TODO: The qblox_instruments -> qcodes -> opentelemetry import chain triggers a
-# DeprecationWarning ("SelectableGroups dict interface is deprecated. Use select.")
-# during pytest's plugin-import phase on Python 3.10, before pyproject.toml
-# filterwarnings are applied.  We suppress it explicitly here so the import succeeds
-# early (caching the modules in sys.modules) and doctest collection of src/qat/…/qblox
-# files doesn't re-trigger the warning later.
-# Remove once opentelemetry/qcodes are updated to avoid the deprecated dict interface.
-with warnings.catch_warnings():
-    warnings.filterwarnings(
-        "ignore",
-        message="SelectableGroups dict interface is deprecated",
-        category=DeprecationWarning,
-    )
-    from qblox_instruments import ClusterType
+from qblox_instruments import ClusterType
 
 from qat.model.loaders.purr import QbloxModelLoader
 from qat.model.loaders.purr.qblox import DEFAULT_DUMMY_CONFIG, DEFAULT_QUBIT_COUNT

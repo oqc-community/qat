@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import pytest
 from pydantic import ValidationError
@@ -72,16 +72,11 @@ class TestReadoutMitigation:
 
 
 class TestErrorMitigation:
-    def test_default_constructor(self, py_version):
+    def test_default_constructor(self):
         error_mit = ErrorMitigation()
         assert error_mit.is_enabled is False
 
-        if py_version >= (3, 11):
-            match_str = "object has no setter"
-        else:
-            match_str = "can't set attribute 'is_enabled'"
-
-        with pytest.raises(AttributeError, match=match_str):
+        with pytest.raises(AttributeError, match="object has no setter"):
             error_mit.is_enabled = True
 
     @pytest.mark.parametrize("n_qubits", [1, 2, 4, 8, 31, 64])

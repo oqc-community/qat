@@ -5,14 +5,19 @@ on:
     - cron: "0 23 * * MON-FRI"
 
 jobs:
+  python-matrix:
+    name: Python versions
+    uses: ./.github/workflows/python-matrix.yaml
+
   unit-tests:
     name: Units tests across multiple OS
+    needs: python-matrix
     runs-on: ${{ matrix.os }}
     strategy:
         fail-fast: true
         matrix:
             os: [ ubuntu-24.04, macos-latest, windows-latest ]
-            python: ["3.10", "3.11", "3.12"]
+            python: ${{ fromJSON(needs.python-matrix.outputs.versions) }}
 
     steps:
     - uses: actions/checkout@v7

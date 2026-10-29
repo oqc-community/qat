@@ -22,8 +22,8 @@ Reference: https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.ht
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Self
 
-from typing_extensions import Self
 from xdsl.backend.register_allocatable import HasRegisterConstraints, RegisterConstraints
 from xdsl.ir import Block, Operation, SSAValue
 from xdsl.irdl import (
