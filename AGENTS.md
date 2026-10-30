@@ -45,7 +45,7 @@ Code users can use `CLAUDE.local.md` instead, which Claude Code loads automatica
 
 ## Project
 
-- Python **3.11–3.12**, Poetry **2.x**, Ruff (line length **92**), pytest with `pytest-xdist`.
+- Python **3.11–3.13**, Poetry **2.x**, Ruff (line length **92**), pytest with `pytest-xdist`.
 - `src/qat/` is the package; key areas are `backend/`, `frontend/`, `middleend/`, `pipelines/`,
   `runtime/`, `ir/`, `model/`, `engines/` and `utils/`.
 - `tests/unit/` mirrors `src/qat/` exactly and is where new tests go; `tests/files/` holds static
@@ -183,7 +183,7 @@ and skips them unless you pass `--ab-enable` or `--ab-only`.
   `--no-verify`.
 - PRs target `main`. CODEOWNERS are requested automatically. Merging needs 2 approvals, resolved
   review threads and an up-to-date branch.
-- Required checks: consistency and formatting, stable unit tests on 3.11–3.12, and legacy unit
+- Required checks: consistency and formatting, stable unit tests on 3.11–3.13, and legacy unit
   tests. These must pass too, though not enforced by the ruleset: `pip-audit`, the licence check (no
   GPL), ≥ 60 % coverage, `--experimental-only` at ≥ 98 % coverage, every notebook under `--nbmake`,
   and the docs build.
@@ -191,7 +191,7 @@ and skips them unless you pass `--ab-enable` or `--ab-only`.
 - Label each PR for the changelog (`.github/release.yml`): `breaking-change`, `enhancement`, `bug`,
   `devops`, `documentation`, `experimental` or `ignore-for-release`.
 - New features need unit tests and, where useful, a docstring example.
-- Dependency changes update `poetry.lock`, support Python 3.11–3.12 and avoid GPL licences.
+- Dependency changes update `poetry.lock`, support Python 3.11–3.13 and avoid GPL licences.
   `scripts/check-dependency.sh` rejects `git`, `path` or `url` dependencies at release.
 
 ## Workflow skills
