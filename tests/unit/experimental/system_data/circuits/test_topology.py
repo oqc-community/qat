@@ -67,6 +67,36 @@ def test_canonical_graph_view_from_canonical_with_single_directed_coupling():
     assert graph.sorted_gate_fidelities[0][1:] == (("q0", "q1"), "cx")
 
 
+@pytest.mark.parametrize(
+    ("edge_index", "expected"),
+    [(0, (10, 11)), (1, (10, 12)), (2, (12, 10))],
+)
+def test_qubit_indices_for_edge_returns_source_and_target_device_indices(
+    edge_index, expected
+):
+    """Device indices differ from CSR rows, and q1 has no outgoing edges."""
+    canonical = CanonicalSystemData(
+        qubits=(
+            QubitData(id="q0", index=10),
+            QubitData(id="q1", index=11),
+            QubitData(id="q2", index=12),
+        ),
+        couplings=(
+            QubitCouplingData(
+                source_qubit_id="q0", target_qubit_id="q1", gate_fidelities=()
+            ),
+            QubitCouplingData(
+                source_qubit_id="q0", target_qubit_id="q2", gate_fidelities=()
+            ),
+            QubitCouplingData(
+                source_qubit_id="q2", target_qubit_id="q0", gate_fidelities=()
+            ),
+        ),
+    )
+
+    assert _to_topology(canonical).qubit_indices_for_edge(edge_index) == expected
+
+
 def test_canonical_graph_view_raises_on_missing_qubit_data():
     """Verify that TopologyView raises an error if no qubit data is provided."""
 

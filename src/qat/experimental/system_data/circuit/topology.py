@@ -329,6 +329,19 @@ class TopologyView(DerivedViewInterface[QubitView]):
         """Returns CSR source row for an edge index."""
         return int(np.searchsorted(self.indptr, edge_index, side="right") - 1)
 
+    def qubit_indices_for_edge(self, edge_index: int) -> tuple[int, int]:
+        """Returns the source and target qubit indices for a given edge index.
+
+        :param edge_index: Index of the edge.
+        :returns: Tuple of source and target qubit indices.
+        """
+        source_row = self._source_row_for_edge_index(edge_index)
+        target_row = int(self.indices[edge_index])
+        return (
+            int(self.node_index[source_row]),
+            int(self.node_index[target_row]),
+        )
+
 
 @dataclass(frozen=True)
 class ScipyTopologyView(DerivedViewInterface[TopologyView]):
