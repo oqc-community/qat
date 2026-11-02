@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2026 Oxford Quantum Circuits Ltd
+
+import inspect
 
 from compiler_config.config import MetricsType
 
@@ -13,7 +15,9 @@ class _FlagFieldValidation(type):
     which'll be dynamically assigned later."""
 
     def __new__(mcs, name, inheritance, attributes):
-        hint_names = set(attributes.get("__annotations__", {}).keys())
+        cls = super().__new__(mcs, name, inheritance, attributes)
+        # Python 3.14 evaluates annotations lazily, so they are not in `attributes`.
+        hint_names = set(inspect.get_annotations(cls))
         snake_cased_flags = [
             val.snake_case_name()
             for val in list(dict(MetricsType.__members__).values())
@@ -25,7 +29,7 @@ class _FlagFieldValidation(type):
                 f"CompilationMetrics is missing type hints for {', '.join(missing_fields)}."
             )
 
-        return super().__new__(mcs, name, inheritance, attributes)
+        return cls
 
 
 class CompilationMetrics(metaclass=_FlagFieldValidation):

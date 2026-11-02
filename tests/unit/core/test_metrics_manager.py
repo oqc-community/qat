@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
+import inspect
+
 import pytest
 from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
+from qat.purr.compiler.metrics import CompilationMetrics, _FlagFieldValidation
 from qat.purr.core.metrics_base import MetricsManager as PurrMetricsManager
 
 
@@ -135,3 +138,33 @@ def test_purr_metrics_manager_lifecycle():
 
     with pytest.raises(TypeError, match="other must be of type MetricsManager"):
         manager.merge(object())
+
+
+class TestFlagFieldValidation:
+    METRIC_NAMES = [
+        flag.snake_case_name() for flag in MetricsType if not flag.is_composite()
+    ]
+
+    def test_all_metrics_hinted(self):
+        hints = dict.fromkeys(self.METRIC_NAMES, int)
+
+        cls = _FlagFieldValidation("Hinted", (), {"__annotations__": hints})
+
+        assert set(cls.__annotations__) == set(self.METRIC_NAMES)
+
+    @pytest.mark.parametrize("missing", METRIC_NAMES)
+    def test_missing_hint_raises(self, missing):
+        hints = dict.fromkeys([n for n in self.METRIC_NAMES if n != missing], int)
+
+        with pytest.raises(ValueError, match=missing):
+            _FlagFieldValidation("Partial", (), {"__annotations__": hints})
+
+    def test_class_body_missing_hint_raises(self):
+        with pytest.raises(ValueError, match="physical_qubit_indices"):
+
+            class Partial(metaclass=_FlagFieldValidation):
+                optimized_circuit: str | None
+                optimized_instruction_count: int | None
+
+    def test_compilation_metrics_hints_every_metric(self):
+        assert set(self.METRIC_NAMES) <= set(inspect.get_annotations(CompilationMetrics))

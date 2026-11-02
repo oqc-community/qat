@@ -5,7 +5,7 @@ name = "qat-compiler"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 license = "BSD-3-Clause"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 dynamic = ["dependencies", "version"]
 authors = [
   { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
@@ -48,7 +48,7 @@ pytket = ">=1.41.0,<3.0.0"
 qiskit = ">=1.4.2,<3.0.0"
 qiskit-aer = "^0.17.1"
 qiskit-experiments = "^0.11.0"
-scipy = ">=1.15.2"
+scipy = ">=1.16.1"
 pyqir = ">=0.11.0,!=0.12.0,!=0.12.1,!=0.12.2,<0.13.0"
 regex = ">=3.6.1"
 jsonpickle = ">=4.0.5"
