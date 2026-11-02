@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post435.dev20261102093329 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post436.dev20261102113403 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -563,6 +563,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.gate.html">qat.experimental.dialect.gate package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.gate.ir.html">qat.experimental.dialect.gate.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.gate.transforms.html">qat.experimental.dialect.gate.transforms package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
@@ -1943,6 +1944,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenResult.alloc_mgrs">alloc_mgrs (PreCodegenResult attribute)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult.alloc_mgrs">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.alloc_op">alloc_op (AllocDetail attribute)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.IntRegisterType.allocatable_registers">allocatable_registers() (IntRegisterType class method)</a>, <a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.allocatable_registers">[1]</a>
 
       <ul>
@@ -1997,6 +2000,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager">(class in qat.purr.backends.qblox.codegen)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail">AllocDetail (class in qat.experimental.dialect.gate.transforms.naive_placement)</a>
+</li>
       <li><a href="qat.experimental.waveforms.evaluate.html#qat.experimental.waveforms.evaluate.evaluate_waveform.params.allow_numerical_derivative">allow_numerical_derivative (qat.experimental.waveforms.evaluate.evaluate_waveform parameter)</a>
 </li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound.params.allow_uneven">allow_uneven (qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound parameter)</a>
@@ -2248,6 +2253,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass.apply">(LowerScfToQ1ScfPass method)</a>
 </li>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.apply">(NaiveQubitPlacementPass method)</a>
+</li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.apply">(PulseToQ1LoweringPass method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.Q1OutliningPass.apply">(Q1OutliningPass method)</a>
@@ -2404,6 +2411,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_optional">as_optional() (in module qat.experimental.dialect.common.attribute_converters)</a>
 </li>
       <li><a href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_string">as_string() (in module qat.experimental.dialect.common.attribute_converters)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.PlacementPolicy.as_written">as_written (PlacementPolicy attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.AslRsImmRdOp">AslRsImmRdOp (class in qat.experimental.dialect.q1)</a>
 
@@ -3382,6 +3391,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.q1_scf.html#qat.experimental.dialect.q1_scf.WhileOp.before_region">before_region (WhileOp attribute)</a>, <a href="qat.experimental.dialect.q1_scf.ir.ops.html#qat.experimental.dialect.q1_scf.ir.ops.WhileOp.before_region">[1]</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.begin_lineage">begin_lineage() (FrameLineageAnalysis method)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.PlacementPolicy.best_coupling">best_coupling (PlacementPolicy attribute)</a>
 </li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.beta">beta (DragGaussianFunction attribute)</a>
 
@@ -5496,6 +5507,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_convention.html#qat.experimental.conversion.pulse_to_q1.sequence_convention.QbloxSequenceInitialisationPass.apply.params.ctx">(qat.experimental.conversion.pulse_to_q1.sequence_convention.QbloxSequenceInitialisationPass.apply parameter)</a>
 </li>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.apply.params.ctx">(qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.apply parameter)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply.params.ctx">(qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line.params.ctx">(qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line parameter)</a>
@@ -5682,6 +5695,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel">DDropResetResonatorPulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass">DeadFrameEliminationPass (class in qat.experimental.dialect.pulse.transforms.dead_frame_elimination)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.dealloc_op">dealloc_op (AllocDetail attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.gate.ir.html#qat.experimental.dialect.gate.ir.DeallocateQubitOp">DeallocateQubitOp (class in qat.experimental.dialect.gate.ir)</a>
 
@@ -6593,6 +6608,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.driver_version">(QbloxTargetData attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.drop">drop (AllocDetail attribute)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Muls32hImmRsRdOp.dst_high">dst_high (Muls32hImmRsRdOp property)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.Muls32hImmRsRdOp.dst_high">[1]</a>
 
       <ul>
@@ -6930,6 +6947,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.ecr_gate">ecr_gate (Qasm2Parser attribute)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.ecr_gate">[1]</a>
 </li>
       <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.edge_couplings_data">edge_couplings_data (TopologyView attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.qubit_indices_for_edge.params.edge_index">edge_index (qat.experimental.system_data.circuit.topology.TopologyView.qubit_indices_for_edge parameter)</a>
 </li>
       <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.edge_metadata">edge_metadata (TopologyView attribute)</a>
 </li>
@@ -7313,10 +7332,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.enter_sweep">enter_sweep() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.enter_sweep">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.entry_ops">entry_ops (FrameLineage property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.BinaryPredicateAttr.enum_type">enum_type (BinaryPredicateAttr attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.attrs.html#qat.experimental.dialect.q1_cf.ir.attrs.BinaryPredicateAttr.enum_type">[1]</a>, <a href="qat.experimental.dialect.q1_scf.html#qat.experimental.dialect.q1_scf.BinaryPredicateAttr.enum_type">[2]</a>
 
       <ul>
@@ -7650,6 +7669,10 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline">ExperimentalQbloxExecutePipeline (class in qat.experimental.pipelines.execute)</a>
 </li>
       <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig">ExperimentalQbloxExecutePipelineConfig (class in qat.experimental.pipelines.execute)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.PlacementPolicy.explicit">explicit (PlacementPolicy attribute)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.explicit_qubit_ids">explicit_qubit_ids (NaiveQubitPlacementPass attribute)</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot0Config">ExpOvershoot0Config (class in qat.backend.qblox.config.specification)</a>
 </li>
@@ -11083,6 +11106,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.UnaryPredicateBranchOp.irdl_options">(UnaryPredicateBranchOp attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.ops.html#qat.experimental.dialect.q1_cf.ir.ops.UnaryPredicateBranchOp.irdl_options">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.is_algorithmic">is_algorithmic (AllocDetail attribute)</a>
+</li>
       <li><a href="qat.core.config.validators.html#qat.core.config.validators.is_backend">is_backend() (in module qat.core.config.validators)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.is_basic_gate">is_basic_gate() (TketBuilder method)</a>
@@ -15119,6 +15144,10 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.gate.ir.types.html#module-qat.experimental.dialect.gate.ir.types">qat.experimental.dialect.gate.ir.types</a>
 </li>
+        <li><a href="qat.experimental.dialect.gate.transforms.html#module-qat.experimental.dialect.gate.transforms">qat.experimental.dialect.gate.transforms</a>
+</li>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#module-qat.experimental.dialect.gate.transforms.naive_placement">qat.experimental.dialect.gate.transforms.naive_placement</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.html#module-qat.experimental.dialect.pulse">qat.experimental.dialect.pulse</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.analysis.html#module-qat.experimental.dialect.pulse.analysis">qat.experimental.dialect.pulse.analysis</a>
@@ -16214,6 +16243,8 @@ window.runMermaid = runMermaid;</script>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSQubit.N">N (RTCSQubit property)</a>
 </li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass">NaiveQubitPlacementPass (class in qat.experimental.dialect.gate.transforms.naive_placement)</a>
+</li>
       <li><a href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline.name">name (AbstractPipeline property)</a>
 
       <ul>
@@ -16644,6 +16675,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Mulu32RsImmRdRdOp.name">(Mulu32RsImmRdRdOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.Mulu32RsImmRdRdOp.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Mulu32RsRsRdRdOp.name">(Mulu32RsRsRdRdOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.Mulu32RsRsRdRdOp.name">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.name">(NaiveQubitPlacementPass attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.NcoConfigAttr.name">(NcoConfigAttr attribute)</a>
 </li>
@@ -17458,6 +17491,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.op">(qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_convention.html#qat.experimental.conversion.pulse_to_q1.sequence_convention.QbloxSequenceInitialisationPass.apply.params.op">(qat.experimental.conversion.pulse_to_q1.sequence_convention.QbloxSequenceInitialisationPass.apply parameter)</a>
+</li>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.apply.params.op">(qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.analysis.locate_kernels.html#qat.experimental.dialect.pulse.analysis.locate_kernels.locate_kernels.params.op">(qat.experimental.dialect.pulse.analysis.locate_kernels.locate_kernels parameter)</a>
 </li>
@@ -18916,6 +18951,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet">PipelineSet (class in qat.core.pipeline)</a>
 </li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.place">place (AllocDetail attribute)</a>
+</li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.PlacementPolicy">PlacementPolicy (class in qat.experimental.dialect.gate.transforms.naive_placement)</a>
+</li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.PLAY">PLAY (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.PLAY">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.play">play() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.play">[1]</a>
@@ -18977,6 +19016,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.DiscriminateOp.policy">policy (DiscriminateOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.policy">[1]</a>
 
       <ul>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.policy">(NaiveQubitPlacementPass attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.DiscriminateOp.params.policy">(qat.experimental.dialect.pulse.ir.DiscriminateOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.params.policy">(qat.experimental.dialect.pulse.ir.ops.DiscriminateOp parameter)</a>
@@ -21131,6 +21172,20 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.gate.ir.types.html#module-qat.experimental.dialect.gate.ir.types">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.gate.transforms
+
+      <ul>
+        <li><a href="qat.experimental.dialect.gate.transforms.html#module-qat.experimental.dialect.gate.transforms">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.gate.transforms.naive_placement
+
+      <ul>
+        <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#module-qat.experimental.dialect.gate.transforms.naive_placement">module</a>
 </li>
       </ul></li>
       <li>
@@ -24505,6 +24560,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.hardware_model.html#qat.utils.hardware_model.ensure_connected_connectivity.params.qubit_indices">(qat.utils.hardware_model.ensure_connected_connectivity parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.qubit_indices_for_edge">qubit_indices_for_edge() (TopologyView method)</a>
+</li>
       <li><a href="qat.experimental.system_data.materialisers.purr.materialise.html#qat.experimental.system_data.materialisers.purr.materialise.PurrMaterialiserV010.build_operation_builder.params.qubit_payload">qubit_payload (qat.experimental.system_data.materialisers.purr.materialise.PurrMaterialiserV010.build_operation_builder parameter)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.qubit_physical_channel_id">qubit_physical_channel_id() (QRPairModel method)</a>
@@ -24535,8 +24592,14 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.gate.ir.ops.html#qat.experimental.dialect.gate.ir.ops.AllocateQubitOp.params.qubit_type">(qat.experimental.dialect.gate.ir.ops.AllocateQubitOp parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.derive.params.qubit_view">qubit_view (qat.experimental.system_data.circuit.topology.TopologyView.derive parameter)</a>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.AllocDetail.qubit_values">qubit_values (AllocDetail attribute)</a>
 </li>
+      <li><a href="qat.experimental.dialect.gate.transforms.naive_placement.html#qat.experimental.dialect.gate.transforms.naive_placement.NaiveQubitPlacementPass.qubit_view">qubit_view (NaiveQubitPlacementPass attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.circuit.topology.html#qat.experimental.system_data.circuit.topology.TopologyView.derive.params.qubit_view">(qat.experimental.system_data.circuit.topology.TopologyView.derive parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">qubit_with_index() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QubitCoupling">QubitCoupling (class in qat.purr.compiler.devices)</a>

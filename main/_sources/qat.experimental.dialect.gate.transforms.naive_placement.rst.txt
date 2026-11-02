@@ -1,0 +1,7 @@
+qat.experimental.dialect.gate.transforms.naive\_placement module
+================================================================
+
+.. automodule:: qat.experimental.dialect.gate.transforms.naive_placement
+   :members:
+   :show-inheritance:
+   :undoc-members:
