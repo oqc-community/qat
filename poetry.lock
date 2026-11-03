@@ -2408,14 +2408,14 @@ test = ["jupyter-server (>=2.0.0)", "pytest (>=7.0)", "pytest-jupyter[server] (>
 
 [[package]]
 name = "jupyterlab"
-version = "4.6.4"
+version = "4.6.5"
 description = "JupyterLab computational environment"
 optional = false
 python-versions = ">=3.10"
 groups = ["notebook"]
 files = [
-    {file = "jupyterlab-4.6.4-py3-none-any.whl", hash = "sha256:15b13f991d3985129c797eb84d9949eeb8b6615e14b444868e642411f2c418b2"},
-    {file = "jupyterlab-4.6.4.tar.gz", hash = "sha256:404f49b081819378524886c9db66dba57a5565981eff885830df1baba3a17df5"},
+    {file = "jupyterlab-4.6.5-py3-none-any.whl", hash = "sha256:cb96fc3d59d20b6f17d0cc1afe6e0508a61d881ab39be89236c55b01fa0e2b99"},
+    {file = "jupyterlab-4.6.5.tar.gz", hash = "sha256:e115a0ef663927d60afd20bd9a8e822a5c61d7d22bcab489d8e37f4885d0d2ce"},
 ]
 
 [package.dependencies]
@@ -3426,20 +3426,20 @@ files = [
 
 [[package]]
 name = "notebook"
-version = "7.6.3"
+version = "7.6.4"
 description = "Jupyter Notebook - A web-based notebook environment for interactive computing"
 optional = false
 python-versions = ">=3.10"
 groups = ["notebook"]
 files = [
-    {file = "notebook-7.6.3-py3-none-any.whl", hash = "sha256:ad7e0eb765fba836cd4a2ab0c7a3a26cde1d91665fbf6f533b6ae7b2de6d88d2"},
-    {file = "notebook-7.6.3.tar.gz", hash = "sha256:e2c08e469c0ae20bb0b3214f0ab77e79653317a2f8e5b34c10361c66874a5b50"},
+    {file = "notebook-7.6.4-py3-none-any.whl", hash = "sha256:15e8a5eefb01f198016f11616426db0486f24404bfa869ec276d5ff8311b533c"},
+    {file = "notebook-7.6.4.tar.gz", hash = "sha256:8aec433e08811af5c8d0e8cff23bf5079d85fd2912cee162894933f26f443d9e"},
 ]
 
 [package.dependencies]
 jupyter-builder = ">=1.0.2,<2"
 jupyter-server = ">=2.19.0,<3"
-jupyterlab = ">=4.6.4,<4.7"
+jupyterlab = ">=4.6.5,<4.7"
 jupyterlab-server = ">=2.28.0,<3"
 notebook-shim = ">=0.2,<0.3"
 tornado = ">=6.2.0"
@@ -4879,20 +4879,20 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyqir"
-version = "0.12.7"
+version = "0.12.8"
 description = ""
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyqir-0.12.7-cp315-abi3.abi3t-manylinux_2_28_aarch64.whl", hash = "sha256:238cd638ca96c0fc732b55e6be4d135a61e4ba420159441311f51f9dfda91f9f"},
-    {file = "pyqir-0.12.7-cp315-abi3.abi3t-manylinux_2_28_x86_64.whl", hash = "sha256:5259014b10c2106a3ab3a76cc56f78da589360ecb99d282d8ccd98fe85c5d28b"},
-    {file = "pyqir-0.12.7-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:b481e1ffebaeadef248aca6b16f071e84169a430bd2d951ccf6ec8308b721546"},
-    {file = "pyqir-0.12.7-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:b7dd774702a8a725463b1ab122dc34915d6f1bfa6844355bf8a6390e42eb8b00"},
-    {file = "pyqir-0.12.7-cp39-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:78997e64f7b9321c4b5b749189a4ae9ec56b0128813c3a9325d256930a6bd28c"},
-    {file = "pyqir-0.12.7-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:a2c3fa533e8012e7123eaa0a2d7fdcba9787d9b7062358134e419a08ce3fdcba"},
-    {file = "pyqir-0.12.7-cp39-abi3-win_amd64.whl", hash = "sha256:12950efeaacc1daf924832818340aa0c2504465fe49be0ce2dc43ffab8b0957d"},
-    {file = "pyqir-0.12.7-cp39-abi3-win_arm64.whl", hash = "sha256:c5e1f078d8a189af64467e2061931fa58c4af16722f5a72e41bd160ee62653e4"},
+    {file = "pyqir-0.12.8-cp315-abi3.abi3t-manylinux_2_28_aarch64.whl", hash = "sha256:f0734feb441dd714cdacff439f9b422ff12cb9c1d1bba2f417f3465a247517f5"},
+    {file = "pyqir-0.12.8-cp315-abi3.abi3t-manylinux_2_28_x86_64.whl", hash = "sha256:9c34959a2a2e8165c1739f82cbea807654971e96f3b07ce451fa90534de59100"},
+    {file = "pyqir-0.12.8-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d53e27d3dd9badf417f8747e111ec140d0abb6235a117f29077e7f928292f9b7"},
+    {file = "pyqir-0.12.8-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:4dc166cb442cc8560b72ee4c25374452ab2a6a36cc8cb8aa67376335748a7c9b"},
+    {file = "pyqir-0.12.8-cp39-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:60b762a4452540ed139a2a0d37b8c2e85b4f09c3b0f7816968d15fe61fa0b6eb"},
+    {file = "pyqir-0.12.8-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:47ff49878ef42e24a21516445c4f9c479ef8695f8be1a97e9999f1122ae2842b"},
+    {file = "pyqir-0.12.8-cp39-abi3-win_amd64.whl", hash = "sha256:f62b0554e62607cc5a6d1aefd3bec64d8779a76fb0454584c5c5f16bd5b6555b"},
+    {file = "pyqir-0.12.8-cp39-abi3-win_arm64.whl", hash = "sha256:23d0f5dd8e1000baddfd42a9b23d9911d535b1b35da0d0a20a532fd7de0f4441"},
 ]
 
 [package.extras]
