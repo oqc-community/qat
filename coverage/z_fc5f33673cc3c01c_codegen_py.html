@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_fc5f33673cc3c01c_pre_emission_verification_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-11-03 09:05 +0000
+            created at 2026-11-05 17:25 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -209,19 +209,21 @@
     <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">            <span class="nam">sequence_op</span><span class="op">.</span><span class="nam">instrument_id</span><span class="op">.</span><span class="nam">data</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">            <span class="nam">sequence_op</span><span class="op">.</span><span class="nam">slot_idx</span><span class="op">.</span><span class="nam">data</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="nam">package</span> <span class="op">=</span> <span class="nam">translate_package</span><span class="op">(</span><span class="nam">sequence_op</span><span class="op">,</span> <span class="nam">translated_module_configs</span><span class="op">[</span><span class="nam">module_location</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">        <span class="nam">package_key</span> <span class="op">=</span> <span class="nam">sequence_op</span><span class="op">.</span><span class="nam">channel_id</span><span class="op">.</span><span class="nam">data</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="key">if</span> <span class="nam">package_key</span> <span class="key">in</span> <span class="nam">packages</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Duplicate Qblox package key </span><span class="op">{</span><span class="nam">package_key</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">        <span class="nam">packages</span><span class="op">[</span><span class="nam">package_key</span><span class="op">]</span> <span class="op">=</span> <span class="nam">package</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">    <span class="key">return</span> <span class="nam">QbloxProgram</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">        <span class="nam">packages</span><span class="op">=</span><span class="nam">packages</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="nam">driver_version</span><span class="op">=</span><span class="nam">hardware_view</span><span class="op">.</span><span class="nam">driver_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">        <span class="nam">fw_version</span><span class="op">=</span><span class="nam">hardware_view</span><span class="op">.</span><span class="nam">firmware_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">        <span class="nam">timeout_seconds</span><span class="op">=</span><span class="nam">DEFAULT_TIMEOUT_SECONDS</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="nam">metadata</span><span class="op">=</span><span class="nam">metadata</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="nam">package</span> <span class="op">=</span> <span class="nam">translate_package</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="nam">sequence_op</span><span class="op">,</span> <span class="nam">translated_module_configs</span><span class="op">[</span><span class="nam">module_location</span><span class="op">]</span><span class="op">,</span> <span class="nam">target_data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">        <span class="nam">package_key</span> <span class="op">=</span> <span class="nam">sequence_op</span><span class="op">.</span><span class="nam">channel_id</span><span class="op">.</span><span class="nam">data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">        <span class="key">if</span> <span class="nam">package_key</span> <span class="key">in</span> <span class="nam">packages</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Duplicate Qblox package key </span><span class="op">{</span><span class="nam">package_key</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="nam">packages</span><span class="op">[</span><span class="nam">package_key</span><span class="op">]</span> <span class="op">=</span> <span class="nam">package</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">    <span class="key">return</span> <span class="nam">QbloxProgram</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">        <span class="nam">packages</span><span class="op">=</span><span class="nam">packages</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">        <span class="nam">driver_version</span><span class="op">=</span><span class="nam">hardware_view</span><span class="op">.</span><span class="nam">driver_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="nam">fw_version</span><span class="op">=</span><span class="nam">hardware_view</span><span class="op">.</span><span class="nam">firmware_version</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">        <span class="nam">timeout_seconds</span><span class="op">=</span><span class="nam">DEFAULT_TIMEOUT_SECONDS</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">        <span class="nam">metadata</span><span class="op">=</span><span class="nam">metadata</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -231,7 +233,7 @@
             <a class="nav" href="z_fc5f33673cc3c01c_pre_emission_verification_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-11-03 09:05 +0000
+            created at 2026-11-05 17:25 +0000
         </p>
     </div>
 </footer>
