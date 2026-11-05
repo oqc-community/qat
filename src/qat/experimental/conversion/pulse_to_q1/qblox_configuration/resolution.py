@@ -7,7 +7,8 @@ calibration of the canonical channel onto :class:`ModuleConfigAttr` and
 :class:`SequencerConfigAttr`. It never invents a value: a field the source left unset stays
 absent so a later pass, or the instrument itself, still owns the default. It also never
 duplicates target data - the module and sequencer capabilities used to validate the
-supplied configuration are read from :data:`DEFAULT_QBLOX_TARGET`.
+supplied configuration are read from the supplied :class:`QbloxTargetDescription`, which
+defaults to :data:`DEFAULT_QBLOX_TARGET`.
 """
 
 from __future__ import annotations
@@ -73,6 +74,7 @@ from qat.experimental.system_data.hardware.qblox.target import (
     ModuleSpec,
     Q1SequencerFeature,
     Q1SequencerType,
+    QbloxTargetDescription,
 )
 from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
@@ -117,6 +119,7 @@ def resolve_sequencer_bindings(
     hardware_view: QbloxHardwareView,
     supplied_configurations_by_resource: Mapping[str, QbloxSuppliedConfiguration],
     used_channel_ids: Collection[str],
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> frozendict[str, SequencerBinding]:
     """Resolve the canonical channels a program uses onto Q1 configuration.
 
@@ -124,6 +127,7 @@ def resolve_sequencer_bindings(
     :param supplied_configurations_by_resource: Supplied configurations keyed by external-
         resource identifier.
     :param used_channel_ids: A collection of canonical channels used within a program.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :returns: The resolved binding of each used canonical channel, keyed by channel
         identifier.
     :raises ValueError: If the supplied configuration is incomplete, conflicts with the
@@ -134,16 +138,17 @@ def resolve_sequencer_bindings(
         hardware_view, supplied_configurations_by_resource
     )
     for module_configuration in module_configurations.values():
-        _validate_supplied_configuration(module_configuration)
+        _validate_supplied_configuration(module_configuration, target_data)
     placements = allocate_sequencers(module_configurations, used_channel_ids)
     bindings: dict[str, SequencerBinding] = {}
     for module_configuration in module_configurations.values():
-        bindings.update(_module_bindings(module_configuration, placements))
+        bindings.update(_module_bindings(module_configuration, placements, target_data))
     return frozendict(bindings)
 
 
 def _validate_supplied_configuration(
     module_configuration: ReconciledModuleConfiguration,
+    target_data: QbloxTargetDescription,
 ) -> None:
     """Validate everything the canonical ports of one physical module supply.
 
@@ -155,12 +160,13 @@ def _validate_supplied_configuration(
 
     :param module_configuration: Configuration assembled from every canonical port exposing
         the physical module.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :raises ValueError: If the module values or any supplied sequencer are invalid for the
         installed hardware.
     """
 
     module_view = module_configuration.module_view
-    module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_view.kind)
+    module_spec = target_data.module_spec(module_view.kind)
     _validate_supplied_module(module_configuration, module_spec)
     for port_id, sequencer_bank in module_configuration.sequencer_banks.items():
         for index, sequencer_configuration in sorted(sequencer_bank.items()):
@@ -169,7 +175,7 @@ def _validate_supplied_configuration(
                 f"{module_view.location!r}"
             )
             _validate_supplied_sequencer(
-                sequencer_configuration, module_view.kind, module_spec, origin
+                sequencer_configuration, module_view.kind, module_spec, origin, target_data
             )
 
 
@@ -225,6 +231,7 @@ def _validate_supplied_module(
 def _module_bindings(
     module_configuration: ReconciledModuleConfiguration,
     placements: Mapping[str, SequencerPlacement],
+    target_data: QbloxTargetDescription,
 ) -> dict[str, SequencerBinding]:
     """Resolve the canonical channels of one physical module a program uses.
 
@@ -234,12 +241,13 @@ def _module_bindings(
     :param module_configuration: Configuration assembled from every canonical port exposing
         the physical module.
     :param placements: Allocated placements keyed by canonical channel identifier.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :returns: The resolved binding of each placed channel routed through the module.
     :raises ValueError: If the module's supplied configuration is invalid.
     """
 
     module_view = module_configuration.module_view
-    module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_view.kind)
+    module_spec = target_data.module_spec(module_view.kind)
     channel_bindings = [
         channel_binding
         for channel_binding in module_view.channel_bindings
@@ -257,7 +265,9 @@ def _module_bindings(
             port_id=channel_binding.port_id,
             module_location=placement.module_location,
             sequencer_index=placement.sequencer_index,
-            sequencer_config=_sequencer_config(channel_binding, placement, module_spec),
+            sequencer_config=_sequencer_config(
+                channel_binding, placement, module_spec, target_data
+            ),
             module_config=module_config,
         )
         for channel_binding, placement in zip(
@@ -271,6 +281,7 @@ def _validate_supplied_sequencer(
     kind: QbloxModuleKind,
     module_spec: ModuleSpec,
     origin: str,
+    target_data: QbloxTargetDescription,
 ) -> None:
     """Validate one supplied sequencer against the installed module's target description.
 
@@ -279,6 +290,7 @@ def _validate_supplied_sequencer(
     :param kind: Installed module kind.
     :param module_spec: Target description of the installed module kind.
     :param origin: Human-readable description of the sequencer, used in error messages.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :raises ValueError: If the sequencer, its routing, or its acquisition configuration is
         invalid for the installed hardware.
     """
@@ -301,20 +313,20 @@ def _validate_supplied_sequencer(
             raise ValueError(
                 f"{origin} routes to output {output_id}, absent on {kind.value}"
             )
-        if index not in DEFAULT_QBLOX_TARGET.output_sequencers(kind, output_id):
+        if index not in target_data.output_sequencers(kind, output_id):
             raise ValueError(f"{origin} cannot drive output {output_id} on {kind.value}")
     for input_id in sorted(connection.input_ids):
         if input_id >= module_spec.input_count:
             raise ValueError(
                 f"{origin} routes from input {input_id}, absent on {kind.value}"
             )
-        if index not in DEFAULT_QBLOX_TARGET.input_sequencers(kind, input_id):
+        if index not in target_data.input_sequencers(kind, input_id):
             raise ValueError(f"{origin} cannot read input {input_id} on {kind.value}")
 
     uses_acquisition = connection.uses_acquisition or any(
         key in sequencer_configuration.values for key in _ACQUISITION_VALUE_KEYS
     )
-    if uses_acquisition and not DEFAULT_QBLOX_TARGET.supports(
+    if uses_acquisition and not target_data.supports(
         kind, index, Q1SequencerFeature.acquisition
     ):
         raise ValueError(f"{origin} configures acquisition but is not acquisition-capable")
@@ -555,12 +567,14 @@ def _sequencer_config(
     channel_binding: QbloxChannelBinding,
     placement: SequencerPlacement,
     module_spec: ModuleSpec,
+    target_data: QbloxTargetDescription,
 ) -> SequencerConfigAttr:
     """Resolve the digital configuration and connections of one sequencer.
 
     :param channel_binding: Calibrated canonical channel driving the sequencer.
     :param placement: Allocated placement of the channel.
     :param module_spec: Target description of the installed module kind.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :returns: The resolved sequencer configuration.
     :raises ValueError: If a supplied value conflicts with the canonical calibration.
     """
@@ -582,6 +596,7 @@ def _sequencer_config(
         placement,
         module_spec,
         frequency,
+        target_data,
     )
     return SequencerConfigAttr(
         port_id=channel_binding.port_id,
@@ -694,6 +709,7 @@ def _validate_nco_frequency(
     placement: SequencerPlacement,
     module_spec: ModuleSpec,
     frequency: float,
+    target_data: QbloxTargetDescription,
 ) -> None:
     """Validate a selected channel's derived NCO against its physical sequencer.
 
@@ -701,10 +717,11 @@ def _validate_nco_frequency(
     :param placement: Allocated physical sequencer placement.
     :param module_spec: Target description of the installed module kind.
     :param frequency: Derived NCO frequency in Hz.
+    :param target_data: Qblox target description with topology and sequencer limits.
     :raises ValueError: If the selected sequencer cannot synthesise the frequency.
     """
 
-    sequencer = DEFAULT_QBLOX_TARGET.sequencer(module_spec.kind, placement.sequencer_index)
+    sequencer = target_data.sequencer(module_spec.kind, placement.sequencer_index)
     minimum = sequencer.sequencer_spec.nco_min_frequency_hz
     maximum = sequencer.sequencer_spec.nco_max_frequency_hz
     if minimum <= frequency <= maximum:

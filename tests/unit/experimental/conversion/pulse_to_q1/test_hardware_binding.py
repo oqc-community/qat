@@ -44,6 +44,7 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.models import (
     QbloxChannelBinding,
     QbloxModuleKind,
@@ -199,6 +200,18 @@ def _sequencer_binding(channel_id: str, index: int) -> SequencerBinding:
             kind=QbloxModuleKind.qcm_rf,
         ),
     )
+
+
+def test_binding_validates_module_slots_against_the_supplied_target():
+    data = canonical_data(configurations=[supplied([sequencer(0)])], slot=2)
+    target_data = replace(DEFAULT_QBLOX_TARGET, min_module_slot=3)
+
+    _bind(data, _sequence(4_200_000_000))
+
+    with pytest.raises(PassFailedException, match="Qblox module slot must be in"):
+        QbloxHardwareBindingPass(data, target_data).apply(
+            Context(), ModuleOp([_sequence(4_200_000_000)])
+        )
 
 
 def test_sequences_are_bound_to_their_resolved_physical_allocation():

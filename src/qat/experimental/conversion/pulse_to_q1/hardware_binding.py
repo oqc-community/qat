@@ -55,6 +55,10 @@ from qat.experimental.system_data.hardware.qblox.configuration import (
     supplied_configurations,
 )
 from qat.experimental.system_data.hardware.qblox.models import QbloxChannelBinding
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
 
@@ -71,6 +75,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
 
     name = "qblox-hardware-binding"
     canonical_data: CanonicalSystemData
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1OutliningPass})
@@ -87,7 +92,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             if isinstance(sequence_op, SequenceOp)
         ]
         try:
-            hardware_view = QbloxHardwareView.derive(self.canonical_data)
+            hardware_view = QbloxHardwareView.derive(self.canonical_data, self.target_data)
             sequence_channel_ids = self._sequence_channel_ids(
                 sequence_ops, hardware_view.channel_bindings
             )
@@ -95,6 +100,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
                 hardware_view,
                 supplied_configurations(self.canonical_data),
                 sequence_channel_ids,
+                self.target_data,
             )
         except (ValueError, VerifyException) as error:
             raise PassFailedException(str(error)) from error

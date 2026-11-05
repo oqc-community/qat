@@ -5,6 +5,7 @@ import re
 from dataclasses import replace
 
 import pytest
+from frozendict import frozendict
 from xdsl.dialects.builtin import NoneAttr
 
 from qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution import (
@@ -21,6 +22,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     ThresholdedAcquireConfigAttr,
     UnweightedAcquireConfigAttr,
 )
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.configuration import (
     AcquisitionPathConnection,
     BooleanOutputConnection,
@@ -35,6 +37,7 @@ from qat.experimental.system_data.hardware.qblox.models import (
     QbloxModuleKind,
     SignalPath,
 )
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
@@ -47,6 +50,7 @@ from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers 
 def _resolve(
     configurations,
     used_channel_ids=None,
+    target_data=DEFAULT_QBLOX_TARGET,
     **kwargs,
 ):
     data = canonical_data(configurations=configurations, **kwargs)
@@ -56,10 +60,60 @@ def _resolve(
         else used_channel_ids
     )
     return resolve_sequencer_bindings(
-        QbloxHardwareView.derive(data),
+        QbloxHardwareView.derive(data, target_data),
         supplied_configurations(data),
         selected_channel_ids,
+        target_data,
     )
+
+
+def _target_with_control_spec(**changes):
+    control = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control), **changes
+    )
+    return replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {**DEFAULT_QBLOX_TARGET.sequencer_specs, Q1SequencerType.control: control}
+        ),
+    )
+
+
+def test_nco_frequency_is_validated_against_the_supplied_target():
+    configurations = [supplied([sequencer(0)])]
+    carrier_frequency = 4_600_000_000
+    target_data = _target_with_control_spec(
+        nco_min_frequency_hz=-700_000_000.0, nco_max_frequency_hz=700_000_000.0
+    )
+
+    with pytest.raises(ValueError, match="outside.*-500000000.0.*500000000.0"):
+        _resolve(configurations, carrier_frequency=carrier_frequency)
+
+    binding = _resolve(
+        configurations, target_data=target_data, carrier_frequency=carrier_frequency
+    )["port-0-channel-0"]
+
+    assert binding.sequencer_config.nco.frequency.value.data == 600_000_000.0
+
+
+def test_sequencer_indices_are_validated_against_the_supplied_target():
+    qcm_rf = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm_rf)
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        module_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.module_specs,
+                QbloxModuleKind.qcm_rf: replace(
+                    qcm_rf,
+                    sequencers=(Q1SequencerType.control,) * 2,
+                    output_channel_map=frozendict({0: (0, 1), 1: (0, 1)}),
+                ),
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="is outside the 2 sequencers"):
+        _resolve([supplied([sequencer(2)])], target_data=target_data)
 
 
 def test_absent_source_values_stay_absent():

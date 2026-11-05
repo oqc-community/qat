@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+from dataclasses import replace
+
 import pytest
 from frozendict import frozendict
 from pydantic_extra_types.semantic_version import SemanticVersion
@@ -13,6 +15,7 @@ from qat.experimental.system_data.canonical.schema import (
     OscillatorData,
     PortData,
 )
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.models import (
     PortReference,
     QbloxModuleKind,
@@ -94,6 +97,20 @@ def _canonical(
             AttributeEntry(key="fw_version", value="4.5.6"),
         ),
     )
+
+
+def test_derivation_validates_module_slots_against_the_supplied_target():
+    data = _canonical(slot_idx=DEFAULT_QBLOX_TARGET.max_module_slot + 1)
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET, max_module_slot=DEFAULT_QBLOX_TARGET.max_module_slot + 1
+    )
+
+    with pytest.raises(ValueError, match="Qblox module slot must be in"):
+        QbloxHardwareView.derive(data)
+
+    view = QbloxHardwareView.derive(data, target_data)
+
+    assert view.channel_bindings
 
 
 @pytest.mark.parametrize(

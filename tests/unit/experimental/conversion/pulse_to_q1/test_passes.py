@@ -24,6 +24,10 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
+import qat.experimental.conversion.pulse_to_q1.passes as passes_module
+from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
+    QbloxHardwareBindingPass,
+)
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
@@ -249,6 +253,20 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
         "q1-verify-allocation",
         "qblox-pre-emission-verification",
     ]
+
+
+def test_configured_q1_pipeline_threads_the_supplied_target_through_its_passes():
+    target_data = replace(DEFAULT_QBLOX_TARGET, max_module_slot=30)
+
+    pipeline = create_qblox_configured_q1_pipeline(_canonical_data(), target_data)
+
+    threaded = [
+        pass_
+        for pass_ in pipeline.passes
+        if isinstance(pass_, QbloxHardwareBindingPass | Q1PulseLegalisationPass)
+    ]
+    assert len(threaded) == 2
+    assert all(pass_.target_data is target_data for pass_ in threaded)
 
 
 class TestQ1PulseValidationPass:
@@ -557,6 +575,14 @@ class TestQ1PulseValidationPass:
 class TestQ1PulseLegalisationPass:
     def _run(self, module: ModuleOp) -> None:
         Q1PulseLegalisationPass().apply(Context(), module)
+
+    def test_builds_its_patterns_from_the_supplied_target(self, mocker):
+        target_data = replace(DEFAULT_QBLOX_TARGET, max_module_slot=30)
+        factory = mocker.spy(passes_module, "create_pulse_to_q1_legalisation_patterns")
+
+        Q1PulseLegalisationPass(target_data).apply(Context(), ModuleOp([]))
+
+        factory.assert_called_once_with(target_data)
 
     def test_accepts_constant_phase(self):
         freq, frame = _frame()

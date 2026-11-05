@@ -37,6 +37,7 @@ from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
     AcquisitionConnectionMode,
+    QbloxTargetDescription,
 )
 
 
@@ -63,8 +64,9 @@ def _set_connection_field(
 def _connection_config(
     config: Mapping[str, object],
     module_kind: QbloxModuleKind | None,
+    target_data: QbloxTargetDescription,
 ) -> ConnectionConfig:
-    if module_kind is not None and DEFAULT_QBLOX_TARGET.module_spec(module_kind).is_rf:
+    if module_kind is not None and target_data.module_spec(module_kind).is_rf:
         complex_connections = sorted(
             str(item["direction"]) + "_".join(str(port_id) for port_id in item["port_ids"])
             for item in config["connections"]
@@ -84,7 +86,7 @@ def _connection_config(
     acquisition_mode = (
         AcquisitionConnectionMode.components
         if module_kind is None
-        else DEFAULT_QBLOX_TARGET.module_spec(module_kind).acquisition_connection_mode
+        else target_data.module_spec(module_kind).acquisition_connection_mode
     )
     if acquisition_mode is AcquisitionConnectionMode.none and (
         config["acquisition_path_connections"]
@@ -140,6 +142,7 @@ def _connection_config(
 def translate_sequencer_config(
     config_attr: SequencerConfigAttr,
     module_kind: QbloxModuleKind | None = None,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> SequencerConfig:
     """Translate one verified Q1 sequencer configuration.
 
@@ -177,7 +180,7 @@ def translate_sequencer_config(
         sync_en=config["enable_sync"],
         marker_ovr_en=marker.get("marker_ovr_en"),
         marker_ovr_value=marker.get("marker_ovr_value"),
-        connection=_connection_config(config, module_kind),
+        connection=_connection_config(config, module_kind, target_data),
         nco=NcoConfig(
             freq=nco.get("frequency"),
             phase_offs=nco.get("phase_offs"),
@@ -496,6 +499,7 @@ def translate_module_config(
 def translate_package(
     sequence_op: SequenceOp,
     module_config: ModuleConfig,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> QbloxPackage:
     """Translate one verified sequence to the shared runtime package.
 
@@ -503,6 +507,7 @@ def translate_package(
 
     :param sequence_op: Fully configured, allocated, and flat Q1 sequence.
     :param module_config: Shared translated configuration for its physical module.
+    :param target_data: Qblox numeric limits used for final emission validation.
     :returns: Package consumed by the shared Qblox engine.
     """
 
@@ -524,8 +529,7 @@ def translate_package(
         instrument_id=sequence_op.instrument_id.data,
         seq_idx=sequence_op.seq_idx.data,
         seq_config=translate_sequencer_config(
-            sequence_op.sequencer_config,
-            sequence_op.module_config.kind.data,
+            sequence_op.sequencer_config, sequence_op.module_config.kind.data, target_data
         ),
         slot_idx=sequence_op.slot_idx.data,
         mod_config=module_config,

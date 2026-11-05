@@ -38,7 +38,10 @@ from qat.experimental.system_data.hardware.qblox.models import (
     QbloxOscillatorBinding,
     QbloxPortBinding,
 )
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,17 +120,21 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
 
     @classmethod
     def derive(
-        cls, canonical_data: CanonicalSystemData, **kwargs: Any
+        cls,
+        canonical_data: CanonicalSystemData,
+        target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
+        **kwargs: Any,
     ) -> QbloxHardwareView:
         """Project typed Qblox extensions from validated canonical system data.
 
         :param canonical_data: Canonical system data produced by a validating materialiser.
+        :param target_data: Qblox target description.
         :param kwargs: Unused derived-view compatibility arguments.
         :returns: An immutable module-oriented projection.
         """
 
         del kwargs
-        return _derive_hardware_view(canonical_data)
+        return _derive_hardware_view(canonical_data, target_data)
 
 
 def _parse_version(value: Any, key: str) -> SemanticVersion:
@@ -153,7 +160,9 @@ def _required_version(
     return _parse_version(entry.value, key)
 
 
-def _derive_hardware_view(canonical_data: CanonicalSystemData) -> QbloxHardwareView:
+def _derive_hardware_view(
+    canonical_data: CanonicalSystemData, target_data: QbloxTargetDescription
+) -> QbloxHardwareView:
     """Group typed canonical bindings into physical modules.
 
     :param canonical_data: Validated canonical system data.
@@ -189,7 +198,7 @@ def _derive_hardware_view(canonical_data: CanonicalSystemData) -> QbloxHardwareV
 
     oscillator_modules: dict[str, QbloxModuleLocation] = {}
     for projection in projections:
-        DEFAULT_QBLOX_TARGET.validate_module_location(projection.reference.module_location)
+        target_data.validate_module_location(projection.reference.module_location)
         if oscillator_id := projection.reference.oscillator_id:
             if oscillator_id not in oscillators_by_id:
                 raise ValueError(

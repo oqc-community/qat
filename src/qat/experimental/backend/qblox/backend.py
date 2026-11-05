@@ -45,7 +45,7 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
     ):
         super().__init__(model=model)
         self.target_data = target_data
-        self.hardware_view = QbloxHardwareView.derive(model)
+        self.hardware_view = QbloxHardwareView.derive(model, target_data)
 
     def emit(
         self,

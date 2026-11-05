@@ -125,7 +125,9 @@ def emit_qblox_program(
             sequence_op.instrument_id.data,
             sequence_op.slot_idx.data,
         )
-        package = translate_package(sequence_op, translated_module_configs[module_location])
+        package = translate_package(
+            sequence_op, translated_module_configs[module_location], target_data
+        )
         package_key = sequence_op.channel_id.data
         if package_key in packages:
             raise ValueError(f"Duplicate Qblox package key {package_key!r}")

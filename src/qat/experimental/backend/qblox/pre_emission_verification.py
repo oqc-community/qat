@@ -72,7 +72,7 @@ class _QbloxPreEmissionVerifier:
             raise PassFailedException(
                 f"Sequence {sequence.channel_id.data!r} is missing its Qblox configuration."
             )
-        return DEFAULT_QBLOX_TARGET.sequencer(
+        return self.target_data.sequencer(
             sequence.module_config.kind.data, sequence.seq_idx.data
         )
 

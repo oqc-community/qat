@@ -37,7 +37,6 @@ from qat.experimental.dialect.q1 import (
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
 from qat.experimental.system_data.hardware.qblox.target import (
-    DEFAULT_QBLOX_TARGET,
     Q1SequencerType,
     QbloxTargetDescription,
 )
@@ -97,7 +96,7 @@ class PhaseLowering:
         is_readout = (
             sequence.module_config is not None
             and sequence.seq_idx is not None
-            and DEFAULT_QBLOX_TARGET.is_readout_sequencer(
+            and target_data.is_readout_sequencer(
                 sequence.module_config.kind.data, sequence.seq_idx.data
             )
         )

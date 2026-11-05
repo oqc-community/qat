@@ -244,6 +244,7 @@ class Q1PulseLegalisationPass(OrderedPass, ModulePass):
     """
 
     name = "q1-pulse-legalisation"
+    target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1PreAcquireTransformationPass})
@@ -253,7 +254,9 @@ class Q1PulseLegalisationPass(OrderedPass, ModulePass):
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         PatternRewriteWalker(
-            GreedyRewritePatternApplier(create_pulse_to_q1_legalisation_patterns()),
+            GreedyRewritePatternApplier(
+                create_pulse_to_q1_legalisation_patterns(self.target_data)
+            ),
             apply_recursively=False,
         ).rewrite_module(op)
 
@@ -551,11 +554,11 @@ def create_qblox_configured_q1_pipeline(
     return OrderedPassPipeline(
         (
             Q1OutliningPass(target_data=target_data),
-            QbloxHardwareBindingPass(canonical_data),
+            QbloxHardwareBindingPass(canonical_data, target_data=target_data),
             QbloxSequenceInitialisationPass(target_data=target_data),
             Q1PulseValidationPass(target_data=target_data),
             Q1PreAcquireTransformationPass(),
-            Q1PulseLegalisationPass(),
+            Q1PulseLegalisationPass(target_data=target_data),
             PulseToQ1LoweringPass(target_data=target_data),
             BoundDeadFrameEliminationPass(),
             DeadCodeElimination(),

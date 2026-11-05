@@ -100,7 +100,11 @@ from qat.experimental.system_data.hardware.qblox import (
     DEFAULT_QBLOX_TARGET,
     QbloxModuleKind,
 )
-from qat.experimental.system_data.hardware.qblox.target import Q1AsmSpec, Q1SequencerType
+from qat.experimental.system_data.hardware.qblox.target import (
+    AcquisitionConnectionMode,
+    Q1AsmSpec,
+    Q1SequencerType,
+)
 
 
 def _target_with_readout_sample_period(sample_period_ns: int):
@@ -634,6 +638,55 @@ def test_rejects_phase_shift_op_with_dynamic_radian_phase():
 
     with pytest.raises(PassFailedException, match="requires constant phase"):
         _run_q1_pipeline(module)
+
+
+def _target_with_readout_qcm():
+    """Return target data whose first QCM sequencer is a readout sequencer.
+
+    The readout sequencer spec is made distinguishable from the control one: it samples
+    every 2 ns and maps one degree to one NCO phase step.
+    """
+
+    readout = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+        sample_period_ns=2,
+        nco_phase_steps=360,
+        nco_phase_steps_per_degree=1.0,
+    )
+    qcm = replace(
+        DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm),
+        sequencers=(Q1SequencerType.readout,) + (Q1SequencerType.control,) * 5,
+        acquisition_memory_bins=1024,
+        acquisition_connection_mode=AcquisitionConnectionMode.components,
+    )
+    return replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {**DEFAULT_QBLOX_TARGET.sequencer_specs, Q1SequencerType.readout: readout}
+        ),
+        module_specs=frozendict(
+            {**DEFAULT_QBLOX_TARGET.module_specs, QbloxModuleKind.qcm: qcm}
+        ),
+    )
+
+
+def test_phase_lowering_classifies_sequencers_with_the_supplied_target():
+    target_data = _target_with_readout_qcm()
+    freq, frame = _frame()
+    phase = ConstantOp(PhaseAttr(math.pi / 2))
+    phase_set = PhaseSetOp(frame, phase)
+    sequence = SequenceOp(
+        "q0_drive",
+        [freq, frame, phase, phase_set, StopOp()],
+        seq_idx=0,
+        module_config=ModuleConfigAttr(1, "cluster", QbloxModuleKind.qcm),
+    )
+    module = ModuleOp([sequence])
+
+    PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
+
+    [set_ph] = [op for op in sequence.body.block.ops if isinstance(op, SetPhImmOp)]
+    assert set_ph.imm.data == 90
 
 
 def _traced_register_int(value: SSAValue) -> int:
@@ -1407,6 +1460,25 @@ class TestRewritePulseOp:
             PatternRewriteWalker(
                 RewritePulseOp(target_data), apply_recursively=False
             ).rewrite_module(module)
+
+    def test_pulse_classifies_sequencers_with_the_supplied_target(self):
+        """A QCM sequencer the supplied target lays out as readout uses the readout sample
+        period, where the default layout would treat it as control."""
+
+        target_data = _target_with_readout_qcm()
+        waveform_op = _sampled_waveform([0.2 + 0.1j] * 4, sample_time=2e3)
+        sequence = SequenceOp(
+            "q0_measure",
+            [*_pulse_ops(waveform_op, "q0.measure"), StopOp()],
+            seq_idx=0,
+            module_config=ModuleConfigAttr(1, "cluster", QbloxModuleKind.qcm),
+        )
+
+        PatternRewriteWalker(
+            RewritePulseOp(target_data), apply_recursively=False
+        ).rewrite_module(ModuleOp([sequence]))
+
+        assert not any(isinstance(op, PulseOp) for op in sequence.body.block.ops)
 
     def test_pulse_uses_bound_readout_sequencer_sample_period(self):
         readout = replace(
