@@ -328,22 +328,17 @@ def _split_combined_readout_channels(node: Any) -> Any:
 
     pulse_channels = new_node.get("pulse_channels")
     if isinstance(pulse_channels, dict):
-        remaining = dict(pulse_channels)
-        split_channels = deepcopy(pulse_channels)
         for key in list(pulse_channels.keys()):
             rename = _matching_readout_rename(key)
             if rename is None:
                 continue
             old_suffix, new_suffixes = rename
-            value = remaining.pop(key)
-            split_channels.pop(key)
+            value = pulse_channels.pop(key)
             for new_suffix in new_suffixes:
                 new_key = _replace_suffix(key, old_suffix, new_suffix)
-                split_channels[new_key] = _renamed_channel_value(
+                pulse_channels[new_key] = _renamed_channel_value(
                     value, old_suffix, new_suffix
                 )
-
-        new_node["pulse_channels"] = split_channels
 
     return new_node
 

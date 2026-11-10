@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-
+from copy import deepcopy
 from types import SimpleNamespace
 
 import pytest
@@ -343,6 +343,24 @@ def test_split_combined_readout_channels_leaves_untouched_and_does_not_mutate():
     assert purr_materialise._split_combined_readout_channels("bad") == "bad"
     assert purr_materialise._split_combined_readout_channels(5) == 5
     # The input node is not mutated.
+    assert node == original
+
+
+def test_split_combined_readout_channels_does_not_mutate_input_with_macq():
+    macq = {"pulse_channel": {"id": "R0.macq", "extras": {"k": [1, 2]}}}
+    node = {"pulse_channels": {"macq": macq}}
+    original = deepcopy(node)
+
+    result = purr_materialise._split_combined_readout_channels(node)
+    measure = result["pulse_channels"]["measure"]
+    acquire = result["pulse_channels"]["acquire"]
+
+    assert node == original
+    assert measure["pulse_channel"]["extras"] is not acquire["pulse_channel"]["extras"]
+    assert measure["pulse_channel"]["extras"] is not macq["pulse_channel"]["extras"]
+
+    measure["pulse_channel"]["extras"]["k"].append(3)
+    assert acquire["pulse_channel"]["extras"]["k"] == [1, 2]
     assert node == original
 
 
