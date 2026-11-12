@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.frontend.purr module &mdash; qat-compiler 3.0.0.post439.dev20261110092639 documentation</title>
+  <title>qat.experimental.frontend.purr module &mdash; qat-compiler 3.0.0.post440.dev20261112104319 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,7 +722,7 @@
 sanitisation pass pipeline, then imports the result into pulse IR.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.frontend.purr.PurrFrontend">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrFrontend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_purr_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.frontend.purr.PurrFrontend" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrFrontend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_purr_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_calibration_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.frontend.purr.PurrFrontend" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend" title="qat.frontend.base.BaseFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseFrontend</span></code></a></p>
 <p>Import PuRR builders into pulse-level IR after legacy sanitisation.</p>
 <p>PuRR IR built using <code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code> can omit structure that legacy
@@ -744,6 +744,9 @@ but required if post-selection is enabled. The frontend derives a
 post-selection view from this model and applies it to the mapped results.</p></li>
 <li><p><span class="target" id="qat.experimental.frontend.purr.PurrFrontend.params.run_purr_pipeline"></span><strong>run_purr_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.frontend.purr.PurrFrontend.params.run_purr_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Can be used to specify if the pipeline should run before
 importing.</p></li>
+<li><p><span class="target" id="qat.experimental.frontend.purr.PurrFrontend.params.check_calibration_id"></span><strong>check_calibration_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.frontend.purr.PurrFrontend.params.check_calibration_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Can be used to specify if the calibration ID of the
+builder’s hardware model should be checked against that of the system data
+when emitting. Defaults to True.</p></li>
 </ul>
 </dd>
 </dl>
@@ -789,6 +792,12 @@ representation.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>TypeError</strong> – If <em>src</em> is not a <code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code>.</p></li>
+<li><p><a class="reference internal" href="qat.model.validators.html#qat.model.validators.MismatchingHardwareModelError" title="qat.model.validators.MismatchingHardwareModelError"><strong>MismatchingHardwareModelError</strong></a> – If the calibration ID of the builder’s
+hardware model differs from that of the system data. If either ID is empty, the
+check is skipped with a warning. The check is skipped entirely if the frontend
+was built with <code class="docutils literal notranslate"><span class="pre">check_calibration_id=False</span></code>. Note that <code class="docutils literal notranslate"><span class="pre">FileModelLoader</span></code>
+sets the legacy ID to the file’s md5 hash, while <code class="docutils literal notranslate"><span class="pre">materialise()</span></code> keeps the ID
+stored in the file, so models loaded from the same file this way do not match.</p></li>
 <li><p><strong>ValueError</strong> – If post-selection is enabled but no canonical model was
 provided at frontend construction.</p></li>
 </ul>
