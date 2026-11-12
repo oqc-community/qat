@@ -14,6 +14,7 @@ import re
 from collections.abc import Iterable
 from copy import deepcopy
 from functools import cache, cached_property
+from importlib.metadata import version
 from pydoc import locate
 from typing import Annotated, Any, TypeAlias, TypeVar, Union, get_args, get_origin
 
@@ -36,6 +37,13 @@ from pydantic._internal._model_construction import ModelMetaclass
 from pydantic_core import core_schema
 
 from qat.purr.utils.logger import get_default_logger
+
+if version("numpydantic") < "2.0.0":
+    _ARRAY_SHAPE = Shape["*, ..."]
+else:
+    from numpydantic.shape import Repeat
+
+    _ARRAY_SHAPE = Shape[*Repeat]
 
 log = get_default_logger()
 
@@ -715,7 +723,7 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
     (de)serialisation purposes.
     """
 
-    value: NDArray[Shape["*, ..."], int | float | complex | bool]  # noqa: F722
+    value: NDArray[_ARRAY_SHAPE, int | float | complex | bool]  # noqa: F722
     _HANDLED_TYPES = (np.ndarray, numbers.Number)
 
     def __init__(self, *args, **kwargs):

@@ -22,7 +22,7 @@
 exclude: '\.lock$'
 
 default_language_version:
-  python: python3
+  python: python3.12
 
 repos:
   # General code hygiene and file checks for many file types

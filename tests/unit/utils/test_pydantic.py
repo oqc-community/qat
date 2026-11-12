@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import random
 from copy import deepcopy
+from importlib.metadata import version
 from pathlib import Path
 
 import numpy as np
@@ -26,6 +27,11 @@ from qat.utils.pydantic import (
     ValidatedSet,
     uint,
 )
+
+if version("numpydantic") < "2.0.0":
+    _SHAPE_3D = Shape["* x, * y, * z"]
+else:
+    _SHAPE_3D = Shape[int, int, int]
 
 
 @pytest.mark.parametrize("seed", [1, 2, 3, 4])
@@ -181,7 +187,7 @@ class TestNDArray:
     def test_dict_multi_dimensional_array(self, array_type):
         a = self.a.astype(dtype=array_type)
         b = self.b.astype(dtype=array_type)
-        NDArray_annot = NDArray[Shape["* x, * y, * z"], array_type]
+        NDArray_annot = NDArray[_SHAPE_3D, array_type]
 
         d = PydDictBase[str, NDArray_annot]({"a": a, "b": b})
         assert np.allclose(d["a"], a)
@@ -198,7 +204,7 @@ class TestNDArray:
     def test_list_multi_dimensional_array(self, array_type):
         a = self.a.astype(dtype=array_type)
         b = self.b.astype(dtype=array_type)
-        NDArray_annot = NDArray[Shape["* x, * y, * z"], array_type]
+        NDArray_annot = NDArray[_SHAPE_3D, array_type]
 
         base_list = PydListBase[NDArray_annot]([a, b])
         assert np.allclose(base_list[0], a)
