@@ -18,6 +18,7 @@ from qat.experimental.frontend.importer.pulse.post_processing import PostProcess
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.pulse.post_processing import PostProcessingView
+from qat.experimental.utils.logging import get_logger
 from qat.frontend.base import BaseFrontend
 from qat.middleend.passes.purr.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.purr.transform import (
@@ -30,10 +31,40 @@ from qat.middleend.passes.purr.transform import (
     SynchronizeTask,
 )
 from qat.model.target_data import QubitDescription, TargetData
+from qat.model.validators import MismatchingHardwareModelError
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
+log = get_logger(__name__)
+
 _PICOSECONDS_AS_SECONDS = 1e-12
+
+
+def _check_calibration_ids(
+    hardware_model: QuantumHardwareModel, system_data: CanonicalSystemData | None
+) -> None:
+    """Check the builder's hardware model and the system data share a calibration ID.
+
+    Skips the check with a warning if either ID is empty, as Genesis files store none.
+    """
+
+    if system_data is None:
+        return
+
+    if not hardware_model.calibration_id or not system_data.calibration_id:
+        log.warning(
+            "Skipped the calibration ID check: the builder's hardware model has ID "
+            f"'{hardware_model.calibration_id}' and the system data has ID "
+            f"'{system_data.calibration_id}'."
+        )
+        return
+
+    if hardware_model.calibration_id != system_data.calibration_id:
+        raise MismatchingHardwareModelError(
+            f"Calibration ID of the builder's hardware model "
+            f"('{hardware_model.calibration_id}') does not match the system data's "
+            f"('{system_data.calibration_id}')."
+        )
 
 
 def _extract_passive_reset_time(
@@ -108,7 +139,10 @@ class PurrFrontend(BaseFrontend):
     """
 
     def __init__(
-        self, model: CanonicalSystemData | None = None, run_purr_pipeline: bool = True
+        self,
+        model: CanonicalSystemData | None = None,
+        run_purr_pipeline: bool = True,
+        check_calibration_id: bool = True,
     ):
         """
         :param model: The model as a :class:`CanonicalSystemData` representation. Optional,
@@ -116,9 +150,13 @@ class PurrFrontend(BaseFrontend):
             post-selection view from this model and applies it to the mapped results.
         :param run_purr_pipeline: Can be used to specify if the pipeline should run before
             importing.
+        :param check_calibration_id: Can be used to specify if the calibration ID of the
+            builder's hardware model should be checked against that of the system data
+            when emitting. Defaults to True.
         """
         self.model = model
         self._run_pipeline = run_purr_pipeline
+        self._check_calibration_id = check_calibration_id
 
     def emit(
         self,
@@ -139,6 +177,12 @@ class PurrFrontend(BaseFrontend):
         :returns: A compiler :class:`ModuleOp` that holds the program in pulse-level
             representation.
         :raises TypeError: If *src* is not a :class:`QuantumInstructionBuilder`.
+        :raises MismatchingHardwareModelError: If the calibration ID of the builder's
+            hardware model differs from that of the system data. If either ID is empty, the
+            check is skipped with a warning. The check is skipped entirely if the frontend
+            was built with ``check_calibration_id=False``. Note that ``FileModelLoader``
+            sets the legacy ID to the file's md5 hash, while ``materialise()`` keeps the ID
+            stored in the file, so models loaded from the same file this way do not match.
         :raises ValueError: If post-selection is enabled but no canonical model was
             provided at frontend construction.
         """
@@ -147,6 +191,9 @@ class PurrFrontend(BaseFrontend):
             raise TypeError(
                 f"PuRR frontend does not support object of type `{type(src).__name__}`."
             )
+
+        if self._check_calibration_id:
+            _check_calibration_ids(src.model, self.model)
 
         res_mgr, met_mgr, compiler_config = self._check_metrics_and_config(
             res_mgr, met_mgr, compiler_config

@@ -24,6 +24,8 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
 )
 from qat.experimental.dialect.results.ir.ops import PostSelectOp
+from qat.experimental.frontend import purr as purr_frontend
+from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.experimental.frontend.purr import PurrFrontend
 from qat.experimental.system_data.canonical.schema import (
     MaxLikelihoodDiscriminateParams,
@@ -31,6 +33,7 @@ from qat.experimental.system_data.canonical.schema import (
 )
 from qat.experimental.system_data.materialisers.boundary import materialise
 from qat.model.loaders.purr import EchoModelLoader
+from qat.model.validators import MismatchingHardwareModelError
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.purr.compiler.instructions import Acquire, AcquireMode, Pulse
 
@@ -503,3 +506,85 @@ def test_macq_pulse_and_acquire_use_two_distinct_frames_in_frontend_emit():
     assert pulse.frame is create_measure.result
     assert acquire.frame is create_acquire.result
     assert pulse.frame is not acquire.frame
+
+
+def _skip_warnings(caplog):
+    return [
+        record
+        for record in caplog.records
+        if record.name == "purr"
+        and record.levelname == "WARNING"
+        and "Skipped the calibration ID check" in record.getMessage()
+    ]
+
+
+def test_matching_calibration_ids_import_without_warning(
+    builder, canonical_model_from_echo, caplog
+):
+    """Matching calibration IDs pass the check and import as normal."""
+    builder.model.calibration_id = "cal-001"
+    model = replace(canonical_model_from_echo, calibration_id="cal-001")
+
+    with caplog.at_level("WARNING"):
+        module = PurrFrontend(model=model).emit(builder)
+
+    assert isinstance(module, ModuleOp)
+    assert not _skip_warnings(caplog)
+
+
+def test_mismatching_calibration_ids_raise_before_import(
+    builder, canonical_model_from_echo, mocker
+):
+    """Mismatched calibration IDs raise, naming both, before sanitisation or import."""
+    builder.model.calibration_id = "cal-001"
+    model = replace(canonical_model_from_echo, calibration_id="cal-002")
+    build_pass_manager = mocker.spy(purr_frontend, "_build_pass_manager")
+    build = mocker.spy(PurrImporter, "build")
+
+    with pytest.raises(MismatchingHardwareModelError, match=r"'cal-001'.*'cal-002'"):
+        PurrFrontend(model=model).emit(builder)
+
+    build_pass_manager.assert_not_called()
+    build.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "builder_id, model_id",
+    [("", "cal-001"), ("cal-001", ""), ("", "")],
+    ids=["empty_builder_id", "empty_system_data_id", "both_empty"],
+)
+def test_empty_calibration_id_skips_check_with_warning(
+    builder, canonical_model_from_echo, caplog, builder_id, model_id
+):
+    """An empty calibration ID on either side skips the check with a warning."""
+    builder.model.calibration_id = builder_id
+    model = replace(canonical_model_from_echo, calibration_id=model_id)
+
+    with caplog.at_level("WARNING"):
+        module = PurrFrontend(model=model).emit(builder)
+
+    assert isinstance(module, ModuleOp)
+    assert len(_skip_warnings(caplog)) == 1
+
+
+def test_calibration_id_not_checked_without_system_data(builder, caplog):
+    """Without system data there is nothing to compare, so no check and no warning."""
+    builder.model.calibration_id = "cal-001"
+
+    with caplog.at_level("WARNING"):
+        module = PurrFrontend().emit(builder)
+
+    assert isinstance(module, ModuleOp)
+    assert not _skip_warnings(caplog)
+
+
+def test_calibration_id_check_can_be_disabled(builder, canonical_model_from_echo, mocker):
+    """Mismatched calibration IDs are accepted when the check is turned off."""
+    builder.model.calibration_id = "cal-001"
+    model = replace(canonical_model_from_echo, calibration_id="cal-002")
+    check = mocker.spy(purr_frontend, "_check_calibration_ids")
+
+    module = PurrFrontend(model=model, check_calibration_id=False).emit(builder)
+
+    assert isinstance(module, ModuleOp)
+    check.assert_not_called()
