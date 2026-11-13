@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2026 Oxford Quantum Circuits Ltd
 from copy import deepcopy
 from importlib.metadata import version
 from numbers import Number
@@ -487,6 +487,29 @@ def apply_default_transforms(circuit, architecture, opts):
         transform.apply(circuit)
 
 
+def _place_on_architecture(circuit: Circuit, architecture: Architecture):
+    """Places each qubit on the node with its logical index, without routing. Registers are
+    flattened in name order.
+
+    :raises ValueError: If a qubit has no node in the architecture.
+    """
+    nodes = {node.index[0]: node for node in architecture.nodes}
+    qubit_map = {}
+    offset = 0
+    for register in sorted({qubit.reg_name for qubit in circuit.qubits}):
+        reg_qubits = [qubit for qubit in circuit.qubits if qubit.reg_name == register]
+        for qubit in reg_qubits:
+            qubit_map[qubit] = nodes.get(offset + qubit.index[0])
+        offset += max(qubit.index[0] for qubit in reg_qubits) + 1
+
+    if unplaced := [str(qubit) for qubit, node in qubit_map.items() if node is None]:
+        raise ValueError(
+            "Verification failed: Failed to apply circuit to hardware topology. Qubits "
+            f"not in the hardware's coupling graph: {', '.join(unplaced)}."
+        )
+    Placement.place_with_map(circuit, qubit_map)
+
+
 def check_validity(circuit, architecture):
     predicates = [
         (
@@ -508,6 +531,10 @@ def check_validity(circuit, architecture):
 def optimize_circuit(circ, architecture, opts):
     """Apply all Tket optimizations to the circuit provided as defined in the options
     flag."""
+    # Kept outside the `try`, as the callers' fall-backs need a placed circuit too.
+    if TketOptimizations.DefaultMappingPass not in opts:
+        _place_on_architecture(circ, architecture)
+
     try:
         # By default we want to decompose Tket-specific circuits and then rebase into
         # the form that Tket can optimize most efficiently.
@@ -645,15 +672,20 @@ def run_multiQ_tket_optimizations(
     couplings = deepcopy(hardware.qubit_direction_couplings)
     optimizations_failed = False
     architecture = None
+    logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
     if any(couplings):
         if TketOptimizations.DefaultMappingPass not in opts:
-            architecture = Architecture([val.direction for val in couplings])
+            architecture = Architecture(
+                [
+                    (logical_qubit_map[control], logical_qubit_map[target])
+                    for control, target in (val.direction for val in couplings)
+                ]
+            )
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
 
         else:
             # Without default remapping pass multi-qubit gates don't get moved around, so
             # trying to apply them to a limited subset of qubits provides no value.
-            logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
             for coupling in couplings:
                 control_ind, target_ind = coupling.direction
                 coupling.direction = (

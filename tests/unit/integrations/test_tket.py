@@ -1,15 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
+import re
 from math import isclose, pi
 
+import numpy as np
 import pytest
 from compiler_config.config import (
     InlineResultsProcessing,
     Qasm2Optimizations,
     Qasm3Optimizations,
     Tket,
+    TketOptimizations,
 )
 from pytket import Circuit, OpType, Qubit
+from pytket.qasm import circuit_from_qasm_str
+from pytket.utils import compare_unitaries
 from sympy import pi as sympy_pi
 
 from qat.integrations.tket import (
@@ -136,6 +141,123 @@ def test_two_qubit_circuit_optimisation(hw):
 
     for qubit in best_qubit_pair:
         assert qubit in circ_indices
+
+
+def _unitary(circuit: Circuit) -> np.ndarray:
+    """Returns the unitary of a single-register circuit, ignoring measurements."""
+    gates = Circuit(circuit.n_qubits)
+    for command in circuit.get_commands():
+        if command.op.type != OpType.Measure:
+            gates.add_gate(command.op, [qubit.index[0] for qubit in command.qubits])
+    return gates.get_unitary()
+
+
+@pytest.mark.parametrize(
+    "hw",
+    [
+        pytest.param(LucyModelLoader().load(), id="one_directional_ring"),
+        pytest.param(
+            JaggedEchoModelLoader(
+                qubit_indices=[2, 4, 5, 10],
+                connectivity=[(2, 4), (4, 2), (4, 5), (5, 4), (5, 10), (10, 5)],
+                random_seed=254,
+            ).load(),
+            id="non_contiguous_indices",
+        ),
+    ],
+)
+class TestDirectionalCXGatesWithoutMappingPass:
+    """Without the mapping pass, ``q[k]`` stays on logical qubit ``k`` and only CX
+    directions may change."""
+
+    opts = TketOptimizations.DirectionalCXGates
+    qasm = """
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[4];
+    creg c[4];
+    h q[0];
+    cx q[0], q[1];
+    cx q[2], q[1];
+    h q[3];
+    cx q[3], q[2];
+    cx q[1], q[2];
+    measure q[0] -> c[3];
+    measure q[1] -> c[2];
+    measure q[2] -> c[1];
+    measure q[3] -> c[0];
+    """
+
+    def test_qubits_are_not_remapped_or_routed(self, hw):
+        circuit = circuit_from_qasm_str(
+            run_pyd_tket_optimizations(self.qasm, self.opts, hw)
+        )
+
+        assert {qubit.reg_name for qubit in circuit.qubits} == {"node"}
+        # No SWAPs are added and each CX keeps its qubit pair.
+        two_qubit_gates = [cmd for cmd in circuit.get_commands() if len(cmd.qubits) == 2]
+        assert {cmd.op.type for cmd in two_qubit_gates} == {OpType.CX}
+        qubit_pairs = sorted(
+            sorted(qubit.index[0] for qubit in cmd.qubits) for cmd in two_qubit_gates
+        )
+        assert qubit_pairs == [[0, 1], [1, 2], [1, 2], [2, 3]]
+        measurements = {
+            qubit.index[0]: bit.index[0] for qubit, bit in circuit.qubit_to_bit_map.items()
+        }
+        assert measurements == {0: 3, 1: 2, 2: 1, 3: 0}
+
+    def test_cx_gates_follow_coupling_directions(self, hw):
+        logical = {index: i for i, index in enumerate(hw.qubits)}
+        allowed_directions = {
+            (logical[control], logical[target])
+            for control, targets in hw.logical_connectivity.items()
+            for target in targets
+        }
+
+        circuit = circuit_from_qasm_str(
+            run_pyd_tket_optimizations(self.qasm, self.opts, hw)
+        )
+
+        cx_directions = {
+            tuple(qubit.index[0] for qubit in cmd.qubits)
+            for cmd in circuit.commands_of_type(OpType.CX)
+        }
+        assert cx_directions <= allowed_directions
+        assert compare_unitaries(
+            _unitary(circuit), _unitary(circuit_from_qasm_str(self.qasm))
+        )
+
+    def test_gate_on_uncoupled_qubits_raises(self, hw):
+        qasm = """
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[3];
+        creg c[3];
+        cx q[0], q[2];
+        measure q -> c;
+        """
+        with pytest.raises(
+            ValueError, match="Failed to apply circuit to hardware topology"
+        ):
+            run_pyd_tket_optimizations(qasm, self.opts, hw)
+
+
+def test_directional_cx_gates_on_qubit_outside_hardware_raises():
+    qasm = """
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[9];
+    creg c[9];
+    cx q[0], q[1];
+    cx q[7], q[8];
+    measure q -> c;
+    """
+    with pytest.raises(
+        ValueError, match=re.escape("Qubits not in the hardware's coupling graph: q[8].")
+    ):
+        run_pyd_tket_optimizations(
+            qasm, TketOptimizations.DirectionalCXGates, LucyModelLoader().load()
+        )
 
 
 class TestTketBuilder:
