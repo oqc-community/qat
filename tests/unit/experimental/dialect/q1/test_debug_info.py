@@ -44,7 +44,7 @@ from qat.experimental.dialect.q1 import (
     SetPhDeltaImmOp,
     SetPhImmOp,
     StopOp,
-    WaitImmOp,
+    UpdParamImmOp,
 )
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
@@ -99,7 +99,9 @@ class TestDebugInfoAutoAttach:
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)
-        [wait_op] = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+        [wait_op] = [
+            op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)
+        ]
         self._assert_provenance(wait_op, "pulse.wait", "q0_drive")
 
     def test_pulse_op(self):
@@ -166,18 +168,22 @@ class TestDebugInfoAutoAttach:
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait, channel_id="q1_drive")
         _run_q1_pipeline(module)
-        [wait_op] = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+        [wait_op] = [
+            op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)
+        ]
         assert wait_op.properties.get("debug_info").port.data == "q1_drive"
 
     def test_long_wait_all_chunks_annotated(self):
-        """Every WaitImmOp in a chunked long wait carries provenance from the source op."""
-        max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_immediate_ns
+        """Every upd_param in a chunked long wait carries provenance from the source op."""
+        max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_rt_duration_ns
         freq, frame = _frame()
         duration = ConstantOp(TimeAttr((2 * max_wait_time + 16) * 1_000))
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)
-        wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+        wait_ops = [
+            op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)
+        ]
         assert len(wait_ops) == 3
         for op in wait_ops:
             self._assert_provenance(op, "pulse.wait", "q0_drive")
@@ -189,6 +195,8 @@ class TestDebugInfoAutoAttach:
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)
-        [wait_op] = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+        [wait_op] = [
+            op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)
+        ]
         line = wait_op.assembly_line(EmissionContext(emit_debug_info=True))
         assert "from pulse.wait on q0_drive" in line

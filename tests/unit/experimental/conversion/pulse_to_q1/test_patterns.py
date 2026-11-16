@@ -87,8 +87,10 @@ from qat.experimental.dialect.q1 import (
     StopOp,
     WaitImmOp,
 )
+from qat.experimental.dialect.q1.ir.abstract_ops import Q1AsmOperation
 from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp, UpdParamImmOp
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
+from qat.experimental.dialect.q1.ir.schedule import Q1ScheduleVisitor
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     ModuleConfigAttr,
     NcoConfigAttr,
@@ -105,6 +107,7 @@ from qat.experimental.system_data.hardware.qblox.target import (
     Q1AsmSpec,
     Q1SequencerType,
 )
+from qat.experimental.tools.schedule import ScheduleTracker
 
 
 def _target_with_readout_sample_period(sample_period_ns: int):
@@ -239,7 +242,7 @@ def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
 
 
 def test_rewrite_wait_op_lowers_short_wait():
-    """A short wait lowers to a single ``q1.wait`` with the requested duration."""
+    """A short wait lowers to a single ``q1.upd_param`` with the requested duration."""
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(16e3))  # 16 ns in ps
     wait = WaitOp(frame, duration)
@@ -249,8 +252,8 @@ def test_rewrite_wait_op_lowers_short_wait():
 
     body_ops = _sequence_body_ops(module)
     assert not any(isinstance(op, WaitOp) for op in body_ops)
-    wait_ops = [op for op in body_ops if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == [16]
+    latch_ops = [op for op in body_ops if isinstance(op, UpdParamImmOp)]
+    assert [op.duration.data for op in latch_ops] == [16]
 
 
 @pytest.mark.parametrize(
@@ -269,8 +272,8 @@ def test_rewrite_wait_op_preserves_nanosecond_duration(duration_ps, expected_dur
     Q1PulseLegalisationPass().apply(Context(), module)
     PulseToQ1LoweringPass().apply(Context(), module)
 
-    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == [expected_duration_ns]
+    latch_ops = [op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)]
+    assert [op.duration.data for op in latch_ops] == [expected_duration_ns]
 
 
 def test_rewrite_wait_op_leaves_dynamic_duration():
@@ -292,8 +295,8 @@ def test_enclosing_port_ignores_non_sequence_parent():
 
 
 def test_rewrite_wait_op_chains_long_wait():
-    """A wait longer than the maximum immediate lowers to a chain summing to the value."""
-    max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_immediate_ns
+    """A wait longer than the maximum RT duration lowers to a chain summing to the value."""
+    max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_rt_duration_ns
     total_ns = 2 * max_wait_time + 16
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
@@ -303,8 +306,8 @@ def test_rewrite_wait_op_chains_long_wait():
     PulseToQ1LoweringPass().apply(Context(), module)
 
     [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
-    wait_ops = [op for op in seq.body.block.ops if isinstance(op, WaitImmOp)]
-    durations = [op.duration.data for op in wait_ops]
+    latch_ops = [op for op in seq.body.block.ops if isinstance(op, UpdParamImmOp)]
+    durations = [op.duration.data for op in latch_ops]
     assert durations == [max_wait_time, max_wait_time, 16]
     assert sum(durations) == total_ns
 
@@ -317,11 +320,11 @@ def test_rewrite_wait_op_preserves_five_nanoseconds():
 
     PulseToQ1LoweringPass().apply(Context(), module)
 
-    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == [5]
+    latch_ops = [op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)]
+    assert [op.duration.data for op in latch_ops] == [5]
 
 
-def test_rewrite_zero_wait_emits_no_q1_wait():
+def test_rewrite_zero_wait_emits_no_q1_instruction():
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(0))
     wait = WaitOp(frame, duration)
@@ -329,7 +332,7 @@ def test_rewrite_zero_wait_emits_no_q1_wait():
 
     PulseToQ1LoweringPass().apply(Context(), module)
 
-    assert not any(isinstance(op, WaitImmOp) for op in _sequence_body_ops(module))
+    assert not any(isinstance(op, UpdParamImmOp) for op in _sequence_body_ops(module))
 
 
 @pytest.mark.parametrize(
@@ -349,8 +352,8 @@ def test_rewrite_wait_op_splits_full_immediate_range(total_ns, expected):
 
     PulseToQ1LoweringPass().apply(Context(), module)
 
-    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == expected
+    latch_ops = [op for op in _sequence_body_ops(module) if isinstance(op, UpdParamImmOp)]
+    assert [op.duration.data for op in latch_ops] == expected
 
 
 def test_rewrite_wait_op_rejects_fractional_nanoseconds():
@@ -402,9 +405,15 @@ def test_split_wait_duration_redistributes_short_remainder_across_chunks():
     assert split_wait_duration(13, q1asm) == (5, 4, 4)
 
 
-def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
-    """Verify pulse.phase_set is lowered to q1.set_ph + q1.upd_param with PhaseSetOp
-    removed."""
+def test_split_wait_duration_limits_chunks_to_rt_maximum():
+    """Chunks become ``upd_param``, so they follow its limit, not the wait immediate's."""
+    q1asm = Q1AsmSpec(max_rt_duration_ns=6, max_wait_immediate_ns=12)
+
+    assert split_wait_duration(12, q1asm) == (6, 6)
+
+
+def test_rewrite_phase_set_op_lowers_to_set_ph():
+    """Verify pulse.phase_set lowers to q1.set_ph alone, with no upd_param."""
     freq, frame = _frame()
     phase = ConstantOp(PhaseAttr(0.5))
     phase_set = PhaseSetOp(frame, phase)
@@ -415,7 +424,7 @@ def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
     body_ops = _sequence_body_ops(module)
     assert not any(isinstance(op, PhaseSetOp) for op in body_ops)
     assert any(isinstance(op, SetPhImmOp) for op in body_ops)
-    assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
+    assert not any(isinstance(op, UpdParamImmOp) for op in body_ops)
 
 
 def test_rewrite_phase_set_op_converts_radians_to_nco_phase_steps():
@@ -441,9 +450,8 @@ def test_rewrite_phase_set_op_converts_radians_to_nco_phase_steps():
     assert set_ph.imm.data == expected_steps
 
 
-def test_rewrite_phase_shift_op_lowers_to_set_ph_delta_and_upd_param():
-    """Verify pulse.phase_shift is lowered to q1.set_ph_delta + q1.upd_param with
-    PhaseShiftOp removed."""
+def test_rewrite_phase_shift_op_lowers_to_set_ph_delta():
+    """Verify pulse.phase_shift lowers to q1.set_ph_delta alone, with no upd_param."""
     freq, frame = _frame()
     phase = ConstantOp(PhaseAttr(0.25))
     phase_shift = PhaseShiftOp(frame, phase)
@@ -454,7 +462,39 @@ def test_rewrite_phase_shift_op_lowers_to_set_ph_delta_and_upd_param():
     body_ops = _sequence_body_ops(module)
     assert not any(isinstance(op, PhaseShiftOp) for op in body_ops)
     assert any(isinstance(op, SetPhDeltaImmOp) for op in body_ops)
-    assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
+    assert not any(isinstance(op, UpdParamImmOp) for op in body_ops)
+
+
+def test_phase_shift_before_wait_applies_to_following_play():
+    """The wait latches the pending phase shift, so the play after it is shifted."""
+    freq, frame = _frame()
+    phase = ConstantOp(PhaseAttr(0.5))
+    shift = PhaseShiftOp(frame, phase)
+    duration = ConstantOp(TimeAttr(16e3))
+    wait = WaitOp(shift.result, duration)
+    waveform = _sampled_waveform([0.2 + 0.1j] * 8)
+    pulse = PulseOp(wait.result, waveform)
+    module = _sequence_module(freq, frame, phase, shift, duration, wait, waveform, pulse)
+
+    _run_q1_pipeline(module)
+
+    [sequence] = list(module.body.block.ops)
+    tracker = ScheduleTracker()
+    visitor = Q1ScheduleVisitor(
+        tracker,
+        waveforms={
+            entry.index.data: tuple(float(value) for value in entry.data.iter_values())
+            for entry in sequence.waveforms
+        },
+    )
+    for op in sequence.body.block.ops:
+        if isinstance(op, Q1AsmOperation):
+            visitor.visit(op)
+    latch, play = tracker.records
+    assert (latch.label, latch.start, latch.end) == ("upd_param", 0, 16)
+    assert latch.phase == pytest.approx(0.5, abs=1e-6)
+    assert (play.label, play.start) == ("play", 16)
+    assert play.phase == pytest.approx(0.5, abs=1e-6)
 
 
 def test_rewrite_phase_shift_op_converts_radians_to_nco_phase_steps():
@@ -1569,86 +1609,8 @@ class TestSquareWaveformLegalisation:
 
 
 class TestSquareWaveformLowering:
-    @pytest.mark.parametrize("width_ns", [4, 12, 80])
-    def test_lowers_square_pulse_with_exact_plateau_duration(self, width_ns: int):
-        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
-
-        PatternRewriteWalker(
-            RewriteSquareWaveformPulseOp(
-                DEFAULT_QBLOX_TARGET,
-                rewrite_callable=SquareWaveformLowering(),
-            ),
-            apply_recursively=False,
-        ).rewrite_module(module)
-
-        ops = list(sequence.body.block.ops)
-        assert not any(isinstance(op, PulseOp) for op in ops)
-        q1_ops = tuple(
-            op
-            for op in ops
-            if isinstance(op, SetAwgOffsImmImmOp | UpdParamImmOp | WaitImmOp)
-        )
-        assert isinstance(q1_ops[0], SetAwgOffsImmImmOp)
-        assert q1_ops[0].imm1.data == int(0.5 * DEFAULT_QBLOX_TARGET.q1asm.max_offset)
-        assert q1_ops[0].imm2.data == int(0.25 * DEFAULT_QBLOX_TARGET.q1asm.max_offset)
-
-        fall_index = next(
-            index
-            for index, q1_op in enumerate(q1_ops[1:], start=1)
-            if isinstance(q1_op, SetAwgOffsImmImmOp)
-        )
-        plateau_ops = q1_ops[1:fall_index]
-        assert all(isinstance(op, UpdParamImmOp | WaitImmOp) for op in plateau_ops)
-        assert sum(op.duration.data for op in plateau_ops) == width_ns
-
-        assert q1_ops[fall_index].imm1.data == 0
-        assert q1_ops[fall_index].imm2.data == 0
-        assert isinstance(q1_ops[fall_index + 1], UpdParamImmOp)
-        assert (
-            q1_ops[fall_index + 1].duration.data
-            == DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
-        )
-        assert (
-            sum(
-                op.duration.data
-                for op in q1_ops
-                if isinstance(op, UpdParamImmOp | WaitImmOp)
-            )
-            == width_ns + DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
-        )
-        assert not any(isinstance(op, SquareWaveformOp) for op in sequence.body.block.ops)
-
-    def test_splits_long_waits_without_q1_core_clock_alignment(self):
-        width_ns = 65_541
-        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
-
-        PatternRewriteWalker(
-            RewriteSquareWaveformPulseOp(
-                DEFAULT_QBLOX_TARGET,
-                rewrite_callable=SquareWaveformLowering(),
-            ),
-            apply_recursively=False,
-        ).rewrite_module(module)
-
-        durations = [
-            op.duration.data
-            for op in sequence.body.block.ops
-            if isinstance(op, UpdParamImmOp | WaitImmOp)
-        ]
-        assert 65_533 in durations
-        assert 4 in durations
-        assert sum(durations[:-1]) == width_ns
-
-    def test_adjusts_wait_when_final_chunk_would_be_too_short(self):
-        target_data = replace(
-            DEFAULT_QBLOX_TARGET,
-            q1asm=replace(
-                DEFAULT_QBLOX_TARGET.q1asm,
-                max_wait_immediate_ns=12,
-            ),
-        )
-        module, sequence = _square_pulse_module(TimeAttr(17_000))
-
+    @staticmethod
+    def _lower(module: ModuleOp, target_data=DEFAULT_QBLOX_TARGET) -> None:
         PatternRewriteWalker(
             RewriteSquareWaveformPulseOp(
                 target_data,
@@ -1657,12 +1619,60 @@ class TestSquareWaveformLowering:
             apply_recursively=False,
         ).rewrite_module(module)
 
-        wait_durations = [
-            op.duration.data for op in sequence.body.block.ops if isinstance(op, WaitImmOp)
+    @staticmethod
+    def _latch_durations(sequence: SequenceOp) -> list[int]:
+        return [
+            op.duration.data
+            for op in sequence.body.block.ops
+            if isinstance(op, UpdParamImmOp)
         ]
-        assert wait_durations == [9, 4]
 
-    def test_rejects_rising_edge_above_configured_rt_maximum(self):
+    @pytest.mark.parametrize("width_ns", [4, 12, 80])
+    def test_lowers_square_pulse_in_exactly_its_width(self, width_ns: int):
+        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
+
+        self._lower(module)
+
+        ops = list(sequence.body.block.ops)
+        assert not any(isinstance(op, PulseOp | SquareWaveformOp) for op in ops)
+        q1_ops = [
+            op
+            for op in ops
+            if isinstance(op, SetAwgOffsImmImmOp | UpdParamImmOp | WaitImmOp)
+        ]
+        rise, *latches, fall = q1_ops
+        max_offset = DEFAULT_QBLOX_TARGET.q1asm.max_offset
+        assert isinstance(rise, SetAwgOffsImmImmOp)
+        assert (rise.imm1.data, rise.imm2.data) == (
+            int(0.5 * max_offset),
+            int(0.25 * max_offset),
+        )
+        assert all(isinstance(op, UpdParamImmOp) for op in latches)
+        assert sum(op.duration.data for op in latches) == width_ns
+        # The falling edge is left for the next timed instruction to latch.
+        assert isinstance(fall, SetAwgOffsImmImmOp)
+        assert (fall.imm1.data, fall.imm2.data) == (0, 0)
+
+    def test_splits_long_width_into_rt_durations(self):
+        width_ns = 65_541
+        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
+
+        self._lower(module)
+
+        assert self._latch_durations(sequence) == [65_535, 6]
+
+    def test_redistributes_short_final_chunk(self):
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(DEFAULT_QBLOX_TARGET.q1asm, max_rt_duration_ns=12),
+        )
+        module, sequence = _square_pulse_module(TimeAttr(13_000))
+
+        self._lower(module, target_data)
+
+        assert self._latch_durations(sequence) == [9, 4]
+
+    def test_rejects_width_that_cannot_be_split_into_rt_durations(self):
         target_data = replace(
             DEFAULT_QBLOX_TARGET,
             q1asm=replace(
@@ -1673,35 +1683,33 @@ class TestSquareWaveformLowering:
         )
         module, _ = _square_pulse_module(TimeAttr(7_000))
 
+        with pytest.raises(PassFailedException, match="cannot be split"):
+            self._lower(module, target_data)
+
+    def test_rejects_width_below_the_minimum_rt_duration(self):
+        module, _ = _square_pulse_module(TimeAttr(2_000))
+
         with pytest.raises(
-            PassFailedException,
-            match="rising-edge duration 7 ns exceeds the maximum RT duration 6 ns",
+            PassFailedException, match="Q1 duration 2 ns is not representable"
         ):
-            PatternRewriteWalker(
-                RewriteSquareWaveformPulseOp(
-                    target_data,
-                    rewrite_callable=SquareWaveformLowering(),
-                ),
-                apply_recursively=False,
-            ).rewrite_module(module)
+            self._lower(module)
 
     def test_lowering_pass_emits_complete_q1_sequence(self):
         module, sequence = _square_pulse_module(TimeAttr(80_000))
 
         _run_q1_pipeline(module)
 
+        ops = list(sequence.body.block.ops)
         assert not any(
             isinstance(
                 op,
                 PulseOp | StartContinuousWaveformOp | WaitOp | StopContinuousWaveformOp,
             )
-            for op in sequence.body.block.ops
+            for op in ops
         )
-        assert (
-            sum(isinstance(op, SetAwgOffsImmImmOp) for op in sequence.body.block.ops) == 2
-        )
-        assert sum(isinstance(op, UpdParamImmOp) for op in sequence.body.block.ops) == 2
-        assert sum(isinstance(op, WaitImmOp) for op in sequence.body.block.ops) == 1
+        assert sum(isinstance(op, SetAwgOffsImmImmOp) for op in ops) == 2
+        assert self._latch_durations(sequence) == [80]
+        assert not any(isinstance(op, WaitImmOp) for op in ops)
 
     def test_rejects_width_that_is_not_a_whole_number_of_nanoseconds(self):
         module, _ = _square_pulse_module(TimeAttr(80_500))

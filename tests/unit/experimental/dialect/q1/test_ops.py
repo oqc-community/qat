@@ -25,6 +25,7 @@ from xdsl.traits import Commutative, IsTerminator, Pure
 from xdsl.utils.exceptions import VerifyException
 from xdsl.utils.test_value import create_ssa_value
 
+import qat.experimental.dialect.q1.ir.ops as q1_ops
 from qat.experimental.dialect.q1 import (
     AcquireImmImmImmOp,
     AcquireImmRsImmOp,
@@ -179,7 +180,15 @@ from qat.experimental.dialect.q1 import (
     XorRsImmRdOp,
     XorRsRsRdOp,
 )
-from qat.experimental.dialect.q1.ir.abstract_ops import JumpImmOperation, LoopImmOperation
+from qat.experimental.dialect.q1.ir.abstract_ops import (
+    JumpImmOperation,
+    LoopImmOperation,
+    Q1AsmOperation,
+)
+from qat.experimental.dialect.q1.ir.traits import (
+    LatchesParametersTrait,
+    UpdatesParameterTrait,
+)
 
 COMMENT_INPUTS = ["test-comment", StringAttr("test-comment")]
 
@@ -231,7 +240,13 @@ def _valid_imm(imm_type: type[Q1Imm], value: int) -> Q1Imm:
 
 
 def _assert_traits(op: Any, expected_traits: tuple) -> None:
-    assert len(expected_traits) == len(op.traits.traits)
+    """Check the format traits; ``test_latch_traits`` covers the latch traits."""
+    traits = [
+        trait
+        for trait in op.traits.traits
+        if not isinstance(trait, LatchesParametersTrait | UpdatesParameterTrait)
+    ]
+    assert len(expected_traits) == len(traits)
     for trait in expected_traits:
         assert op.has_trait(trait)
 
@@ -1200,3 +1215,51 @@ class TestIRsRdRdFormat:
         (imm,) = _imm(op_type, 7)
         op = op_type(imm, rs, rd1=Registers.R3, rd2=Registers.R4)
         _assert_aliases(op, aliases)
+
+
+_LATCHING_OPS = (
+    UpdParamImmOp,
+    PlayImmImmImmOp,
+    PlayRsRsImmOp,
+    AcquireImmImmImmOp,
+    AcquireImmRsImmOp,
+    AcquireTtlImmImmImmImmOp,
+    AcquireTtlImmRsImmImmOp,
+    AcquireWeightedImmImmImmImmImmOp,
+    AcquireWeightedImmRsRsRsImmOp,
+)
+_PARAMETER_OPS = (
+    SetFreqImmOp,
+    SetFreqRsOp,
+    SetPhImmOp,
+    SetPhRsOp,
+    SetPhDeltaImmOp,
+    SetPhDeltaRsOp,
+    ResetPhOp,
+    SetAwgGainImmImmOp,
+    SetAwgGainRsRsOp,
+    SetAwgOffsImmImmOp,
+    SetAwgOffsRsRsOp,
+    SetMrkImmOp,
+    SetMrkRsOp,
+)
+
+
+@pytest.mark.parametrize(
+    "op_type",
+    [
+        op_type
+        for op_type in vars(q1_ops).values()
+        if isinstance(op_type, type)
+        and issubclass(op_type, Q1AsmOperation)
+        and op_type.__module__ == q1_ops.__name__
+    ],
+    ids=lambda op_type: op_type.__name__,
+)
+def test_latch_traits(op_type) -> None:
+    """Only timed instructions that apply pending parameters latch; only parameter
+    instructions wait for a latch."""
+    definition = op_type.get_irdl_definition()
+    traits = {type(trait) for trait in definition.traits.traits}
+    assert (LatchesParametersTrait in traits) == (op_type in _LATCHING_OPS)
+    assert (UpdatesParameterTrait in traits) == (op_type in _PARAMETER_OPS)

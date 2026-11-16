@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Pass and pipeline definitions for the Pulse-to-Q1 conversion."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from math import isfinite
 
@@ -10,7 +11,7 @@ from xdsl.context import Context
 from xdsl.dialects.arith import AddiOp, ConstantOp as ArithConstantOp, MuliOp
 from xdsl.dialects.builtin import IndexType, IntAttr, ModuleOp
 from xdsl.dialects.scf import ForOp
-from xdsl.ir import SSAValue
+from xdsl.ir import Operation, SSAValue
 from xdsl.irdl import IRDLOperation
 from xdsl.passes import ModulePass, PassPipeline
 from xdsl.pattern_rewriter import GreedyRewritePatternApplier, PatternRewriteWalker
@@ -51,6 +52,16 @@ from qat.experimental.dialect.pulse.utils import (
     extract_frequency_hz,
     extract_phase_radians,
     extract_time_ps,
+)
+from qat.experimental.dialect.q1 import (
+    DurationImm,
+    UpdParamImmOp,
+    WaitSyncImmOp,
+    WaitSyncRsOp,
+)
+from qat.experimental.dialect.q1.ir.traits import (
+    LatchesParametersTrait,
+    UpdatesParameterTrait,
 )
 from qat.experimental.dialect.q1.transforms.reg_alloc import (
     LinearScanRegisterAllocationPass,
@@ -495,6 +506,92 @@ class PulseToQ1LoweringPass(OrderedPass, ModulePass):
         ).rewrite_module(op)
 
 
+def _pending_update_state(ops: Iterable[Operation]) -> bool | None:
+    """Return whether a parameter update is still pending after ``ops`` run in order.
+
+    :param ops: Operations in program order, including any nested regions.
+    :returns: ``True`` if an update is pending, ``False`` if a latching instruction follows
+        the last update, or ``None`` if the operations neither update nor latch.
+
+    An operation with several regions is judged by its first region that updates or latches.
+    Q1 has no branching operation, so this does not yet matter.
+    """
+    for op in reversed(list(ops)):
+        if op.has_trait(UpdatesParameterTrait):
+            return True
+        if op.has_trait(LatchesParametersTrait):
+            return False
+        for region in op.regions:
+            for nested in region.blocks:
+                if (state := _pending_update_state(nested.ops)) is not None:
+                    return state
+    return None
+
+
+def _is_wait_sync(op: Operation | None) -> bool:
+    """Return whether ``op`` is a ``wait_sync`` with an immediate or register duration."""
+    return isinstance(op, WaitSyncImmOp | WaitSyncRsOp)
+
+
+def _is_shot_loop(op: Operation) -> bool:
+    """Return whether ``op`` is a loop whose iterations start at a ``wait_sync``."""
+    return isinstance(op, ForOp) and _is_wait_sync(op.body.block.first_op)
+
+
+@dataclass(frozen=True)
+class LatchPendingParametersPass(OrderedPass, ModulePass):
+    """Latch pending parameter updates before each ``wait_sync`` and before ``stop``.
+
+    The lowering leaves instructions such as ``set_ph_delta`` and ``set_awg_offs`` for the
+    next timed instruction to latch. Before a ``wait_sync`` or ``stop`` that instruction
+    comes too late or not at all: a square pulse's falling edge would stay high through the
+    synchronisation wait, and a final phase update would land with the next shot's
+    ``reset_ph``. This pass adds ``upd_param`` in front of them.
+
+    It does not shift any operation within a shot: the added time comes only at the end of
+    a shot or sequence, just before ``wait_sync`` or ``stop``, and ``wait_sync`` realigns
+    the channels.
+
+    Updates pending at the end of other loop bodies are left alone: the first timed
+    instruction of the next iteration, or after the loop, latches them at the right time.
+    """
+
+    name = "latch-pending-parameters"
+    target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({PulseToQ1LoweringPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerScfToQ1ScfPass})
+
+    def apply(self, ctx: Context, op: ModuleOp) -> None:
+        # TODO(COMPILER-1809): Replace this per-lowering latching rule with the decided
+        # parameter-latching model.
+        duration = DurationImm(self.target_data.q1asm.min_rt_duration_ns)
+        for sequence in (nested for nested in op.walk() if isinstance(nested, SequenceOp)):
+            blocks = [
+                block
+                for nested in sequence.walk()
+                for region in nested.regions
+                for block in region.blocks
+            ]
+            # Innermost blocks first, so an outer block sees a latch added inside a loop.
+            for block in reversed(blocks):
+                barriers = [
+                    nested
+                    for nested in block.ops
+                    if _is_wait_sync(nested) or _is_shot_loop(nested)
+                ]
+                parent = block.parent_op()
+                if parent is sequence or (parent is not None and _is_shot_loop(parent)):
+                    barriers.append(block.last_op)
+                for barrier in barriers:
+                    ops = list(block.ops)
+                    if _pending_update_state(ops[: ops.index(barrier)]):
+                        block.insert_op_before(UpdParamImmOp(duration), barrier)
+
+
 @dataclass(frozen=True)
 class BoundDeadFrameEliminationPass(OrderedPass, ModulePass):
     """Erase frame metadata after binding and lowering have consumed it.
@@ -560,6 +657,7 @@ def create_qblox_configured_q1_pipeline(
             Q1PreAcquireTransformationPass(),
             Q1PulseLegalisationPass(target_data=target_data),
             PulseToQ1LoweringPass(target_data=target_data),
+            LatchPendingParametersPass(target_data=target_data),
             BoundDeadFrameEliminationPass(),
             DeadCodeElimination(),
             LowerScfToQ1ScfPass(),

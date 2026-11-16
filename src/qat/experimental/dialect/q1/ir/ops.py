@@ -77,6 +77,10 @@ from qat.experimental.dialect.q1.ir.imm_desc import (
     WaitDurationImm,
 )
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
+from qat.experimental.dialect.q1.ir.traits import (
+    LatchesParametersTrait,
+    UpdatesParameterTrait,
+)
 
 # region Core Instructions
 
@@ -2223,7 +2227,7 @@ class SetMrkImmOp(ImmOperation[UI4Imm]):
 
     name = "q1.i.set_mrk"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def mrk(self):
@@ -2238,7 +2242,7 @@ class SetMrkRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.set_mrk"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def mrk(self):
@@ -2253,7 +2257,7 @@ class SetFreqImmOp(ImmOperation[SI32Imm]):
 
     name = "q1.i.set_freq"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_freq(self):
@@ -2268,7 +2272,7 @@ class SetFreqRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.set_freq"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_freq(self):
@@ -2283,7 +2287,7 @@ class ResetPhOp(NullaryOperation):
 
     name = "q1..reset_ph"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
 
 @irdl_op_definition
@@ -2292,7 +2296,7 @@ class SetPhImmOp(ImmOperation[NcoPhaseImm]):
 
     name = "q1.i.set_ph"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_po(self):
@@ -2307,7 +2311,7 @@ class SetPhRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.set_ph"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_po(self):
@@ -2322,7 +2326,7 @@ class SetPhDeltaImmOp(ImmOperation[NcoPhaseImm]):
 
     name = "q1.i.set_ph_delta"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_delta_po(self):
@@ -2337,7 +2341,7 @@ class SetPhDeltaRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.set_ph_delta"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def nco_delta_po(self):
@@ -2352,7 +2356,7 @@ class SetAwgGainImmImmOp(ImmImmOperation[SI16Imm, SI16Imm]):
 
     name = "q1.ii.set_awg_gain"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def gain0(self):
@@ -2373,7 +2377,7 @@ class SetAwgGainRsRsOp(RsRsOperation[IntRegisterType]):
 
     name = "q1.rr.set_awg_gain"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def gain0(self):
@@ -2394,7 +2398,7 @@ class SetAwgOffsImmImmOp(ImmImmOperation[SI16Imm, SI16Imm]):
 
     name = "q1.ii.set_awg_offs"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def offs0(self):
@@ -2415,7 +2419,7 @@ class SetAwgOffsRsRsOp(RsRsOperation[IntRegisterType]):
 
     name = "q1.rr.set_awg_offs"
 
-    traits = traits_def()
+    traits = traits_def(UpdatesParameterTrait())
 
     @property
     def offs0(self):
@@ -3091,7 +3095,7 @@ class UpdParamImmOp(ImmOperation[DurationImm]):
 
     name = "q1.i.upd_param"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def duration(self):
@@ -3110,7 +3114,7 @@ class PlayImmImmImmOp(ImmImmImmOperation[UI10Imm, UI10Imm, DurationImm]):
 
     name = "q1.iii.play"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def wave0(self):
@@ -3141,7 +3145,7 @@ class PlayRsRsImmOp(RsRsImmOperation[IntRegisterType, DurationImm]):
 
     name = "q1.rri.play"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def wave0(self):
@@ -3177,7 +3181,7 @@ class AcquireImmImmImmOp(ImmImmImmOperation[UI5Imm, UI24Imm, DurationImm]):
 
     name = "q1.iii.acquire"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):
@@ -3211,7 +3215,7 @@ class AcquireImmRsImmOp(ImmRsImmOperation[IntRegisterType, UI5Imm, DurationImm])
 
     name = "q1.iri.acquire"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):
@@ -3247,7 +3251,7 @@ class AcquireWeightedImmImmImmImmImmOp(
 
     name = "q1.iiiii.acquire_weighted"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):
@@ -3293,7 +3297,7 @@ class AcquireWeightedImmRsRsRsImmOp(
 
     name = "q1.irrri.acquire_weighted"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):
@@ -3340,7 +3344,7 @@ class AcquireTtlImmImmImmImmOp(
 
     name = "q1.iiii.acquire_ttl"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):
@@ -3381,7 +3385,7 @@ class AcquireTtlImmRsImmImmOp(
 
     name = "q1.irii.acquire_ttl"
 
-    traits = traits_def()
+    traits = traits_def(LatchesParametersTrait())
 
     @property
     def acq_idx(self):

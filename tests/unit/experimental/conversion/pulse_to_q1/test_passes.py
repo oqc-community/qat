@@ -30,6 +30,7 @@ from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
 )
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
+    LatchPendingParametersPass,
     PulseToQ1LoweringPass,
     Q1PreAcquireTransformationPass,
     Q1PulseLegalisationPass,
@@ -68,8 +69,17 @@ from qat.experimental.dialect.q1 import (
     DurationImm,
     IntRegisterType,
     MoveImmRdOp,
+    NcoPhaseImm,
+    NopOp,
+    SetAwgOffsImmImmOp,
+    SetPhDeltaImmOp,
+    SI16Imm,
     StopOp,
+    SU32Imm,
     UI5Imm,
+    UpdParamImmOp,
+    WaitSyncImmOp,
+    WaitSyncRsOp,
 )
 from qat.experimental.dialect.q1_sequence import ModuleConfigAttr, SequenceOp
 from qat.experimental.system_data.canonical.schema import (
@@ -241,6 +251,7 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
         "acquire-pre-q1-transformation",
         "q1-pulse-legalisation",
         "pulse-to-q1-lowering",
+        "latch-pending-parameters",
         "bound-dead-frame-elimination",
         "dce",
         "lower-scf-to-q1-scf",
@@ -263,9 +274,12 @@ def test_configured_q1_pipeline_threads_the_supplied_target_through_its_passes()
     threaded = [
         pass_
         for pass_ in pipeline.passes
-        if isinstance(pass_, QbloxHardwareBindingPass | Q1PulseLegalisationPass)
+        if isinstance(
+            pass_,
+            QbloxHardwareBindingPass | Q1PulseLegalisationPass | LatchPendingParametersPass,
+        )
     ]
-    assert len(threaded) == 2
+    assert len(threaded) == 3
     assert all(pass_.target_data is target_data for pass_ in threaded)
 
 
@@ -899,6 +913,146 @@ def test_bound_dead_frame_elimination_preserves_sequence_allocation():
     DeadCodeElimination().apply(Context(), module)
 
     assert not any(isinstance(op, ConstantOp) for op in sequence.walk())
+
+
+def _upd_param(duration: int) -> UpdParamImmOp:
+    return UpdParamImmOp(DurationImm(duration))
+
+
+def _wait_sync() -> WaitSyncImmOp:
+    return WaitSyncImmOp(DurationImm(4))
+
+
+def _offset(value: int = 100) -> SetAwgOffsImmImmOp:
+    return SetAwgOffsImmImmOp(SI16Imm(value), SI16Imm(0))
+
+
+def _phase_shift() -> SetPhDeltaImmOp:
+    return SetPhDeltaImmOp(NcoPhaseImm(1000))
+
+
+class TestLatchPendingParametersPass:
+    @staticmethod
+    def _loop(*body_ops) -> list:
+        bounds = [ArithConstantOp.from_int_and_width(v, IndexType()) for v in (0, 2, 1)]
+        body = Block([*body_ops, scf.YieldOp()], arg_types=[IndexType()])
+        return [*bounds, scf.ForOp(*bounds, [], body)]
+
+    @staticmethod
+    def _shot_loop(*body_ops) -> list:
+        return TestLatchPendingParametersPass._loop(_wait_sync(), *body_ops)
+
+    @staticmethod
+    def _names(block: Block) -> list[str]:
+        return [op.name.rsplit(".", 1)[-1] for op in block.ops]
+
+    @staticmethod
+    def _loop_body(sequence: SequenceOp) -> Block:
+        return next(op for op in sequence.walk() if isinstance(op, scf.ForOp)).body.block
+
+    def _run(self, *ops) -> SequenceOp:
+        sequence = SequenceOp("q0_drive", [*ops, StopOp()])
+        LatchPendingParametersPass().apply(Context(), ModuleOp([sequence]))
+        return sequence
+
+    @pytest.mark.parametrize("update", [_offset, _phase_shift], ids=["offset", "phase"])
+    def test_latches_update_pending_at_sequence_end(self, update):
+        sequence = self._run(_upd_param(8), update())
+
+        assert self._names(sequence.body.block)[-2:] == ["upd_param", "stop"]
+        assert sequence.body.block.last_op.prev_op.duration.data == (
+            DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
+        )
+
+    @pytest.mark.parametrize(
+        "names",
+        [
+            pytest.param([], id="no-updates"),
+            pytest.param(["upd_param"], id="latch-only"),
+            pytest.param(["set_awg_offs", "upd_param"], id="update-already-latched"),
+        ],
+    )
+    def test_leaves_sequence_without_pending_update_unchanged(self, names):
+        builders = {"set_awg_offs": _offset, "upd_param": lambda: _upd_param(8)}
+
+        sequence = self._run(*(builders[name]() for name in names))
+
+        assert self._names(sequence.body.block) == [*names, "stop"]
+
+    @pytest.mark.parametrize("update", [_offset, _phase_shift], ids=["offset", "phase"])
+    def test_latches_update_pending_at_end_of_shot(self, update):
+        sequence = self._run(*self._shot_loop(_upd_param(8), update()))
+
+        assert self._names(self._loop_body(sequence))[-2:] == ["upd_param", "yield"]
+        # The shot body's latch covers the sequence end too.
+        assert self._names(sequence.body.block)[-2:] == ["for", "stop"]
+
+    def test_latches_update_pending_before_shot_loop(self):
+        sequence = self._run(_offset(), _upd_param(8), _offset(0), *self._shot_loop())
+
+        names = self._names(sequence.body.block)
+        assert names[names.index("for") - 1] == "upd_param"
+
+    def test_latches_update_pending_before_wait_sync(self):
+        sequence = self._run(_phase_shift(), _wait_sync())
+
+        assert self._names(sequence.body.block) == [
+            "set_ph_delta",
+            "upd_param",
+            "wait_sync",
+            "stop",
+        ]
+
+    def test_latches_update_pending_before_register_wait_sync(self):
+        duration = MoveImmRdOp(SU32Imm(8), IntRegisterType.unallocated())
+
+        sequence = self._run(_offset(0), duration, WaitSyncRsOp(duration.rd))
+
+        assert self._names(sequence.body.block) == [
+            "set_awg_offs",
+            "move",
+            "upd_param",
+            "wait_sync",
+            "stop",
+        ]
+
+    def test_latches_update_pending_before_register_wait_sync_shot_loop(self):
+        duration = MoveImmRdOp(SU32Imm(8), IntRegisterType.unallocated())
+
+        sequence = self._run(
+            duration, _offset(0), *self._loop(WaitSyncRsOp(duration.rd), _upd_param(8))
+        )
+
+        names = self._names(sequence.body.block)
+        assert names[names.index("for") - 1] == "upd_param"
+
+    def test_leaves_other_loop_bodies_for_the_next_timed_instruction(self):
+        sequence = self._run(*self._loop(_upd_param(8), _phase_shift()), _upd_param(4))
+
+        assert self._names(self._loop_body(sequence))[-2:] == ["set_ph_delta", "yield"]
+        assert self._names(sequence.body.block)[-3:] == ["for", "upd_param", "stop"]
+
+    def test_latches_update_left_pending_by_a_final_loop(self):
+        sequence = self._run(*self._loop(_upd_param(8), _offset(0)))
+
+        assert self._names(self._loop_body(sequence))[-2:] == ["set_awg_offs", "yield"]
+        assert self._names(sequence.body.block)[-3:] == ["for", "upd_param", "stop"]
+
+    def test_latches_once_before_stop_after_a_loop_ending_in_an_update(self):
+        sequence = self._run(*self._loop(_upd_param(8), _phase_shift()))
+
+        assert self._names(self._loop_body(sequence)) == [
+            "upd_param",
+            "set_ph_delta",
+            "yield",
+        ]
+        assert self._names(sequence.body.block)[-3:] == ["for", "upd_param", "stop"]
+        assert self._names(sequence.body.block).count("upd_param") == 1
+
+    def test_looks_past_a_loop_that_neither_updates_nor_latches(self):
+        sequence = self._run(_offset(), *self._loop(NopOp()))
+
+        assert self._names(sequence.body.block)[-3:] == ["for", "upd_param", "stop"]
 
 
 class TestPulseToQ1AcquireLowering:

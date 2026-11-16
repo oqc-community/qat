@@ -20,8 +20,6 @@ from qat.experimental.dialect.q1 import (
     SetAwgOffsImmImmOp,
     SI16Imm,
     UpdParamImmOp,
-    WaitDurationImm,
-    WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 from qat.experimental.system_data.hardware.qblox.target import (
@@ -31,26 +29,27 @@ from qat.experimental.system_data.hardware.qblox.target import (
 
 
 def split_wait_duration(duration_ns: int, q1asm: Q1AsmSpec) -> tuple[int, ...]:
-    """Split a pulse-level wait into exactly representable normal Q1 waits.
+    """Split a pulse-level wait into exactly representable Q1 RT durations.
 
-    The special ``wait 0`` encoding is never emitted here. A final remainder below the
-    minimum non-zero RT duration is made up by shortening the preceding chunks.
+    Each chunk lies in ``[min_rt_duration_ns, max_rt_duration_ns]``, so it fits an
+    ``upd_param`` or a non-zero ``wait``. A final remainder below the minimum is made up by
+    shortening the preceding chunks.
 
     :param duration_ns: Total pulse-level wait duration in nanoseconds.
     :param q1asm: Q1 instruction timing limits.
-    :returns: Wait-immediate durations whose exact sum is ``duration_ns``.
-    :raises PassFailedException: If the duration cannot be represented using normal waits.
+    :returns: Chunk durations whose exact sum is ``duration_ns``.
+    :raises PassFailedException: If the duration cannot be represented using RT durations.
     """
 
     if duration_ns == 0:
         return ()
 
     minimum = q1asm.min_rt_duration_ns
-    maximum = q1asm.max_wait_immediate_ns
+    maximum = q1asm.max_rt_duration_ns
     resolution = q1asm.rt_duration_resolution_ns
     if duration_ns < minimum or duration_ns % resolution:
         raise PassFailedException(
-            f"Q1 wait duration {duration_ns} ns is not representable by normal waits "
+            f"Q1 duration {duration_ns} ns is not representable by RT durations "
             f"with minimum {minimum} ns and resolution {resolution} ns."
         )
 
@@ -71,11 +70,33 @@ def split_wait_duration(duration_ns: int, q1asm: Q1AsmSpec) -> tuple[int, ...]:
             break
     if deficit:
         raise PassFailedException(
-            f"Q1 wait duration {duration_ns} ns cannot be split into waits in "
+            f"Q1 duration {duration_ns} ns cannot be split into RT durations in "
             f"[{minimum}, {maximum}] ns at {resolution} ns resolution."
         )
     chunks.append(minimum)
     return tuple(chunks)
+
+
+def lower_wait_duration(
+    duration_ns: int, q1asm: Q1AsmSpec, debug_info: DebugInfoAttr | None = None
+) -> list[UpdParamImmOp]:
+    """Lower a pulse-level wait to ``upd_param`` instructions.
+
+    ``upd_param`` waits like ``wait`` but also applies pending parameter changes, such as a
+    phase update or AWG offset, at the start of the wait. That is the time the Pulse
+    schedule gives them.
+
+    :param duration_ns: Total wait duration in nanoseconds.
+    :param q1asm: Q1 instruction timing limits.
+    :param debug_info: Optional source information copied to emitted instructions.
+    :returns: ``upd_param`` instructions whose durations sum to ``duration_ns``.
+    :raises PassFailedException: If the duration cannot be represented using RT durations.
+    """
+
+    return [
+        UpdParamImmOp(DurationImm(duration)).with_debug_info(debug_info)
+        for duration in split_wait_duration(duration_ns, q1asm)
+    ]
 
 
 def _square_waveform(op: PulseOp) -> SquareWaveformOp:
@@ -126,8 +147,11 @@ class SquareWaveformLegalisation:
 class SquareWaveformLowering:
     """Lower a canonical square pulse to latched Q1 AWG offsets.
 
-    The non-zero offset remains live for exactly the Pulse waveform width. Latching the
-    falling edge then advances the Q1 timeline by one minimum RT duration.
+    The rising edge is latched by ``upd_param`` instructions that last exactly the Pulse
+    waveform width. The falling edge, a zero ``set_awg_offs``, is left pending for the next
+    timed instruction, so the pulse takes no extra time on Q1.
+    :class:`~qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass`
+    latches it where nothing else would before a ``wait_sync`` or ``stop``.
     """
 
     def __call__(
@@ -160,34 +184,18 @@ class SquareWaveformLowering:
         amplitude_value = cast(AmplitudeAttr, amplitude.value)
 
         width_ns = width.value.literal_value // 1000
-        minimum_duration = target_data.q1asm.min_rt_duration_ns
-        rise_duration = width_ns if width_ns < 2 * minimum_duration else minimum_duration
-        remaining_duration = width_ns - rise_duration
-        if rise_duration > target_data.q1asm.max_rt_duration_ns:
-            raise PassFailedException(
-                f"Square waveform rising-edge duration {rise_duration} ns exceeds the "
-                f"maximum RT duration {target_data.q1asm.max_rt_duration_ns} ns."
-            )
-
         value = amplitude_value.literal_value
         max_offset = target_data.q1asm.max_offset
+        # TODO(COMPILER-1809): Replace this per-lowering latching rule with the decided
+        # parameter-latching model.
         q1_ops: list[Operation] = [
             SetAwgOffsImmImmOp(
                 SI16Imm(int(value.real * max_offset)),
                 SI16Imm(int(value.imag * max_offset)),
             ).with_debug_info(debug_info),
-            UpdParamImmOp(DurationImm(rise_duration)).with_debug_info(debug_info),
+            *lower_wait_duration(width_ns, target_data.q1asm, debug_info),
+            SetAwgOffsImmImmOp(SI16Imm(0), SI16Imm(0)).with_debug_info(debug_info),
         ]
-        for wait_duration in split_wait_duration(remaining_duration, target_data.q1asm):
-            q1_ops.append(
-                WaitImmOp(WaitDurationImm(wait_duration)).with_debug_info(debug_info)
-            )
-        q1_ops.extend(
-            [
-                SetAwgOffsImmImmOp(SI16Imm(0), SI16Imm(0)).with_debug_info(debug_info),
-                UpdParamImmOp(DurationImm(minimum_duration)).with_debug_info(debug_info),
-            ]
-        )
         rewriter.replace_op(pulse_op, q1_ops, new_results=[pulse_op.frame])
         if not waveform.result.uses:
             rewriter.erase_op(waveform)

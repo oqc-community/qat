@@ -8,6 +8,12 @@
 ``PhaseLowering`` consumes canonical constants and converts radians to degrees,
 then to NCO phase steps.
 
+Q1 parameter instructions (``set_ph``, ``set_ph_delta``, ``set_freq`` and
+``set_awg_offs``) take no time and do not latch themselves: the next ``upd_param``,
+``play`` or ``acquire`` applies them. Lowerings therefore emit parameter instructions
+without an ``upd_param``, and every Pulse wait lowers to ``upd_param`` so pending changes
+apply at their Pulse time. A lowering that adds ``set_freq`` must follow the same rule.
+
 Dynamic phase operands are unsupported: Q1 phase instructions only accept an
 immediate operand, so there is no numeric radians-to-steps runtime conversion for
 a dynamic value. ``Q1PulseValidationPass`` rejects a dynamic ``pulse.phase_set`` or
@@ -27,13 +33,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseShiftOp,
 )
 from qat.experimental.dialect.pulse.utils import extract_phase_radians
-from qat.experimental.dialect.q1 import (
-    DurationImm,
-    NcoPhaseImm,
-    SetPhDeltaImmOp,
-    SetPhImmOp,
-    UpdParamImmOp,
-)
+from qat.experimental.dialect.q1 import NcoPhaseImm, SetPhDeltaImmOp, SetPhImmOp
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
 from qat.experimental.system_data.hardware.qblox.target import (
@@ -76,6 +76,10 @@ class PhaseLowering:
 
     Conversion from radians is lossy. Values are quantised into sequencer NCO phase-step
     space prior to emission.
+
+    The emitted ``set_ph`` or ``set_ph_delta`` is not followed by ``upd_param``: the next
+    timed instruction latches it, so the phase update takes no time, as in the Pulse
+    schedule.
     """
 
     def __call__(
@@ -113,16 +117,17 @@ class PhaseLowering:
         phase_deg = rad2deg(legalised_radians)
         steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_degree))
         steps %= sequencer_data.nco_phase_steps
-        primary = (
+        phase_op = (
             SetPhImmOp(NcoPhaseImm(steps))
             if isinstance(op, PhaseSetOp)
             else SetPhDeltaImmOp(NcoPhaseImm(steps))
         ).with_debug_info(debug_info)
-        rewriter.replace_op(
-            op,
-            [
-                primary,
-                UpdParamImmOp(DurationImm(target_data.q1asm.min_rt_duration_ns)),
-            ],
-            (op.frame,),
-        )
+        # TODO(COMPILER-1809): Replace this per-lowering latching rule with the decided
+        # parameter-latching model.
+        # TODO(COMPILER-1810): Two phase updates pending at once may overwrite or add on
+        # hardware. FoldContiguousPhases merges consecutive phase ops on a frame before
+        # lowering, so this lowering does not emit two in a row within a block. It does
+        # not merge across control flow: a loop body that ends with a phase update, then
+        # starts the next iteration with one, leaves two pending. Shot loops are safe,
+        # because LatchPendingParametersPass latches before each wait_sync.
+        rewriter.replace_op(op, phase_op, (op.frame,))

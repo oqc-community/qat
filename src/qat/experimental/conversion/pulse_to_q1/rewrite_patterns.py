@@ -33,7 +33,7 @@ from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.waveform import (
     SquareWaveformLegalisation,
     SquareWaveformLowering,
-    split_wait_duration,
+    lower_wait_duration,
 )
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
@@ -60,8 +60,6 @@ from qat.experimental.dialect.q1 import (
     SetAwgOffsImmImmOp,
     SI16Imm,
     UI10Imm,
-    WaitDurationImm,
-    WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
 from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, SU32Imm, UI5Imm
@@ -212,16 +210,19 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetDescription) -> Q1Seq
 
 
 class RewriteWaitOp(RewritePattern):
-    """Lower ``pulse.wait`` to one or more ``q1.wait`` instructions.
+    """Lower ``pulse.wait`` to one or more ``q1.upd_param`` instructions.
+
+    Q1 parameter instructions such as ``set_ph_delta`` and ``set_awg_offs`` do not latch
+    themselves. Lowering a wait to ``upd_param`` rather than ``wait`` applies any pending
+    change at the start of the wait, which is when the Pulse schedule applies it.
 
     The requested duration must be an exact integer number of nanoseconds. Durations that
-    exceed the maximum wait immediate are split into normal non-zero waits whose exact sum
-    is preserved. A Pulse-level zero wait is removed rather than lowered to the special
-    Q1 ``wait 0`` instruction.
+    exceed the maximum RT duration are split into chunks whose exact sum is preserved. A
+    Pulse-level zero wait is removed.
     The frame carried by ``pulse.wait`` is forwarded to downstream operations.
 
     Register-driven durations that do not fold to a compile-time constant are left
-    untouched. Those are handled elsewhere and are out of scope for this lowering.
+    untouched. ``Q1PulseValidationPass`` rejects them before lowering.
     """
 
     def __init__(self, target_data: QbloxTargetDescription) -> None:
@@ -242,11 +243,11 @@ class RewriteWaitOp(RewritePattern):
 
         # Note: this has no breakpoint to turn unrolling into
         # hardware-based loops for now.
-        debug_info = _make_debug_info(op)
-        wait_ops: list[Operation] = [
-            WaitImmOp(WaitDurationImm(duration)).with_debug_info(debug_info)
-            for duration in split_wait_duration(total_ns, self.target_data.q1asm)
-        ]
+        # TODO(COMPILER-1809): Replace this per-lowering latching rule with the decided
+        # parameter-latching model.
+        wait_ops = lower_wait_duration(
+            total_ns, self.target_data.q1asm, _make_debug_info(op)
+        )
 
         rewriter.replace_matched_op(wait_ops, new_results=[op.frame])
 
@@ -427,7 +428,8 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
 
     A continuous waveform is emitted on Q1 hardware by latching a constant AWG
     offset on both output paths. This pattern replaces the pulse op with a
-    ``SetAwgOffsImmImmOp`` carrying the I and Q offsets scaled to the DAC range.
+    ``SetAwgOffsImmImmOp`` carrying the I and Q offsets scaled to the DAC range. The next
+    timed instruction latches the offset.
     """
 
     def __init__(self, target_data: QbloxTargetDescription) -> None:
@@ -472,7 +474,8 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
     """Lowers a ``pulse.stop_continuous_waveform`` op to a Q1 AWG offset reset.
 
     Stopping a continuous waveform corresponds to clearing the latched AWG offset
-    on both output paths, emitted as a ``SetAwgOffsImmImmOp`` with zero offsets.
+    on both output paths, emitted as a ``SetAwgOffsImmImmOp`` with zero offsets. The next
+    timed instruction latches it.
     """
 
     def __init__(self, target_data: QbloxTargetDescription) -> None:

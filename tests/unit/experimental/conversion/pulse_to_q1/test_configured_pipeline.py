@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
+from collections import defaultdict
 from dataclasses import replace
 
 import pytest
@@ -42,6 +43,8 @@ from qat.experimental.dialect.pulse.ir import (
     CreateFrameOp,
     FrequencyAttr,
     IntegrateOp,
+    PhaseAttr,
+    PhaseShiftOp,
     PulseOp,
     SquareWaveformOp,
     StartContinuousWaveformOp,
@@ -50,24 +53,30 @@ from qat.experimental.dialect.pulse.ir import (
     TimeAttr,
     WaitOp,
 )
+from qat.experimental.dialect.pulse.ir.schedule import build_pulse_schedule
+from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager
 from qat.experimental.dialect.q1 import (
     AcquireImmImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
     DurationImm,
     IntRegisterType,
+    LabelOp,
+    LoopRdImmOp,
     MoveImmRdOp,
     PlayImmImmImmOp,
     Q1RegisterType,
     Registers,
+    SetAwgOffsImmImmOp,
     StopOp,
     SU32Imm,
     UI5Imm,
     UI6Imm,
     UI10Imm,
     UI24Imm,
-    WaitImmOp,
+    UpdParamImmOp,
 )
 from qat.experimental.dialect.q1.ir.abstract_ops import Q1AsmOperation
+from qat.experimental.dialect.q1.ir.schedule import build_q1_schedule
 from qat.experimental.dialect.q1_cf import JmpBranchOp
 from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf import YieldOp as Q1ScfYieldOp
@@ -91,6 +100,7 @@ from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind, SignalPath
 from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
+from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
     canonical_data,
@@ -265,12 +275,63 @@ def test_pipeline_preserves_timing_instruction_through_control_flow_lowering():
     _configured_pipeline(_canonical_data()).apply(Context(), module)
 
     sequence = _assert_emission_ready(module)
-    waits = [
-        operation
+    timing = [
+        operation.duration.data if isinstance(operation, UpdParamImmOp) else "offset"
         for operation in sequence.body.block.ops
-        if isinstance(operation, WaitImmOp)
+        if isinstance(operation, SetAwgOffsImmImmOp | UpdParamImmOp)
     ]
-    assert [operation.duration.data for operation in waits] == [8]
+    # Prologue latch, the start offset latched by the wait, then the stop offset latched
+    # before the sequence ends.
+    assert timing == [4, "offset", 8, "offset", 4]
+
+
+def _square_pulse_body(frame: CreateFrameOp) -> list:
+    amplitude = ConstantOp(AmplitudeAttr(0.25))
+    duration = ConstantOp(TimeAttr(8e3))
+    start = StartContinuousWaveformOp(frame, amplitude)
+    wait = WaitOp(start, duration)
+    return [amplitude, duration, start, wait, StopContinuousWaveformOp(wait)]
+
+
+def _phase_shift_body(frame: CreateFrameOp) -> list:
+    phase = ConstantOp(PhaseAttr(0.5))
+    return [phase, PhaseShiftOp(frame, phase)]
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        pytest.param(
+            _square_pulse_body,
+            ["set_awg_offs", "upd_param", "set_awg_offs", "upd_param"],
+            id="square_pulse",
+        ),
+        pytest.param(_phase_shift_body, ["set_ph_delta", "upd_param"], id="phase_shift"),
+    ],
+)
+def test_pipeline_latches_pending_parameters_at_end_of_shot_loop(body, expected):
+    """A shot ending in a parameter update latches it before looping back to ``wait_sync``,
+    and the loop body still opens with the shot-synchronisation prologue."""
+    frequency, frame = _frame()
+    lower = ArithConstantOp.from_int_and_width(0, IndexType())
+    upper = ArithConstantOp.from_int_and_width(3, IndexType())
+    step = ArithConstantOp.from_int_and_width(1, IndexType())
+    loop = scf.ForOp(
+        lower.result,
+        upper.result,
+        step.result,
+        [],
+        Block([*body(frame), scf.YieldOp()], arg_types=[IndexType()]),
+    )
+    module = _pulse_module(frequency, frame, lower, upper, step, loop)
+
+    _configured_pipeline(_canonical_data()).apply(Context(), module)
+
+    ops = list(_assert_emission_ready(module).body.block.ops)
+    [label] = [index for index, op in enumerate(ops) if isinstance(op, LabelOp)]
+    [loop_back] = [index for index, op in enumerate(ops) if isinstance(op, LoopRdImmOp)]
+    shot = [op.name.rsplit(".", 1)[-1] for op in ops[label + 1 : loop_back]]
+    assert shot == ["wait_sync", "reset_ph", "upd_param", *expected]
 
 
 def test_program_acquisition_length_overrides_hardware_default():
@@ -829,3 +890,112 @@ def test_pre_emission_verification_uses_named_weight_sample_capacity_spec():
         PassFailedException, match=f"exceeding the {limit} sample sequencer capacity"
     ):
         QbloxPreEmissionVerificationPass().apply(Context(), ModuleOp([sequence]))
+
+
+_PULSE_EVENT_KINDS = {
+    "pulse": "play",
+    "readout": "acquire",
+    "start continuous waveform": "offset",
+    "stop continuous waveform": "offset",
+}
+
+
+def _pulse_events(module: ModuleOp) -> dict[str, list[tuple[str, float]]]:
+    """Return the start time of each play, acquire and offset change per channel."""
+    events = defaultdict(list)
+    for resource, timeline in build_pulse_schedule(
+        module, time_unit="ns"
+    ).timelines.items():
+        for event in timeline:
+            if (kind := _PULSE_EVENT_KINDS.get(event.label)) is not None:
+                events[resource.replace("-", "_")].append((kind, event.start))
+    return dict(events)
+
+
+def _q1_events(module: ModuleOp) -> dict[str, list[tuple[str, float]]]:
+    """Return the start time of each play, acquire and offset change per sequence."""
+    events = defaultdict(list)
+    for resource, timeline in build_q1_schedule(module).timelines.items():
+        offset = 0j
+        for event in timeline:
+            if event.label in ("play", "acquire"):
+                events[resource].append((event.label, event.start))
+            elif (
+                event.signal is not None and event.signal.size and event.signal[0] != offset
+            ):
+                offset = event.signal[0]
+                events[resource].append(("offset", event.start))
+    return dict(events)
+
+
+def _channel_with_phase_shifts(port_id: str, waveform: SquareWaveformOp) -> list:
+    frequency = ConstantOp(FrequencyAttr(200_000_000))
+    frame = CreateFrameOp(frequency, StringAttr(port_id))
+    operations = [frequency, frame]
+    current = frame.result
+    for phase in (0.5, 0.25, 0.125):
+        constant = ConstantOp(PhaseAttr(phase))
+        shift = PhaseShiftOp(current, constant)
+        pulse = PulseOp(shift.result, waveform)
+        operations.extend([constant, shift, pulse])
+        current = pulse.result
+    duration = ConstantOp(TimeAttr(16_000))
+    acquire = AcquireOp(current, duration, label="readout")
+    return [*operations, duration, acquire, IntegrateOp(acquire.acquisition_result)]
+
+
+def _channel_with_continuous_waveform(port_id: str, waveform: SquareWaveformOp) -> list:
+    frequency = ConstantOp(FrequencyAttr(200_000_000))
+    frame = CreateFrameOp(frequency, StringAttr(port_id))
+    pulse = PulseOp(frame, waveform)
+    phase = ConstantOp(PhaseAttr(0.5))
+    shift = PhaseShiftOp(pulse.result, phase)
+    amplitude = ConstantOp(AmplitudeAttr(0.25))
+    start = StartContinuousWaveformOp(shift.result, amplitude)
+    duration = ConstantOp(TimeAttr(20_000))
+    wait = WaitOp(start.result, duration)
+    stop = StopContinuousWaveformOp(wait.result)
+    return [frequency, frame, pulse, phase, shift, amplitude, start, duration, wait, stop]
+
+
+def test_pipeline_keeps_pulse_timing_with_phase_shifts_on_several_channels():
+    """Phase updates must not delay later operations on any channel."""
+    canonical = canonical_data(
+        QbloxModuleKind.qrm,
+        configurations=[
+            supplied([sequencer(0, outputs=(0,), inputs=(0,))]),
+            supplied([sequencer(1, outputs=(1,))]),
+        ],
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )
+    width = ConstantOp(TimeAttr(16_000))
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width, amplitude)
+    *readout_ops, integrate = _channel_with_phase_shifts("port-0", waveform)
+    body = [
+        width,
+        amplitude,
+        waveform,
+        *readout_ops,
+        integrate,
+        *_channel_with_continuous_waveform("port-1", waveform),
+        func.ReturnOp(integrate.result),
+    ]
+    module = ModuleOp(
+        [func.FuncOp("main", ((), (integrate.result.type,)), Region(Block(body)))]
+    )
+    PulsePipelineManager(
+        PulseLevelConstraints.derive(canonical)
+    ).build_default_pipeline().apply(Context(), module)
+    expected = _pulse_events(module)
+
+    create_qblox_configured_q1_pipeline(canonical).apply(Context(), module)
+    actual = _q1_events(module)
+
+    # Every Q1 sequence starts with the same prologue: set_latch_en and upd_param.
+    prologue = 2 * DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
+    assert actual == {
+        channel: [(kind, start + prologue) for kind, start in events]
+        for channel, events in expected.items()
+    }
