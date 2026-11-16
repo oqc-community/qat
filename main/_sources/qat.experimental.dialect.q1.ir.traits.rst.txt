@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.ir.traits module
+============================================
+
+.. automodule:: qat.experimental.dialect.q1.ir.traits
+   :members:
+   :show-inheritance:
+   :undoc-members:

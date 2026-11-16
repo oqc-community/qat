@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post444.dev20261116132416 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post445.dev20261116143611 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -2240,6 +2240,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.apply">(EvaluateWaveformsAsSamples method)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineagePass.apply">(FrameLineagePass method)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass.apply">(LatchPendingParametersPass method)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf.html#qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf.LineariseQ1CfToQ1Pass.apply">(LineariseQ1CfToQ1Pass method)</a>
 </li>
@@ -5939,6 +5941,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.debug_info">(Q1AsmOperation attribute)</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration.params.debug_info">(qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration parameter)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.with_debug_info.params.debug_info">(qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.with_debug_info parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.ResetPhOp.debug_info">(ResetPhOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.ResetPhOp.debug_info">[1]</a>
@@ -6856,8 +6860,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation.params.duration_limit">(qat.middleend.passes.transform.InstructionLengthSanitisation parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration.params.duration_ns">duration_ns (qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration parameter)</a>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration.params.duration_ns">duration_ns (qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration.params.duration_ns">(qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.DurationImm">DurationImm (class in qat.experimental.dialect.q1)</a>
 
       <ul>
@@ -11750,6 +11758,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.latch_rst">latch_rst() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.latch_rst">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.traits.html#qat.experimental.dialect.q1.ir.traits.LatchesParametersTrait">LatchesParametersTrait (class in qat.experimental.dialect.q1.ir.traits)</a>
+</li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass">LatchPendingParametersPass (class in qat.experimental.conversion.pulse_to_q1.passes)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.LatchRstImmOp">LatchRstImmOp (class in qat.experimental.dialect.q1)</a>
 
       <ul>
@@ -12790,6 +12802,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.LoopRdRsOp">(class in qat.experimental.dialect.q1.ir.ops)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration">lower_wait_duration() (in module qat.experimental.conversion.pulse_to_q1.waveform)</a>
+</li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp">LowerArithIntegerConstantToMoveOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
 </li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.LoweringPass">LoweringPass (class in qat.core.pass_base)</a>
@@ -15214,6 +15228,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.schedule.html#module-qat.experimental.dialect.q1.ir.schedule">qat.experimental.dialect.q1.ir.schedule</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.traits.html#module-qat.experimental.dialect.q1.ir.traits">qat.experimental.dialect.q1.ir.traits</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.target.html#module-qat.experimental.dialect.q1.target">qat.experimental.dialect.q1.target</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.transforms.html#module-qat.experimental.dialect.q1.transforms">qat.experimental.dialect.q1.transforms</a>
@@ -16567,6 +16583,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.LabelAttr.name">(LabelAttr attribute)</a>, <a href="qat.experimental.dialect.q1.ir.attrs.html#qat.experimental.dialect.q1.ir.attrs.LabelAttr.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.LabelOp.name">(LabelOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.LabelOp.name">[1]</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass.name">(LatchPendingParametersPass attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.LatchRstImmOp.name">(LatchRstImmOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.LatchRstImmOp.name">[1]</a>
 </li>
@@ -20337,9 +20355,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.system_data.hardware.qblox.target.html#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.q1_core_clock_period_ns">q1_core_clock_period_ns (Q1SequencerSpec attribute)</a>
 </li>
-      <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration.params.q1asm">q1asm (qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration parameter)</a>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration.params.q1asm">q1asm (qat.experimental.conversion.pulse_to_q1.waveform.lower_wait_duration parameter)</a>
 
       <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.waveform.html#qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration.params.q1asm">(qat.experimental.conversion.pulse_to_q1.waveform.split_wait_duration parameter)</a>
+</li>
         <li><a href="qat.experimental.system_data.hardware.qblox.html#qat.experimental.system_data.hardware.qblox.QbloxTargetDescription.q1asm">(QbloxTargetDescription attribute)</a>, <a href="qat.experimental.system_data.hardware.qblox.target.html#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.q1asm">[1]</a>
 </li>
       </ul></li>
@@ -21412,6 +21432,13 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.schedule.html#module-qat.experimental.dialect.q1.ir.schedule">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.q1.ir.traits
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.traits.html#module-qat.experimental.dialect.q1.ir.traits">module</a>
 </li>
       </ul></li>
       <li>
@@ -22646,6 +22673,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.measure.html#module-qat.ir.measure">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.ir.pulse_channel
 
@@ -22653,8 +22682,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.pulse_channel.html#module-qat.ir.pulse_channel">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.ir.qat_ir
 
@@ -25415,6 +25442,8 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.required_predecessors">(EvaluateWaveformsAsSamples method)</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass.required_predecessors">(LatchPendingParametersPass method)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf.html#qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf.LineariseQ1CfToQ1Pass.required_predecessors">(LineariseQ1CfToQ1Pass method)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html#qat.experimental.dialect.q1_scf.transforms.lower_to_cf.LowerQ1ScfToQ1CfPass.required_predecessors">(LowerQ1ScfToQ1CfPass method)</a>
@@ -26904,6 +26933,8 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass.runs_before">(BoundDeadFrameEliminationPass method)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass.runs_before">(LatchPendingParametersPass method)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.transforms.reg_alloc.html#qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass.runs_before">(LinearScanRegisterAllocationPass method)</a>
 </li>
@@ -28761,6 +28792,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ExecutePipelineDescription.target_data">(ExecutePipelineDescription attribute)</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.LatchPendingParametersPass.target_data">(LatchPendingParametersPass attribute)</a>
+</li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineClassDescription.target_data">(PipelineClassDescription attribute)</a>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineFactoryDescription.target_data">(PipelineFactoryDescription attribute)</a>
@@ -30130,10 +30163,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.model.loaders.lucy.html#qat.model.loaders.lucy.LucyCouplingQuality.UNIFORM">UNIFORM (LucyCouplingQuality attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Unit">Unit (class in qat.purr.integrations.features)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker.resource.params.unit">unit (qat.experimental.tools.schedule.ScheduleTracker.resource parameter)</a>
 
       <ul>
@@ -30201,6 +30234,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline">UpdateablePipeline (class in qat.pipelines.updateable)</a>
 </li>
       <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.UpdateablePipelineDescription">UpdateablePipelineDescription (class in qat.core.config.descriptions)</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.ir.traits.html#qat.experimental.dialect.q1.ir.traits.UpdatesParameterTrait">UpdatesParameterTrait (class in qat.experimental.dialect.q1.ir.traits)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.UpdParamImmOp">UpdParamImmOp (class in qat.experimental.dialect.q1)</a>
 

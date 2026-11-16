@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post444.dev20261116132416 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post445.dev20261116143611 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -723,6 +723,11 @@
 <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2π)</span></code> range.</p>
 <p><code class="docutils literal notranslate"><span class="pre">PhaseLowering</span></code> consumes canonical constants and converts radians to degrees,
 then to NCO phase steps.</p>
+<p>Q1 parameter instructions (<code class="docutils literal notranslate"><span class="pre">set_ph</span></code>, <code class="docutils literal notranslate"><span class="pre">set_ph_delta</span></code>, <code class="docutils literal notranslate"><span class="pre">set_freq</span></code> and
+<code class="docutils literal notranslate"><span class="pre">set_awg_offs</span></code>) take no time and do not latch themselves: the next <code class="docutils literal notranslate"><span class="pre">upd_param</span></code>,
+<code class="docutils literal notranslate"><span class="pre">play</span></code> or <code class="docutils literal notranslate"><span class="pre">acquire</span></code> applies them. Lowerings therefore emit parameter instructions
+without an <code class="docutils literal notranslate"><span class="pre">upd_param</span></code>, and every Pulse wait lowers to <code class="docutils literal notranslate"><span class="pre">upd_param</span></code> so pending changes
+apply at their Pulse time. A lowering that adds <code class="docutils literal notranslate"><span class="pre">set_freq</span></code> must follow the same rule.</p>
 <p>Dynamic phase operands are unsupported: Q1 phase instructions only accept an
 immediate operand, so there is no numeric radians-to-steps runtime conversion for
 a dynamic value. <code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass</span></code> rejects a dynamic <code class="docutils literal notranslate"><span class="pre">pulse.phase_set</span></code> or
@@ -748,6 +753,9 @@ before this stage runs.</p>
 phase instructions.</p>
 <p>Conversion from radians is lossy. Values are quantised into sequencer NCO phase-step
 space prior to emission.</p>
+<p>The emitted <code class="docutils literal notranslate"><span class="pre">set_ph</span></code> or <code class="docutils literal notranslate"><span class="pre">set_ph_delta</span></code> is not followed by <code class="docutils literal notranslate"><span class="pre">upd_param</span></code>: the next
+timed instruction latches it, so the phase update takes no time, as in the Pulse
+schedule.</p>
 </dd></dl>
 
 </section>
