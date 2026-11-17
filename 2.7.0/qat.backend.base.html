@@ -358,9 +358,46 @@ the QPU.</p>
 <dt class="sig sig-object py" id="qat.backend.base.AllocatingBackend.allocate">
 <span class="sig-name descname"><span class="pre">allocate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.AllocatingBackend.allocate" title="Link to this definition"></a></dt>
 <dd><p>For a given target, allocate an FPGA card and a sequencer.</p>
+<p>This is a greedy, first-come choice: it tracks one set of taken sequencers per
+slot but each physical channel has its own candidate set, so the outcome depends
+on the order targets arrive in and it can fail when a valid assignment exists.
+Prefer <a class="reference internal" href="#qat.backend.base.AllocatingBackend.allocate_bipartite" title="qat.backend.base.AllocatingBackend.allocate_bipartite"><code class="xref py py-meth docutils literal notranslate"><span class="pre">allocate_bipartite()</span></code></a>, which allocates all targets together.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.base.AllocatingBackend.allocate.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.backend.base.AllocatingBackend.allocate.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span>) – The pulse channel to allocate a sequencer for.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The sequencer index and the slot index.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the physical channel has no sequencer left.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.base.AllocatingBackend.allocate_bipartite">
+<span class="sig-name descname"><span class="pre">allocate_bipartite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.AllocatingBackend.allocate_bipartite" title="Link to this definition"></a></dt>
+<dd><p>Allocate sequencers to targets using a bipartite graph matching algorithm.</p>
+<p>All targets are matched together, respecting each physical channel’s own candidate
+sequencers, so an assignment is found whenever one exists. Targets and candidates
+are sorted first, so the result does not depend on the order of <code class="docutils literal notranslate"><span class="pre">targets</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.base.AllocatingBackend.allocate_bipartite.params.targets"></span><strong>targets</strong><a class="paramlink headerlink reference internal" href="#qat.backend.base.AllocatingBackend.allocate_bipartite.params.targets">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span>) – Pulse channels that need a sequencer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mapping of slot index to <code class="docutils literal notranslate"><span class="pre">{target_id:</span> <span class="pre">sequencer_index}</span></code>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any target cannot be given a sequencer; the message names
+every target left unplaced.</p>
 </dd>
 </dl>
 </dd></dl>
