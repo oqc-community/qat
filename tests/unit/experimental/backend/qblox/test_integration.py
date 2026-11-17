@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+import json
+from pathlib import Path
+
 import pytest
 from numpy import array
 from xdsl.context import Context
@@ -36,6 +39,7 @@ from qat.experimental.system_data.hardware.qblox.configuration import (
     SequencerConnection,
 )
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.materialisers.boundary import materialise
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
@@ -497,3 +501,60 @@ def test_rf_boolean_acquisition_alias_reaches_runtime_payload(kind, enabled):
     program = _compile(module, canonical)
 
     assert program.packages["port_0"].seq_config.connection.acq is enabled
+
+
+def _with_prop_delay_comp_en(node, value):
+    """Return a copy of a PuRR payload with every NCO compensation flag set to ``value``."""
+
+    if isinstance(node, dict):
+        return {
+            key: (
+                value
+                if key == "prop_delay_comp_en"
+                else _with_prop_delay_comp_en(item, value)
+            )
+            for key, item in node.items()
+        }
+    if isinstance(node, list):
+        return [_with_prop_delay_comp_en(item, value) for item in node]
+    return node
+
+
+@pytest.mark.parametrize("source_value", [None, False], ids=["unset", "disabled"])
+@pytest.mark.parametrize(
+    ("port_id", "carrier"),
+    [
+        pytest.param("A-CH-QCM-RF-2", 3_872_000_000, id="drive"),
+        pytest.param("A-CH-QRM-RF-14", 10_203_300_000, id="readout"),
+    ],
+)
+def test_purr_calibration_compiles_with_nco_propagation_delay_compensation_enabled(
+    source_value, port_id, carrier
+):
+    payload = json.loads(
+        Path("tests/files/calibrations/qblox_calibration.json").read_text()
+    )
+    canonical = materialise(
+        source_payload=_with_prop_delay_comp_en(payload, source_value),
+        source_additional_data={},
+    )
+
+    program = _compile(_control_module(port_id, carrier), canonical)
+
+    assert program.packages
+    for package in program.packages.values():
+        assert package.seq_config.nco.prop_delay_comp_en is True
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_supplied_nco_propagation_delay_compensation_reaches_runtime_payload(enabled):
+    canonical = canonical_data(
+        QbloxModuleKind.qcm_rf,
+        configurations=[
+            supplied([sequencer(0, values={"nco": {"prop_delay_comp_en": enabled}})])
+        ],
+    )
+
+    program = _compile(_control_module("port-0", 4_200_000_000), canonical)
+
+    assert program.packages["port_0"].seq_config.nco.prop_delay_comp_en is enabled

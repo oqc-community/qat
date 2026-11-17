@@ -167,7 +167,10 @@ def test_connection_fields_decode_into_typed_routing():
     sequencer = configuration.sequencers[0]
     assert sequencer.index == 0
     assert sequencer.values == frozendict(
-        {"sync_en": True, "nco": frozendict({"freq": 1.0e8})}
+        {
+            "sync_en": True,
+            "nco": frozendict({"freq": 1.0e8, "prop_delay_comp_en": True}),
+        }
     )
     connection = sequencer.connection
     assert connection.connections == (
@@ -236,6 +239,25 @@ def test_boolean_output_field_preserves_the_qblox_alias(enabled):
     assert (connection.output_id, connection.enabled) == (0, enabled)
 
 
+@pytest.mark.parametrize(
+    "nco",
+    [
+        pytest.param(None, id="no-nco"),
+        pytest.param({"freq": 1_000_000}, id="flag-absent"),
+        pytest.param({"freq": 1_000_000, "prop_delay_comp_en": None}, id="flag-unset"),
+        pytest.param({"freq": 1_000_000, "prop_delay_comp_en": True}, id="flag-enabled"),
+        pytest.param({"freq": 1_000_000, "prop_delay_comp_en": False}, id="flag-disabled"),
+    ],
+)
+def test_purr_nco_propagation_delay_compensation_is_always_enabled(nco):
+    configuration = decode_qblox_configuration({"sequencers": {0: {"nco": nco}}})
+
+    values = configuration.sequencers[0].values
+    assert values["nco"]["prop_delay_comp_en"] is True
+    if nco is not None:
+        assert values["nco"]["freq"] == 1_000_000
+
+
 def test_empty_connection_is_reported_as_absent():
     configuration = decode_qblox_configuration(
         {"sequencers": {0: {"connection": {"bulk_value": None}}}}
@@ -251,6 +273,7 @@ def test_empty_connection_is_reported_as_absent():
         ({"sequencers": []}, "sequencers must be a mapping"),
         ({"sequencers": {"a": {}}}, "keyed by sequencer index"),
         ({"sequencers": {0: 1}}, "must be a mapping"),
+        ({"sequencers": {0: {"nco": 1}}}, "nco must be a mapping"),
         ({"module": {"lo": object()}}, "unsupported object value"),
         (
             {"module": {"lo": {"_adapter_reference": "mapping"}}},

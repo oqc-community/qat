@@ -349,6 +349,15 @@ def _decode_sequencer(index: int, value: Any, path: str) -> QbloxSequencerConfig
         and key != "connection"
         and (decoded := _decode_value(item, f"{path}.{key}")) is not None
     }
+    # COMPILER-1807: legacy PuRR codegen always enabled NCO propagation delay
+    # compensation, so PuRR-sourced values are overridden to match it.
+    nco = values.get("nco")
+    if nco is None:
+        nco = {}
+        values["nco"] = nco
+    elif not isinstance(nco, dict):
+        raise ValueError(f"{path}.nco must be a mapping")
+    nco["prop_delay_comp_en"] = True
     return QbloxSequencerConfiguration(
         index=index,
         connection=_decode_connection(value.get("connection"), f"{path}.connection"),
