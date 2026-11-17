@@ -402,6 +402,26 @@ def test_sequencer_allocation(qblox_model, backend_type):
     assert not backend.allocations
 
 
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_emit_allocates_overlapping_candidates_together(copied_qblox_model, backend_type):
+    """Greedy allocation would give the drive sequencer 0 and then fail to place the measure
+    channel, which can only use 0."""
+    qubit = copied_qblox_model.get_qubit(0)
+    drive, measure = qubit.get_drive_channel(), qubit.get_measure_channel()
+    builder = copied_qblox_model.create_builder()
+    for channel, allowed in ((drive, {0, 1}), (measure, {0})):
+        config = channel.physical_channel.config
+        config.sequencers = {idx: config.sequencers[idx] for idx in allowed}
+        builder.add(Pulse(channel, PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 5.0))
+
+    executable = do_emit(copied_qblox_model, backend_type, builder)
+
+    packages = executable.programs[0].packages
+    assert packages[drive.full_id()].seq_idx == 1
+    assert packages[measure.full_id()].seq_idx == 0
+
+
 @pytest.mark.parametrize(
     "compiler_config, expected",
     [

@@ -1087,11 +1087,18 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
 
         try:
             packages = {}
-            for target, context in contexts.items():
-                if not context.is_empty() or not ignore_empty:
-                    seq_idx, slot_idx = self.allocate(target)
-                    package = context.create_package(target, seq_idx, slot_idx)
-                    packages[target.full_id()] = package
+            contexts_to_consider = {
+                target: context
+                for target, context in contexts.items()
+                if not context.is_empty() or not ignore_empty
+            }
+            self.allocations = self.allocate_bipartite(list(contexts_to_consider.keys()))
+            for target, context in contexts_to_consider.items():
+                slot_idx = target.physical_channel.slot_idx
+                seq_idx = self.allocations[slot_idx][target.full_id()]
+                packages[target.full_id()] = context.create_package(
+                    target, seq_idx, slot_idx
+                )
             _check_shared_lo_conflicts(packages.values())
             return QbloxProgram(
                 packages=packages,

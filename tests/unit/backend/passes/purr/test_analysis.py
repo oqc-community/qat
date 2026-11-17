@@ -35,6 +35,7 @@ from qat.middleend.passes.purr.transform import (
 from qat.middleend.passes.purr.validation import ReturnSanitisationValidation
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
     Acquire,
     Delay,
@@ -52,6 +53,26 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 
 class TestAnalysisPasses:
+    @pytest.mark.parametrize("hash_sign", [1, -1])
+    def test_triage_pass_target_order_is_independent_of_hashing(
+        self, mocker, function_seed, hash_sign
+    ):
+        # Scope instructions add every target to the target map at once; their order
+        # must not follow the (process-dependent) hash order of the set of targets.
+        model = EchoModelLoader(random_seed=function_seed).load()
+        qubit = model.get_qubit(0)
+        builder = model.create_builder().repeat(10).X(qubit).measure_single_shot_z(qubit)
+        assert isinstance(builder.instructions[0], Repeat)
+        mocker.patch.object(
+            PulseChannel, "__hash__", lambda self: hash_sign * hash(self.full_id())
+        )
+
+        res_mgr = ResultManager()
+        TriagePass().run(builder, res_mgr)
+
+        target_ids = [t.full_id() for t in res_mgr.lookup_by_type(TriageResult).target_map]
+        assert target_ids == sorted(target_ids)
+
     def test_triage_pass(self, function_seed):
         index = 0
         model = EchoModelLoader(random_seed=function_seed).load()

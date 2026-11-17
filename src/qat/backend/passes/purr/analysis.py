@@ -109,7 +109,7 @@ class TriagePass(AnalysisPass):
                 # TODO: Find a better way to handle scopes with the new instructions
                 # Would a `ControlFlowInstruction` class be useful?
                 # Are `Label` and `Jump` instructions needed here as well?
-                for t in targets:
+                for t in sorted(targets, key=lambda t: t.full_id()):
                     result.target_map[t].append(inst)
 
             ### Assortments ###
