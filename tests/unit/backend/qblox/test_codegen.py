@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from more_itertools import partition
+from qblox_instruments import ClusterType
 
 from qat import qatconfig
 from qat.backend.passes.purr.analysis import ReadWriteResult, TILegalisationPass
@@ -20,6 +21,7 @@ from qat.backend.qblox.codegen import (
     _check_shared_lo_conflicts,
     _debug_info_enabled,
     _get_lo_lanes,
+    _get_package_lo,
 )
 from qat.backend.qblox.config.specification import (
     ConnectionConfig,
@@ -376,6 +378,80 @@ class TestQbloxContext:
 
         with pytest.raises(AssertionError):
             context.ledger(4, np.ones(3, dtype=complex))
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "nco_freq, expected",
+        [
+            pytest.param(100.0, 100.0, id="on-grid-unchanged"),
+            pytest.param(100.75, 100.75, id="quarter-step-unchanged"),
+            pytest.param(100.1, 100.0, id="rounds-down"),
+            pytest.param(100.2, 100.25, id="rounds-up"),
+            pytest.param(-100.1, -100.0, id="negative-rounds-towards-nearest"),
+            pytest.param(-100.2, -100.25, id="negative-rounds-away-from-zero"),
+            pytest.param(123_456_789.0731, 123_456_789.0, id="large-freq"),
+        ],
+    )
+    def test_create_package_rounds_nco_freq_to_hardware_resolution(
+        self, qblox_model, mocker, nco_freq, expected
+    ):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        mocker.patch.object(
+            TILegalisationPass, "decompose_freq", return_value=(5e9, nco_freq)
+        )
+        context = QbloxContext(ReadWriteResult(), {})
+
+        freq = context.create_package(drive_channel, 0, 0).seq_config.nco.freq
+
+        assert freq == expected
+        assert (freq * CONTROL_SEQUENCER_DATA.nco_freq_steps_per_hz).is_integer()
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "get_channel, lane",
+        [
+            pytest.param(lambda q: q.get_drive_channel(), "out2", id="drive-on-out2"),
+            pytest.param(lambda q: q.get_measure_channel(), "out0_in0", id="readout"),
+        ],
+    )
+    def test_create_package_drops_qrc_only_fields(
+        self, copied_qblox_model, get_channel, lane
+    ):
+        channel = get_channel(copied_qblox_model.get_qubit(0))
+        assert "QRC" in channel.physical_channel.id
+        config = channel.physical_channel.config
+        assert config.module.lo.out0_in0_en is True
+        context = QbloxContext(ReadWriteResult(), {})
+
+        pkg = context.create_package(channel, 0, 0)
+
+        assert pkg.mod_config.lo.out0_in0_en is None
+        assert getattr(pkg.mod_config.lo, f"{lane}_freq") is not None
+        # Only the package changes, not the model.
+        assert config.module.lo.out0_in0_en is True
+
+    @pytest.mark.parametrize(
+        "qblox_model",
+        [
+            {
+                "dummy_config": {
+                    2: ClusterType.CLUSTER_QCM_RF,
+                    14: ClusterType.CLUSTER_QRM_RF,
+                },
+                "qubit_count": 2,
+            }
+        ],
+        indirect=True,
+    )
+    def test_create_package_keeps_qrm_rf_readout_fields(self, copied_qblox_model):
+        channel = copied_qblox_model.get_qubit(0).get_measure_channel()
+        assert "QRM-RF" in channel.physical_channel.id
+        context = QbloxContext(ReadWriteResult(), {})
+
+        pkg = context.create_package(channel, 0, 0)
+
+        assert pkg.mod_config.lo.out0_in0_en is True
+        assert pkg.mod_config.lo.out0_in0_freq is not None
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
@@ -1334,6 +1410,50 @@ def test_compilation_leaves_model_config_unchanged(
 )
 def test_get_lo_lanes(lo, connections, lanes):
     assert _get_lo_lanes(lo, connections) == lanes
+
+
+@pytest.mark.parametrize(
+    "channel_id, connections, freqs, out0_in0_en",
+    [
+        pytest.param(
+            "CLUSTER_QRM_RF-Slot14-CH0",
+            {"out0", "in0"},
+            {"out0_in0_freq"},
+            True,
+            id="qrm-rf-readout",
+        ),
+        pytest.param(
+            "CLUSTER_QRC-Slot1-CH0",
+            {"out0", "in0"},
+            {"out0_in0_freq"},
+            None,
+            id="qrc-readout",
+        ),
+        pytest.param(
+            "CLUSTER_QRC-Slot1-CH2", {"out2"}, {"out2_freq"}, None, id="qrc-drive"
+        ),
+        pytest.param(
+            "CLUSTER_QRM_RF-Slot14-CH0",
+            {"out1"},
+            {"out1_in1_freq"},
+            True,
+            id="non-qrc-out0-in0-unused",
+        ),
+    ],
+)
+def test_get_package_lo(mocker, channel_id, connections, freqs, out0_in0_en):
+    model_lo = LoConfig(out0_in0_en=True, out0_in0_freq=1e9, out2_freq=2e9)
+    target = mocker.Mock()
+    target.physical_channel.id = channel_id
+    target.physical_channel.config.module.lo = model_lo
+
+    lo = _get_package_lo(target, connections, 5e9)
+
+    set_freqs = {f: v for f, v in lo.model_dump(exclude_none=True).items() if "_freq" in f}
+    assert set_freqs == dict.fromkeys(freqs, 5e9)
+    assert lo.out0_in0_en is out0_in0_en
+    # The model's LO is left unchanged.
+    assert model_lo == LoConfig(out0_in0_en=True, out0_in0_freq=1e9, out2_freq=2e9)
 
 
 @pytest.mark.parametrize(

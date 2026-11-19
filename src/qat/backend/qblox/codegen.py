@@ -32,7 +32,11 @@ from qat.backend.qblox.passes.analysis import (
     QbloxLegalisationPass,
     TriageResult,
 )
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
+from qat.backend.qblox.target_data import (
+    CONTROL_SEQUENCER_DATA,
+    TARGET_DATA,
+    QbloxTargetData,
+)
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
@@ -92,21 +96,46 @@ def _get_lo_lanes(lo: LoConfig, connections: set[str]) -> set[str]:
     return lanes
 
 
+def _get_package_lo(
+    target: PulseChannel, connections: set[str], lo_freq: float
+) -> LoConfig:
+    """Return the LO config for the package of a sequencer on ``target``.
+
+    A new config is built, so per-package values don't leak into the model or other
+    packages. Only this sequencer's lanes get ``lo_freq``, so stale model frequencies aren't
+    re-applied. ``out0_in0_en`` is dropped on QRC, which has no LO enables. The lanes are
+    found from the model's LO first, so a QRC readout still gets a frequency.
+
+    The config doesn't carry the module type, so QRC channels are recognised by their ID,
+    e.g. ``"CLUSTER_QRC-Slot1-CH0"``.
+    """
+    is_qrc = "QRC" in target.physical_channel.id
+    model_lo = target.physical_channel.config.module.lo
+    lanes = _get_lo_lanes(model_lo, connections)
+    lo = LoConfig(
+        **model_lo.model_dump(exclude={f for f in LoConfig.model_fields if "_freq" in f}),
+        **{f"{lane}_freq": lo_freq for lane in lanes},
+    )
+    if is_qrc:
+        lo.out0_in0_en = None
+    return lo
+
+
 def _check_shared_lo_conflicts(
     packages: Iterable[QbloxPackage],
 ) -> None:
     """Raise if packages on one module need different frequencies from one LO lane.
 
-    Only lanes a package uses count.
+    A package's lanes are the LO frequencies it sets, which ``create_package`` limits to
+    the lanes its sequencer uses. The LO enables aren't used, as they are dropped from QRC
+    packages.
     """
     requests: dict[tuple[str | None, int, str], dict[str, float]] = defaultdict(dict)
     for package in packages:
-        connections = set(package.seq_config.connection.bulk_value)
-        for lane in _get_lo_lanes(package.mod_config.lo, connections):
-            key = (package.instrument_id, package.slot_idx, lane)
-            requests[key][package.pulse_channel_id] = getattr(
-                package.mod_config.lo, f"{lane}_freq"
-            )
+        for field, freq in package.mod_config.lo.model_dump(exclude_none=True).items():
+            if field.endswith("_freq"):
+                key = (package.instrument_id, package.slot_idx, field.removesuffix("_freq"))
+                requests[key][package.pulse_channel_id] = freq
 
     for (instrument_id, slot_idx, lane), by_channel in requests.items():
         if len(set(by_channel.values())) > 1:
@@ -206,17 +235,9 @@ class QbloxContext:
         lo_freq, nco_freq = TILegalisationPass.decompose_freq(target.frequency, target)
 
         qblox_config = target.physical_channel.config
-        # Copy so per-package values don't leak into the model or other packages. Only this
-        # package's lanes get a frequency, so stale model values aren't re-applied.
         seq_config: SequencerConfig = qblox_config.sequencers[seq_idx].model_copy(deep=True)
         connections = set(seq_config.connection.bulk_value)
-        model_lo = qblox_config.module.lo
-        lo = LoConfig(
-            **model_lo.model_dump(
-                exclude={f for f in LoConfig.model_fields if "_freq" in f}
-            ),
-            **{f"{lane}_freq": lo_freq for lane in _get_lo_lanes(model_lo, connections)},
-        )
+        lo = _get_package_lo(target, connections, lo_freq)
         mod_config: ModuleConfig = qblox_config.module.model_copy(
             update={"lo": lo}, deep=True
         )
@@ -237,7 +258,9 @@ class QbloxContext:
             mod_config.scope_acq.avg_mode_en_path3 = True
 
         # Customise Sequencer config
-        seq_config.nco.freq = nco_freq
+        # The NCO has a 0.25 Hz resolution, so round to the nearest step.
+        steps_per_hz = CONTROL_SEQUENCER_DATA.nco_freq_steps_per_hz
+        seq_config.nco.freq = round(nco_freq * steps_per_hz) / steps_per_hz
         seq_config.nco.prop_delay_comp_en = True
         seq_config.square_weight_acq.integration_length = (
             self.sequencer_config.square_weight_acq.integration_length

@@ -382,15 +382,15 @@ class ExpOvershoot3Config(BaseModel):
 class LoConfig(BaseModel):
     """Configuration for the local oscillator in QCM-RF, QRM-RF, and QRC.
 
-    :param out0_en: Flag to enable/diable the LO on output 0. Relevant in QCM-RF.
+    :param out0_en: Flag to enable/disable the LO on output 0. Relevant in QCM-RF.
     :param out0_freq: Frequency (in Hz) for the LO attached to output 0. Relevant in QCM-RF.
-    :param out1_en: Flag to enable/diable the LO on output 1.Relevant in QCM-RF.
+    :param out1_en: Flag to enable/disable the LO on output 1.Relevant in QCM-RF.
     :param out1_freq: Frequency (in Hz) for the LO attached to output 1. Relevant in QCM-RF.
     :param out2_freq: Frequency (in Hz) for the LO attached to output 2. Relevant in QRC.
     :param out3_freq: Frequency (in Hz) for the LO attached to output 3. Relevant in QRC.
     :param out4_freq: Frequency (in Hz) for the LO attached to output 4. Relevant in QRC.
     :param out5_freq: Frequency (in Hz) for the LO attached to output 5. Relevant in QRC.
-    :param out0_in0_en: Flag to enable/diable the LO common to output 0 and input 0.
+    :param out0_in0_en: Flag to enable/disable the LO common to output 0 and input 0.
         Relevant in QRM-RF.
     :param out0_in0_freq: Frequency (in Hz) for the LO common to output 0 and input 0.
         Relevant in QCM-RF/QRC.
