@@ -1,0 +1,15 @@
+qat.exceptions package
+======================
+
+.. automodule:: qat.exceptions
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.exceptions.compilation

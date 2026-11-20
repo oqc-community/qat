@@ -1,0 +1,7 @@
+qat.exceptions.compilation module
+=================================
+
+.. automodule:: qat.exceptions.compilation
+   :members:
+   :show-inheritance:
+   :undoc-members:
