@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post452.dev20261123094415 documentation</title>
+  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post453.dev20261123132630 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -861,7 +861,21 @@ full detail.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketOptimisationHelper.run_multi_qubit_optimizations">
 <span class="sig-name descname"><span class="pre">run_multi_qubit_optimizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_1q_quality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketOptimisationHelper.run_multi_qubit_optimizations" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Place, route and optimise a circuit with two or more qubits.</p>
+<p>With the default mapping pass, tries the connected parts of the device that have the
+best couplings first, widening to worse couplings until the circuit fits. If the
+optimisations fail, falls back to the default passes alone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.integrations.tket.TketOptimisationHelper.run_multi_qubit_optimizations.params.use_1q_quality"></span><strong>use_1q_quality</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketOptimisationHelper.run_multi_qubit_optimizations.params.use_1q_quality">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Weight each coupling’s quality by the quality of its two
+qubits.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="qat.exceptions.compilation.html#qat.exceptions.compilation.UnsupportedProgramError" title="qat.exceptions.compilation.UnsupportedProgramError"><strong>UnsupportedProgramError</strong></a> – If the circuit uses more qubits than the device
+has, or than its largest connected group of qubits.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketOptimisationHelper.run_one_qubit_optimizations">
