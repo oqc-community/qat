@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
+import re
 from math import isclose, pi
 
 import pytest
@@ -8,10 +9,12 @@ from compiler_config.config import (
     Qasm2Optimizations,
     Qasm3Optimizations,
     Tket,
+    TketOptimizations,
 )
 from pytket import Circuit, OpType, Qubit
 from sympy import pi as sympy_pi
 
+from qat.exceptions.compilation import UnsupportedProgramError
 from qat.integrations.tket import (
     TketBuilder,
     TketOptimisationHelper,
@@ -136,6 +139,86 @@ def test_two_qubit_circuit_optimisation(hw):
 
     for qubit in best_qubit_pair:
         assert qubit in circ_indices
+
+
+def _ghz_qasm2(n_used: int, n_declared: int | None = None) -> str:
+    """A QASM2 GHZ program on the first ``n_used`` qubits, measuring each of them.
+
+    Registers have ``n_declared`` qubits and bits, defaulting to ``n_used``.
+    """
+    n_declared = n_declared or n_used
+    cx_chain = "".join(f"cx q[{i}], q[{i + 1}];\n" for i in range(n_used - 1))
+    measures = "".join(f"measure q[{i}] -> c[{i}];\n" for i in range(n_used))
+    return (
+        'OPENQASM 2.0;\ninclude "qelib1.inc";\n'
+        f"qreg q[{n_declared}];\ncreg c[{n_declared}];\n"
+        f"h q[0];\n{cx_chain}{measures}"
+    )
+
+
+class TestCircuitSize:
+    """Circuits too big for the device get a clear error."""
+
+    model_32q = PydEchoModelLoader(32).load()
+    opts = Qasm2Optimizations().tket_optimizations
+    too_many_qubits = re.escape("Circuit uses 34 qubits, only 32 available.")
+
+    def test_more_qubits_than_device_raises(self):
+        with pytest.raises(UnsupportedProgramError, match=self.too_many_qubits):
+            run_pyd_tket_optimizations(
+                _ghz_qasm2(34), opts=self.opts, hardware=self.model_32q
+            )
+
+    def test_more_qubits_than_device_raises_without_mapping_pass(self):
+        opts = self.opts & ~TketOptimizations.DefaultMappingPass
+        with pytest.raises(UnsupportedProgramError, match=self.too_many_qubits):
+            run_pyd_tket_optimizations(_ghz_qasm2(34), opts=opts, hardware=self.model_32q)
+
+    def test_no_connected_part_fits_raises(self):
+        model = PydEchoModelLoader(4, connectivity=[(0, 1), (2, 3)]).load()
+        with pytest.raises(
+            UnsupportedProgramError,
+            match=re.escape(
+                "Circuit uses 3 qubits, but the largest connected group of qubits on "
+                "the device has 2."
+            ),
+        ):
+            run_pyd_tket_optimizations(_ghz_qasm2(3), opts=self.opts, hardware=model)
+
+    def test_circuit_matching_device_size_compiles(self):
+        qasm = run_pyd_tket_optimizations(
+            _ghz_qasm2(32), opts=self.opts, hardware=self.model_32q
+        )
+        assert isinstance(qasm, str)
+
+    def test_declared_but_unused_qubits_count_against_device(self):
+        # QASM keeps declared qubits, so users can pick physical qubits by index.
+        with pytest.raises(UnsupportedProgramError, match=self.too_many_qubits):
+            run_pyd_tket_optimizations(
+                _ghz_qasm2(32, n_declared=34), opts=self.opts, hardware=self.model_32q
+            )
+
+    def test_circuit_with_one_used_qubit_at_high_index_is_placed(self):
+        # Circuit input has unused qubits stripped, leaving q[33] as its only qubit.
+        circuit = Circuit(34, 1).X(33).Measure(33, 0)
+        qasm = run_pyd_tket_optimizations(circuit, opts=self.opts, hardware=self.model_32q)
+        assert "qreg q[" not in qasm
+        assert "qreg node[" in qasm
+
+    def test_classical_register_wider_than_32_bits(self):
+        program = (
+            'OPENQASM 2.0;\ninclude "qelib1.inc";\n'
+            "qreg q[2];\ncreg c[40];\nh q[0];\ncx q[0], q[1];\n"
+            "measure q[0] -> c[0];\nmeasure q[1] -> c[39];\n"
+        )
+        qasm = run_pyd_tket_optimizations(program, opts=self.opts, hardware=self.model_32q)
+        assert "creg c[40];" in qasm
+
+    def test_circuit_using_no_qubits_compiles_on_uncoupled_device(self):
+        # Circuit input has unused qubits stripped, leaving none to route.
+        model = PydEchoModelLoader(1, connectivity=[]).load()
+        qasm = run_pyd_tket_optimizations(Circuit(1, 1), opts=self.opts, hardware=model)
+        assert "qreg" not in qasm
 
 
 class TestTketBuilder:

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2026 Oxford Quantum Circuits Ltd
 
 from math import pi
 
@@ -15,6 +15,7 @@ from pytket.qasm.qasm import QASMUnsupportedError
 from qiskit.qasm2.exceptions import QASM2ParseError
 from sympy import pi as sympy_pi, sympify
 
+from qat.exceptions.compilation import UnsupportedProgramError
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.integrations.tket import (
@@ -30,6 +31,11 @@ from qat.purr.utils.logger import get_default_logger
 from qat.utils.graphs import get_connected_subgraphs
 
 log = get_default_logger()
+
+# pytket's default ``maxwidth`` for QASM output (pytket 2.18.0). It caps classical register
+# width and also sets the largest register value used when writing range conditions, so
+# it stays the floor to keep output unchanged for registers that already fit.
+_PYTKET_DEFAULT_MAXWIDTH = 32
 
 
 def run_tket_optimizations(
@@ -65,6 +71,8 @@ class TketOptimisationHelper:
         self.hardware = hardware
         self.opts = opts
         if isinstance(circuit, str):
+            # QASM keeps every declared qubit: users who declare the whole device and
+            # pick qubits by index rely on that to choose where their circuit runs.
             self.circ = self._get_circuit_from_qasm(circuit)
         else:
             # Helps handle cases where more qubits are allocated than needed
@@ -77,6 +85,10 @@ class TketOptimisationHelper:
     def run_optimizations(self):
         n_qubits = self.circ.n_qubits
         match n_qubits:
+            case 0:
+                # Nothing to place: the circuit declares no qubits, or is a Circuit whose
+                # qubits were all unused and stripped.
+                pass
             case 1:
                 self.run_one_qubit_optimizations()
             case 2:
@@ -92,16 +104,46 @@ class TketOptimisationHelper:
 
         best_qubit = max(qubit_qualities, key=qubit_qualities.get)
 
-        q_map = {Qubit(0): Node(best_qubit), Qubit(best_qubit): Node(0)}
+        # A Circuit's one qubit need not be q[0] once unused qubits are stripped.
+        q_map = {self.circ.qubits[0]: Node(best_qubit)}
         Placement.place_with_map(self.circ, q_map)
 
     def run_multi_qubit_optimizations(self, use_1q_quality: bool = False):
+        """Place, route and optimise a circuit with two or more qubits.
+
+        With the default mapping pass, tries the connected parts of the device that have the
+        best couplings first, widening to worse couplings until the circuit fits. If the
+        optimisations fail, falls back to the default passes alone.
+
+        :param use_1q_quality: Weight each coupling's quality by the quality of its two
+            qubits.
+        :raises UnsupportedProgramError: If the circuit uses more qubits than the device
+            has, or than its largest connected group of qubits.
+        """
+        n_device_qubits = len(self.hardware.qubits)
+        if self.circ.n_qubits > n_device_qubits:
+            raise UnsupportedProgramError(
+                f"Circuit uses {self.circ.n_qubits} qubits, "
+                f"only {n_device_qubits} available."
+            )
+
         optimisations_failed = False
         if TketOptimizations.DefaultMappingPass not in self.opts:
             couplings = self._get_logical_qubit_couplings()
             optimisations_failed = self._optimise_circuit(couplings)
         else:
             self._calculate_multi_qubit_qualities(use_1q_quality)
+
+            # The loop's lowest quality level uses every coupling, so a circuit bigger
+            # than the largest connected group can never be placed: fail before trying.
+            subgraphs_nodes, _ = get_connected_subgraphs(list(self.coupling_qualities))
+            largest_group_size = max((len(nodes) for nodes in subgraphs_nodes), default=1)
+            if self.circ.n_qubits > largest_group_size:
+                raise UnsupportedProgramError(
+                    f"Circuit uses {self.circ.n_qubits} qubits, but the largest connected "
+                    f"group of qubits on the device has {largest_group_size}."
+                )
+
             sorted_coupling_qualities = dict(
                 sorted(
                     self.coupling_qualities.items(), key=lambda item: item[1], reverse=True
@@ -132,7 +174,11 @@ class TketOptimisationHelper:
 
     def convert_to_qasm_string(self):
         try:
-            qasm_string = circuit_to_qasm_str(self.circ)
+            # pytket refuses classical registers wider than maxwidth, so widen it to fit.
+            maxwidth = max(
+                [_PYTKET_DEFAULT_MAXWIDTH] + [reg.size for reg in self.circ.c_registers]
+            )
+            qasm_string = circuit_to_qasm_str(self.circ, maxwidth=maxwidth)
             log.info(f"Number of gates after tket optimization: {self.circ.n_gates}")
             return qasm_string
         except (QASMUnsupportedError, RuntimeError) as e:
@@ -198,11 +244,6 @@ class TketOptimisationHelper:
 
         If our optimizations failed, but we want the mapping pass, apply that by itself.
         """
-        if self.architecture is None:
-            raise ValueError(
-                "Unable to resolve hardware instance for fall-back optimizations."
-            )
-
         delay_failed = False
         try:
             # DelayMeasure throws on failure, and we want to raise our own errors for
@@ -226,7 +267,7 @@ class TketOptimisationHelper:
             except RuntimeError as e:
                 message = str(e)
                 if MaxNQubitsPredicate.__name__ in message:
-                    raise ValueError(
+                    raise UnsupportedProgramError(
                         f"Circuit uses {len(self.circ.qubits)} qubits, "
                         f"only {len(self.architecture.nodes)} available."
                     ) from e
