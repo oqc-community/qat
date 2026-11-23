@@ -3010,14 +3010,14 @@ files = [
 
 [[package]]
 name = "mistune"
-version = "3.3.3"
+version = "3.4.0"
 description = "A sane and fast Markdown parser with useful plugins and renderers"
 optional = false
-python-versions = ">=3.8"
-groups = ["notebook"]
+python-versions = ">=3.10"
+groups = ["dev", "notebook"]
 files = [
-    {file = "mistune-3.3.3-py3-none-any.whl", hash = "sha256:99de1585e42dcbd826faa9e11a202727a5e202e4e4722a4c69ac1ff615793dd7"},
-    {file = "mistune-3.3.3.tar.gz", hash = "sha256:c4c6c0c840b8637a2e9b8b6d607eb7c8f00888bf14c754409bcd339e848c2477"},
+    {file = "mistune-3.4.0-py3-none-any.whl", hash = "sha256:d03cec4c8620f21517a996d82d14f3b59c30d79bda2cc6c56bd32b839f18ce6b"},
+    {file = "mistune-3.4.0.tar.gz", hash = "sha256:2eaf7952af928ca8d33b779762effc1da517b62c6ad85ec8ca957e3b07b9782a"},
 ]
 
 [[package]]
