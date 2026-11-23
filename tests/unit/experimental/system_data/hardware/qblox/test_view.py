@@ -707,7 +707,7 @@ def test_driver_firmware_versions_extracted_from_metadata():
     assert view.driver_version == SemanticVersion.parse("1.2.3")
     assert view.firmware_version == SemanticVersion.parse("4.5.6")
     assert all(
-        module_details.firmware_version == "4.5.6"
+        module_details.firmware_version == SemanticVersion.parse("4.5.6")
         for module_location, module_details in view.modules.items()
     )
 
