@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.transforms.verify_allocation module &mdash; qat-compiler 3.0.0.post454.dev20261124105540 documentation</title>
+  <title>qat.experimental.dialect.q1.transforms.verify_allocation module &mdash; qat-compiler 3.0.0.post455.dev20261124160203 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -728,12 +728,18 @@
 physical register before later lowering passes consume it.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VerifyQ1AllocationPass</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VerifyQ1AllocationPass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checked_stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Reject any Q1 register value that is still unallocated or virtual.</p>
 <p>The pass walks every <a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.ops.html#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceOp</span></code></a>
 in the module, including nested regions, and aggregates all allocation issues into a
 single <code class="xref py py-class docutils literal notranslate"><span class="pre">PassFailedException</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.params.checked_stage"></span><strong>checked_stage</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.params.checked_stage">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Name of the pass whose output is checked. If omitted,
+errors name no pass.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.apply" title="Link to this definition"></a></dt>
@@ -753,6 +759,11 @@ single <code class="xref py py-class docutils literal notranslate"><span class="
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.checked_stage">
+<span class="sig-name descname"><span class="pre">checked_stage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.checked_stage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.verify_allocation.VerifyQ1AllocationPass.name">
