@@ -220,6 +220,20 @@ class TestNDArray:
 
 
 class TestPydArray:
+    @pytest.mark.parametrize(
+        "arr_type,dtype",
+        [(IntNDArray, int), (FloatNDArray, float), (ComplexNDArray, complex)],
+    )
+    @pytest.mark.parametrize("shape", [(0,), (2, 3), (2, 0, 3)])
+    def test_typed_array_shape_round_trip(self, arr_type, dtype, shape):
+        value = np.zeros(shape, dtype=dtype)
+        arr = arr_type(value)
+
+        restored = arr_type.model_validate(arr.model_dump())
+
+        assert restored.value.shape == shape
+        np.testing.assert_array_equal(restored.value, value)
+
     def test_empty_array(self):
         arr = PydArray(value=np.array([]))
         assert arr.value.size == 0

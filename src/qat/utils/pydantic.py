@@ -38,12 +38,7 @@ from pydantic_core import core_schema
 
 from qat.purr.utils.logger import get_default_logger
 
-if version("numpydantic") < "2.0.0":
-    _ARRAY_SHAPE = Shape["*, ..."]
-else:
-    from numpydantic.shape import Repeat
-
-    _ARRAY_SHAPE = Shape[*Repeat]
+_ARRAY_SHAPE = Shape["*, ..."] if version("numpydantic") < "2.0.0" else tuple[int, ...]
 
 log = get_default_logger()
 
