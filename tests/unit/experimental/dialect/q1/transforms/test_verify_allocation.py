@@ -370,6 +370,49 @@ class TestVerifyQ1AllocationPassNestedRegions:
 class TestVerifyQ1AllocationPassErrorMessages:
     """Test that error messages are clear and helpful."""
 
+    @pytest.mark.parametrize("checked_stage", [None, _AllocationBreakingPass.name])
+    @pytest.mark.parametrize(
+        ("register_type", "issue"),
+        [
+            (IntRegisterType.unallocated(), "an unallocated Q1 register"),
+            (IntRegisterType.infinite_register(42), "a virtual Q1 register (inf_gpr_42)"),
+        ],
+    )
+    def test_checked_stage_preserves_nested_register_details(
+        self, checked_stage, register_type, issue
+    ):
+        """Stage context preserves nested-register diagnostic details."""
+        region_op = _MockRegionOp(Region(Block(arg_types=[register_type])))
+        module = ModuleOp([SequenceOp(program=[region_op], channel_id="test")])
+        pipeline = OrderedPassPipeline(
+            (VerifyQ1AllocationPass(checked_stage=checked_stage),)
+        )
+
+        with pytest.raises(PassFailedException) as exc_info:
+            pipeline.apply(Context(), module)
+
+        context = f" after pass {checked_stage!r}" if checked_stage is not None else ""
+        assert str(exc_info.value) == (
+            f"Register allocation verification failed{context}. Found 1 issue(s):\n"
+            f"Sequence 'test': block_arg 0 of operation 'mock.region' is {issue}."
+        )
+
+    def test_checked_stage_leaves_valid_module_unchanged(self):
+        """Verification with stage context leaves valid IR unchanged."""
+        producer = _MockProducerOp(Registers.R1)
+        module = ModuleOp(
+            [
+                SequenceOp(
+                    program=[producer, _MockConsumerOp(producer.result)], channel_id="test"
+                )
+            ]
+        )
+        original = str(module)
+
+        VerifyQ1AllocationPass(checked_stage="custom-lowering").apply(Context(), module)
+
+        assert str(module) == original
+
     def test_error_message_includes_channel_id(self):
         """Test that error messages include the sequence channel ID."""
         producer = _MockProducerOp(IntRegisterType.unallocated())

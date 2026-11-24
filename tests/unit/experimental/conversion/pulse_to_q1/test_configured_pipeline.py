@@ -77,6 +77,10 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1.ir.abstract_ops import Q1AsmOperation
 from qat.experimental.dialect.q1.ir.schedule import build_q1_schedule
+from qat.experimental.dialect.q1.transforms.reg_alloc import (
+    LinearScanRegisterAllocationPass,
+)
+from qat.experimental.dialect.q1.transforms.verify_allocation import VerifyQ1AllocationPass
 from qat.experimental.dialect.q1_cf import JmpBranchOp
 from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf import YieldOp as Q1ScfYieldOp
@@ -261,6 +265,61 @@ def test_pipeline_lowers_normalized_pulse_to_configured_flat_q1():
     sequence = _assert_emission_ready(module)
     assert sequence.channel_id.data == "port_0"
     assert not any(isinstance(op, CreateFrameOp) for op in sequence.walk())
+
+
+@pytest.mark.parametrize(
+    ("checked_pass", "previous_checkpoints"),
+    [
+        (LinearScanRegisterAllocationPass, 0),
+        (LowerQ1ScfToQ1CfPass, 1),
+        (LineariseQ1CfToQ1Pass, 2),
+    ],
+)
+@pytest.mark.parametrize(
+    ("register_type", "issue"),
+    [
+        (IntRegisterType.unallocated(), "an unallocated Q1 register"),
+        (IntRegisterType.infinite_register(42), "a virtual Q1 register (inf_gpr_42)"),
+    ],
+)
+def test_allocation_failure_names_checked_stage(
+    checked_pass, previous_checkpoints, register_type, issue
+):
+    frequency, frame = _frame()
+    duration = ConstantOp(TimeAttr(8e3))
+    module = _pulse_module(frequency, frame, duration, WaitOp(frame, duration))
+    completed_checkpoints = []
+    injected_sequence = None
+
+    def inject_after_checked_pass(previous, module, following):
+        nonlocal injected_sequence
+        if isinstance(previous, VerifyQ1AllocationPass):
+            completed_checkpoints.append(previous)
+        if isinstance(previous, checked_pass):
+            assert len(completed_checkpoints) == previous_checkpoints
+            assert isinstance(following, VerifyQ1AllocationPass)
+            [injected_sequence] = [
+                operation
+                for operation in module.walk()
+                if isinstance(operation, SequenceOp)
+            ]
+            injected_sequence.body.blocks[0].add_op(MoveImmRdOp(SU32Imm(0), register_type))
+
+    pipeline = replace(
+        _configured_pipeline(_canonical_data()), callback=inject_after_checked_pass
+    )
+
+    with pytest.raises(PassFailedException) as exc_info:
+        pipeline.apply(Context(), module)
+
+    assert injected_sequence is not None
+    assert len(completed_checkpoints) == previous_checkpoints
+    assert str(exc_info.value) == (
+        f"Register allocation verification failed after pass {checked_pass.name!r}. "
+        "Found 1 issue(s):\n"
+        f"Sequence {injected_sequence.channel_id.data!r}: result 0 of operation "
+        f"{MoveImmRdOp.name!r} is {issue}."
+    )
 
 
 def test_pipeline_preserves_timing_instruction_through_control_flow_lowering():

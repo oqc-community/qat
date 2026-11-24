@@ -6,6 +6,7 @@ This module checks that every Q1 register value in a sequence has been fully all
 physical register before later lowering passes consume it.
 """
 
+from dataclasses import dataclass
 from typing import cast
 
 from xdsl.context import Context
@@ -108,15 +109,21 @@ def verify_sequence_allocation(sequence: SequenceOp) -> list[str]:
     return list(errors_by_value.values())
 
 
+@dataclass(frozen=True)
 class VerifyQ1AllocationPass(OrderedPass, ModulePass):
     """Reject any Q1 register value that is still unallocated or virtual.
 
     The pass walks every :class:`~qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp`
     in the module, including nested regions, and aggregates all allocation issues into a
     single :class:`~xdsl.utils.exceptions.PassFailedException`.
+
+    :param checked_stage: Name of the pass whose output is checked. If omitted,
+        errors name no pass.
     """
 
     name = "q1-verify-allocation"
+
+    checked_stage: str | None = None
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         """Verify all sequences in the module have properly allocated registers.
@@ -132,7 +139,12 @@ class VerifyQ1AllocationPass(OrderedPass, ModulePass):
 
         if all_errors:
             error_report = "\n".join(all_errors)
+            context = (
+                f" after pass {self.checked_stage!r}"
+                if self.checked_stage is not None
+                else ""
+            )
             raise PassFailedException(
-                f"Register allocation verification failed. Found {len(all_errors)} "
-                f"issue(s):\n{error_report}"
+                f"Register allocation verification failed{context}. "
+                f"Found {len(all_errors)} issue(s):\n{error_report}"
             )

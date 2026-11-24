@@ -663,11 +663,11 @@ def create_qblox_configured_q1_pipeline(
             LowerScfToQ1ScfPass(),
             ReconcileUnrealizedCastsPass(),
             LinearScanRegisterAllocationPass(),
-            VerifyQ1AllocationPass(),
+            VerifyQ1AllocationPass(checked_stage=LinearScanRegisterAllocationPass.name),
             LowerQ1ScfToQ1CfPass(),
-            VerifyQ1AllocationPass(),
+            VerifyQ1AllocationPass(checked_stage=LowerQ1ScfToQ1CfPass.name),
             LineariseQ1CfToQ1Pass(),
-            VerifyQ1AllocationPass(),
+            VerifyQ1AllocationPass(checked_stage=LineariseQ1CfToQ1Pass.name),
             QbloxPreEmissionVerificationPass(target_data=target_data),
         )
     )
