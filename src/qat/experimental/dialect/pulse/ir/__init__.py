@@ -57,6 +57,7 @@ from .ops import (
     MaxTimeOp,
     MixOp,
     ModuloOp,
+    ParallelOp,
     PhaseOp,
     PhaseSetOp,
     PhaseShiftOp,
@@ -75,6 +76,7 @@ from .ops import (
     SubOp,
     SynchronizeOp,
     WaitOp,
+    YieldOp,
 )
 from .traits import (
     AdvancesTimeTrait,
@@ -110,6 +112,7 @@ _ops = [
     MaxTimeOp,
     MixOp,
     ModuloOp,
+    ParallelOp,
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
@@ -127,6 +130,7 @@ _ops = [
     SubOp,
     SynchronizeOp,
     WaitOp,
+    YieldOp,
 ]
 
 _interfaces = [IsAnalyticalWaveformInterface]

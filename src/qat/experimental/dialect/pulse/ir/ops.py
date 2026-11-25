@@ -20,7 +20,7 @@ from xdsl.dialects.builtin import (
     i1,
 )
 from xdsl.interfaces import HasFolderInterface
-from xdsl.ir import Region
+from xdsl.ir import Block, BlockArgument, Region
 from xdsl.irdl import (
     AnyOf,
     AtLeast,
@@ -33,6 +33,7 @@ from xdsl.irdl import (
     VarConstraint,
     attr_def,
     irdl_op_definition,
+    lazy_traits_def,
     operand_def,
     opt_attr_def,
     prop_def,
@@ -50,6 +51,7 @@ from xdsl.traits import (
     IsTerminator,
     Pure,
     ReturnLike,
+    SingleBlockImplicitTerminator,
     SymbolOpInterface,
 )
 from xdsl.utils.exceptions import VerifyException
@@ -1648,6 +1650,247 @@ class IntegrateOp(IRDLOperation):
             integrated.
         """
         return super().__init__(operands=[acquisition], result_types=[IQResultType()])
+
+
+@irdl_op_definition
+class ParallelOp(IRDLOperation, PulseOperationInterface):
+    """Plays operations in parallel on one frame.
+
+    This lets pulses and acquisitions overlap in time on the same reference frame: the
+    same port, frequency and phase.
+
+    The region has one block. Its arguments are the lanes, and it ends with
+    :class:`YieldOp`. Semantics:
+
+    * Each lane is the parent frame, with its port, frequency and phase. Lanes run side
+      by side in time.
+    * The region lasts as long as its longest lane. There is an implicit sync of the
+      lanes at the end, and the first result is the frame after the region.
+    * The frame result is implicit, so only acquisitions are yielded. Each one becomes a
+      result after the frame.
+
+    Example of how this looks in textual MLIR:
+
+    .. code-block:: mlir
+
+        %frame_1, %acquisition = pulse.parallel(%frame_0) ({
+        ^bb0(%lane_0 : !pulse.frame<"q0_measure">,
+             %lane_1 : !pulse.frame<"q0_measure">):
+            %lane_0_1 = pulse.pulse(%lane_0, %waveform)
+                : !pulse.frame<"q0_measure">
+            %lane_1_1 = pulse.wait(%lane_1, %delay)
+                : !pulse.frame<"q0_measure">
+            %lane_1_2, %acquired = pulse.acquire(%lane_1_1, %duration)
+                : (!pulse.frame<"q0_measure">, !pulse.acquisition)
+            pulse.yield(%acquired) : !pulse.acquisition
+        }) : (!pulse.frame<"q0_measure">, !pulse.acquisition)
+        %iq = pulse.integrate(%acquisition) : !pulse.iq_result
+
+    :ivar frame: The SSA value representing the frame the lanes run on.
+    :ivar frame_result: The SSA value representing the frame after the region.
+    :ivar acquisitions: The acquisitions yielded from the region, in yield order.
+    :ivar body: The region holding the lanes' operations.
+    """
+
+    name = "pulse.parallel"
+    traits = lazy_traits_def(
+        lambda: (SingleBlockImplicitTerminator(YieldOp), AdvancesTimeTrait())
+    )
+
+    frame = operand_def(FrameType)
+    frame_result = result_def(FrameType)
+    acquisitions = var_result_def(AcquisitionType)
+    body = region_def("single_block")
+
+    def __init__(self, frame: SSAValue | Operation, num_lanes: int, acquisitions: int = 0):
+        """Builds the op with an empty body. Add operations on :attr:`lanes`, then end the
+        body with a :class:`YieldOp`.
+
+        :param frame: The SSA value representing the frame the lanes run on.
+        :param num_lanes: The number of lanes, made as block arguments of the frame's type.
+        :param acquisitions: The number of acquisitions the region yields.
+        """
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        block = Block(arg_types=[frame_ssa.type] * num_lanes)
+        return super().__init__(
+            operands=[frame_ssa],
+            result_types=[frame_ssa.type, [AcquisitionType()] * acquisitions],
+            regions=[Region(block)],
+        )
+
+    @property
+    def lanes(self) -> tuple[BlockArgument, ...]:
+        """The lanes, which are the arguments of the body's block."""
+        return tuple(self.body.block.args)
+
+    def verify_(self):
+        """Verifies the lanes and the operations in the region.
+
+        Enforced invariants:
+
+        * There is at least one lane. Each lane, and the frame result, has the
+          parent frame's type.
+        * The region holds only :class:`PulseOp`, :class:`AcquireOp` and :class:`WaitOp`,
+          then the :class:`YieldOp`. This rules out phase ops, so phase stays with the
+          parent frame; syncs, so the only sync is the implicit one at the end; and
+          control flow and frame creation.
+        * Each of those ops acts on a lane, or on a frame made from one in the
+          region, never on a frame from outside, and returns a frame of the parent's type.
+        * Each frame value in the region is used at most once, and only inside the region.
+          Using one twice would start two ops on a lane at the same time; using one
+          after the region would keep a lane alive past the end of the region.
+        * At most one lane plays pulses, and at most one acquires. See
+          :meth:`_verify_one_pulsing_one_acquiring`.
+
+        The ending :class:`YieldOp` is checked by the ``SingleBlockImplicitTerminator``
+        trait.
+        """
+        if self.frame_result.type != self.frame.type:
+            raise VerifyException(
+                f"The frame result of pulse.parallel must have the parent frame's type "
+                f"{self.frame.type}, got {self.frame_result.type}."
+            )
+
+        block = self.body.block
+        if not block.args:
+            raise VerifyException("pulse.parallel must have at least one lane.")
+
+        for arg in block.args:
+            if arg.type != self.frame.type:
+                raise VerifyException(
+                    f"Lanes of pulse.parallel must have the parent frame's type "
+                    f"{self.frame.type}, got {arg.type}."
+                )
+
+        for op in block.ops:
+            if not isinstance(op, PulseOp | AcquireOp | WaitOp | YieldOp):
+                raise VerifyException(
+                    f"pulse.parallel may only hold pulse.pulse, pulse.acquire and "
+                    f"pulse.wait, found {op.name}."
+                )
+
+        roots = self._lane_roots()
+        for value in roots:
+            uses = list(value.uses)
+            if any(use.operation.parent_block() is not block for use in uses):
+                raise VerifyException(
+                    "A frame from inside pulse.parallel must not be used outside it; use "
+                    "the frame result instead."
+                )
+            if len(uses) > 1:
+                raise VerifyException(
+                    "Each frame value in pulse.parallel may be used only once, so that two "
+                    "ops never start on one lane at the same time."
+                )
+
+        self._verify_one_pulsing_one_acquiring(roots)
+
+    def _lane_roots(self) -> dict[SSAValue, BlockArgument]:
+        """Maps each frame value in the region to the lane it descends from.
+
+        Raises if an op acts on a frame from outside the region, or returns a frame whose
+        type differs from the parent frame's.
+        """
+        roots: dict[SSAValue, BlockArgument] = {arg: arg for arg in self.body.block.args}
+        for op in self.body.block.ops:
+            if isinstance(op, YieldOp):
+                continue
+            root = roots.get(op.frame)
+            if root is None:
+                raise VerifyException(
+                    f"{op.name} in pulse.parallel must act on one of its lanes, not "
+                    f"on a frame from outside the region."
+                )
+            frame_result = op.results[0]
+            if frame_result.type != self.frame.type:
+                raise VerifyException(
+                    f"Frames in pulse.parallel must have the parent frame's type "
+                    f"{self.frame.type}, but {op.name} returns {frame_result.type}."
+                )
+            roots[frame_result] = root
+        return roots
+
+    def _verify_one_pulsing_one_acquiring(
+        self, roots: dict[SSAValue, BlockArgument]
+    ) -> None:
+        """Verifies that at most one lane plays pulses, and at most one acquires.
+
+        This keeps the first version simple: a read-out needs no more, and backends then
+        handle one pulse stream and one acquisition stream. It is not a hardware limit,
+        since some targets can play overlapping pulses on separate units. The yield is
+        variadic, so dropping this rule needs no signature change.
+
+        :param roots: Maps each frame value in the region to its lane.
+        """
+        # TODO(COMPILER-1834): Drop or relax this rule once the spike decides.
+        pulsing = {roots[op.frame] for op in self.body.block.ops if isinstance(op, PulseOp)}
+        acquiring = {
+            roots[op.frame] for op in self.body.block.ops if isinstance(op, AcquireOp)
+        }
+        if len(pulsing) > 1:
+            raise VerifyException(
+                f"At most one lane of pulse.parallel may play pulses, found {len(pulsing)}."
+            )
+        if len(acquiring) > 1:
+            raise VerifyException(
+                f"At most one lane of pulse.parallel may acquire, found {len(acquiring)}."
+            )
+
+
+@irdl_op_definition
+class YieldOp(IRDLOperation):
+    """Ends the region of a :class:`ParallelOp` and carries acquisitions out of it.
+
+    Each operand becomes a result of the parent op, after the frame result. Unlike
+    :class:`ReturnOp`, which leaves the kernel, this only leaves the region. Lanes
+    are not yielded, because the parent op returns the frame implicitly.
+
+    :ivar arguments: The acquisitions to carry out of the region. Each must come from a
+        :class:`AcquireOp` in the same region.
+    """
+
+    name = "pulse.yield"
+    traits = traits_def(HasParent(ParallelOp), IsTerminator())
+
+    arguments = var_operand_def(AcquisitionType)
+
+    def __init__(self, *values: SSAValue | Operation):
+        """
+        :param values: The acquisitions to carry out of the region.
+        """
+        return super().__init__(operands=[values])
+
+    def verify_(self):
+        """Verifies the yielded values against the parent :class:`ParallelOp`.
+
+        * The yielded types match the parent's results after the frame.
+        * Each value is the acquisition result of a :class:`AcquireOp` in the same region.
+        * No value is yielded twice, so each result is a distinct acquisition.
+        """
+        parent_op = self.parent_op()
+        # Traits have already checked the parent's type; a detached yield has no parent.
+        if parent_op is None:
+            return
+
+        expected = parent_op.acquisitions.types
+        if self.arguments.types != expected:
+            raise VerifyException(
+                f"The yielded types must match the results of pulse.parallel after the "
+                f"frame, expected {expected}, got {self.arguments.types}."
+            )
+
+        for value in self.arguments:
+            owner = value.owner
+            if not isinstance(owner, AcquireOp) or owner.parent_block() is not self.parent:
+                raise VerifyException(
+                    "Each value yielded from pulse.parallel must come from a pulse.acquire "
+                    "in its region."
+                )
+
+        if len(set(self.arguments)) != len(self.arguments):
+            raise VerifyException(
+                "pulse.yield must not yield the same acquisition more than once."
+            )
 
 
 @irdl_op_definition

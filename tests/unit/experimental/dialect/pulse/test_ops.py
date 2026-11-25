@@ -4,7 +4,7 @@
 import numpy as np
 import pytest
 from xdsl.context import Context
-from xdsl.dialects import func
+from xdsl.dialects import func, scf
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
     BoolAttr,
@@ -13,6 +13,7 @@ from xdsl.dialects.builtin import (
     FlatSymbolRefAttr,
     FloatAttr,
     FunctionType,
+    IndexType,
     IntAttr,
     IntegerAttr,
     ModuleOp,
@@ -21,7 +22,7 @@ from xdsl.dialects.builtin import (
     i64,
 )
 from xdsl.dialects.complex import ComplexNumberAttr, ConstantOp as ComplexConstantOp
-from xdsl.ir import Attribute, Block, Operation, Region
+from xdsl.ir import Attribute, Block, Operation, Region, SSAValue
 from xdsl.irdl import (
     AnyAttr,
     IRDLOperation,
@@ -40,6 +41,7 @@ from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
     AcquisitionType,
     AddOp,
+    AdvancesTimeTrait,
     AmplitudeAttr,
     AmplitudeType,
     BlackmanWaveformOp,
@@ -62,6 +64,7 @@ from qat.experimental.dialect.pulse.ir import (
     MaxTimeOp,
     MixOp,
     ModuloOp,
+    ParallelOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -89,8 +92,10 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WaveformType,
     WeightsAttr,
+    YieldOp,
 )
 from qat.experimental.dialect.pulse.ir.attributes import StateMapDictAttr
+from qat.experimental.dialect.pulse.ir.interfaces import PulseOperationInterface
 from qat.experimental.dialect.q1 import MoveImmRdOp, Registers, SU32Imm
 from qat.experimental.waveforms.shapes.blackman import BlackmanWaveformShape
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
@@ -1967,3 +1972,383 @@ class TestCallKernelOp:
 
         with pytest.raises(VerifyException, match="result 1"):
             call.verify()
+
+
+_MEASURE_PORT = "q0_measure"
+
+
+def _measure_frame() -> CreateFrameOp:
+    """Builds a frame on the measure port."""
+
+    return CreateFrameOp(ConstantOp(FrequencyAttr(6.8e9)), StringAttr(_MEASURE_PORT))
+
+
+def _square_waveform() -> tuple[list[Operation], SSAValue]:
+    """Builds a square waveform, returning its ops and the waveform value."""
+
+    width = ConstantOp(TimeAttr(1_600_000))
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width, amplitude)
+    return [width, amplitude, waveform], waveform.result
+
+
+def _readout_kernel(yield_acquisition: bool = True) -> tuple[ModuleOp, ParallelOp]:
+    """Builds a kernel with a read-out region: a pulse on one lane, and a wait then an
+    acquisition on the other. After the region, the frame waits and, if the acquisition
+    is yielded, it is integrated and returned."""
+
+    frequency = ConstantOp(FrequencyAttr(6.8e9))
+    frame = CreateFrameOp(frequency, StringAttr(_MEASURE_PORT))
+    waveform_ops, waveform = _square_waveform()
+    delay = ConstantOp(TimeAttr(240_000))
+    duration = ConstantOp(TimeAttr(1_360_000))
+
+    parallel = ParallelOp(frame.result, 2, acquisitions=1 if yield_acquisition else 0)
+    lane_0, lane_1 = parallel.lanes
+    pulse = PulseOp(lane_0, waveform)
+    wait = WaitOp(lane_1, delay)
+    acquire = AcquireOp(wait.result, duration)
+    yielded = [acquire.acquisition_result] if yield_acquisition else []
+    parallel.body.block.add_ops([pulse, wait, acquire, YieldOp(*yielded)])
+
+    next_wait = WaitOp(parallel.frame_result, delay)
+    ops = [frequency, frame, *waveform_ops, delay, duration, parallel, next_wait]
+    if yield_acquisition:
+        integrate = IntegrateOp(parallel.acquisitions[0])
+        ops += [integrate, ReturnOp(integrate.result)]
+        outputs = [IQResultType()]
+    else:
+        ops.append(ReturnOp())
+        outputs = []
+
+    kernel = _build_kernel("readout", ([], outputs), _build_region(ops))
+    return _build_module(kernel), parallel
+
+
+class TestParallelOp:
+    """Tests the instantiation and verification of the parallel operation."""
+
+    def test_readout_region_verifies(self):
+        """A pulse on one lane and a wait then an acquire on another verifies, and the
+        results feed ops after the region."""
+
+        module, parallel = _readout_kernel()
+        module.verify()
+
+        assert parallel.frame_result.type == FrameType(_MEASURE_PORT)
+        assert parallel.acquisitions.types == (AcquisitionType(),)
+        [frame_user] = parallel.frame_result.uses
+        assert isinstance(frame_user.operation, WaitOp)
+        [acquisition_user] = parallel.acquisitions[0].uses
+        assert isinstance(acquisition_user.operation, IntegrateOp)
+
+    def test_print_and_parse_roundtrip(self, io_stream):
+        """Printing then parsing a module with a parallel op gives the same IR."""
+
+        module, _ = _readout_kernel()
+        Printer(stream=io_stream).print_op(module)
+        printed = io_stream.getvalue()
+
+        context = Context()
+        context.load_dialect(Builtin)
+        context.load_dialect(Pulse)
+        parsed = Parser(context, printed).parse_module()
+        parsed.verify()
+
+        assert [op for op in parsed.walk() if isinstance(op, ParallelOp)]
+        assert str(parsed) == str(module)
+
+    @pytest.mark.parametrize("num_lanes", [1, 3])
+    def test_lanes_have_parent_frame_type(self, num_lanes):
+        """The builder makes one block argument per lane, with the parent's port."""
+
+        frame = _measure_frame()
+        parallel = ParallelOp(frame.result, num_lanes)
+        assert len(parallel.lanes) == num_lanes
+        assert all(lane.type == FrameType(_MEASURE_PORT) for lane in parallel.lanes)
+        assert parallel.frame == frame.result
+        assert len(parallel.results) == 1
+
+    def test_region_without_acquire_returns_only_frame(self):
+        """A region with no acquire yields nothing, and the op returns only the frame."""
+
+        _, waveform = _square_waveform()
+        parallel = ParallelOp(_measure_frame().result, 2)
+        lane_0, _ = parallel.lanes
+        parallel.body.block.add_ops([PulseOp(lane_0, waveform), YieldOp()])
+        parallel.verify()
+
+        assert parallel.results == (parallel.frame_result,)
+        assert len(parallel.acquisitions) == 0
+
+    def test_acquire_not_yielded_verifies(self):
+        """An acquisition the region does not yield is allowed."""
+
+        module, parallel = _readout_kernel(yield_acquisition=False)
+        module.verify()
+        assert len(parallel.acquisitions) == 0
+
+    def test_allows_pulse_and_acquire_on_same_lane(self):
+        """The rule counts lanes, so one lane may pulse and then acquire."""
+
+        _, waveform = _square_waveform()
+        duration = ConstantOp(TimeAttr(1_360_000))
+        parallel = ParallelOp(_measure_frame().result, 1, acquisitions=1)
+        [lane_0] = parallel.lanes
+        pulse = PulseOp(lane_0, waveform)
+        acquire = AcquireOp(pulse.result, duration)
+        parallel.body.block.add_ops([pulse, acquire, YieldOp(acquire.acquisition_result)])
+        parallel.verify()
+
+    @pytest.mark.parametrize(
+        "op_name",
+        [
+            "pulse.phase_shift",
+            "pulse.phase_set",
+            "pulse.sync",
+            "scf.for",
+            "pulse.create_frame",
+            "pulse.constant",
+        ],
+    )
+    def test_rejects_op_in_region(self, op_name):
+        """Only pulse, acquire and wait may sit in the region."""
+
+        phase = ConstantOp(PhaseAttr(0.5))
+        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        bounds = [ArithConstantOp(IntegerAttr(i, IndexType())) for i in (0, 1, 1)]
+        parallel = ParallelOp(_measure_frame().result, 2)
+        lane_0, lane_1 = parallel.lanes
+
+        match op_name:
+            case "pulse.phase_shift":
+                op = PhaseShiftOp(lane_0, phase)
+            case "pulse.phase_set":
+                op = PhaseSetOp(lane_0, phase)
+            case "pulse.sync":
+                op = SynchronizeOp(lane_0, lane_1)
+            case "scf.for":
+                loop_body = Block([scf.YieldOp()], arg_types=[IndexType()])
+                op = scf.ForOp(*bounds, [], loop_body)
+            case "pulse.create_frame":
+                op = CreateFrameOp(frequency, StringAttr(_MEASURE_PORT))
+            case "pulse.constant":
+                op = ConstantOp(TimeAttr(1_000_000))
+        parallel.body.block.add_ops([op, YieldOp()])
+
+        with pytest.raises(VerifyException, match=f"found {op_name}"):
+            parallel.verify()
+
+    def test_rejects_two_pulsing_lanes(self):
+        """At most one lane may play pulses."""
+
+        _, waveform = _square_waveform()
+        parallel = ParallelOp(_measure_frame().result, 2)
+        lane_0, lane_1 = parallel.lanes
+        parallel.body.block.add_ops(
+            [PulseOp(lane_0, waveform), PulseOp(lane_1, waveform), YieldOp()]
+        )
+
+        with pytest.raises(VerifyException, match="one lane .* may play pulses"):
+            parallel.verify()
+
+    def test_rejects_two_acquiring_lanes(self):
+        """At most one lane may acquire."""
+
+        duration = ConstantOp(TimeAttr(1_360_000))
+        parallel = ParallelOp(_measure_frame().result, 2)
+        lane_0, lane_1 = parallel.lanes
+        parallel.body.block.add_ops(
+            [AcquireOp(lane_0, duration), AcquireOp(lane_1, duration), YieldOp()]
+        )
+
+        with pytest.raises(VerifyException, match="one lane .* may acquire"):
+            parallel.verify()
+
+    def test_rejects_missing_yield(self):
+        """A region that does not end with pulse.yield fails."""
+
+        delay = ConstantOp(TimeAttr(240_000))
+        parallel = ParallelOp(_measure_frame().result, 1)
+        [lane_0] = parallel.lanes
+        parallel.body.block.add_op(WaitOp(lane_0, delay))
+
+        with pytest.raises(VerifyException, match="is not a terminator"):
+            parallel.verify()
+
+    def test_rejects_empty_region(self):
+        """A region with no operations, so no pulse.yield, fails."""
+
+        parallel = ParallelOp(_measure_frame().result, 1)
+
+        with pytest.raises(VerifyException, match="empty block"):
+            parallel.verify()
+
+    def test_rejects_lane_with_other_port(self):
+        """Lanes must have the parent frame's type."""
+
+        frame = _measure_frame()
+        block = Block([YieldOp()], arg_types=[FrameType("q1_measure")])
+        parallel = ParallelOp.create(
+            operands=[frame.result],
+            result_types=[frame.result.type],
+            regions=[Region(block)],
+        )
+
+        with pytest.raises(VerifyException, match="parent frame's type"):
+            parallel.verify()
+
+    def test_rejects_no_lanes(self):
+        """A region must have at least one lane."""
+
+        parallel = ParallelOp(_measure_frame().result, 0)
+        parallel.body.block.add_op(YieldOp())
+
+        with pytest.raises(VerifyException, match="at least one lane"):
+            parallel.verify()
+
+    def test_rejects_frame_from_outside_region(self):
+        """Ops in the region must act on a lane, not on a frame from outside."""
+
+        other = _measure_frame()
+        _, waveform = _square_waveform()
+        parallel = ParallelOp(_measure_frame().result, 2)
+        parallel.body.block.add_ops([PulseOp(other.result, waveform), YieldOp()])
+
+        with pytest.raises(VerifyException, match="from outside the region"):
+            parallel.verify()
+
+    def test_rejects_frame_result_with_other_port(self):
+        """A frame op in the region must not switch the frame to another port."""
+
+        delay = ConstantOp(TimeAttr(240_000))
+        parallel = ParallelOp(_measure_frame().result, 1)
+        [lane_0] = parallel.lanes
+        wait = WaitOp.create(
+            operands=[lane_0, delay.result], result_types=[FrameType("q1")]
+        )
+        parallel.body.block.add_ops([wait, YieldOp()])
+
+        with pytest.raises(VerifyException, match="but pulse.wait returns"):
+            parallel.verify()
+
+    @pytest.mark.parametrize("second", ["pulse", "acquire"])
+    def test_rejects_frame_value_used_twice(self, second):
+        """Two ops on one lane value would start at the same time, so it fails."""
+
+        _, waveform = _square_waveform()
+        duration = ConstantOp(TimeAttr(1_360_000))
+        parallel = ParallelOp(_measure_frame().result, 1)
+        [lane_0] = parallel.lanes
+        if second == "pulse":
+            second_op = PulseOp(lane_0, waveform)
+        else:
+            second_op = AcquireOp(lane_0, duration)
+        parallel.body.block.add_ops([PulseOp(lane_0, waveform), second_op, YieldOp()])
+
+        with pytest.raises(VerifyException, match="used only once"):
+            parallel.verify()
+
+    def test_rejects_region_frame_used_after_region(self):
+        """A frame from inside the region must not be used after it."""
+
+        _, waveform = _square_waveform()
+        delay = ConstantOp(TimeAttr(240_000))
+        parallel = ParallelOp(_measure_frame().result, 1)
+        [lane_0] = parallel.lanes
+        inner_pulse = PulseOp(lane_0, waveform)
+        parallel.body.block.add_ops([inner_pulse, YieldOp()])
+        WaitOp(inner_pulse.result, delay)
+
+        with pytest.raises(VerifyException, match="must not be used outside"):
+            parallel.verify()
+
+    def test_rejects_parallel_frame_result_with_other_port(self):
+        """The frame result must have the parent frame's type."""
+
+        frame = _measure_frame()
+        block = Block([YieldOp()], arg_types=[frame.result.type])
+        parallel = ParallelOp.create(
+            operands=[frame.result],
+            result_types=[FrameType("q1_measure")],
+            regions=[Region(block)],
+        )
+
+        with pytest.raises(VerifyException, match="frame result"):
+            parallel.verify()
+
+    def test_is_pulse_operation_that_advances_time(self):
+        """The op is a pulse operation and advances time on its frame."""
+
+        parallel = ParallelOp(_measure_frame().result, 1)
+        assert isinstance(parallel, PulseOperationInterface)
+        assert parallel.has_trait(AdvancesTimeTrait)
+
+
+class TestYieldOp:
+    """Tests the instantiation and verification of the yield operation."""
+
+    def test_outside_parallel_raises(self):
+        """A yield whose parent is not pulse.parallel fails."""
+
+        acquisition = _ProducerOp(AcquisitionType())
+        yield_op = YieldOp(acquisition.result)
+        func.FuncOp("main", ((), ()), _build_region([acquisition, yield_op]))
+
+        with pytest.raises(VerifyException, match="expects parent op 'pulse.parallel'"):
+            yield_op.verify()
+
+    def test_detached_yield_verifies(self):
+        """A yield with no parent has nothing to check against."""
+
+        YieldOp(_ProducerOp(AcquisitionType()).result).verify()
+
+    @pytest.mark.parametrize(
+        ("declared", "yielded"), [(0, 1), (1, 0)], ids=["extra", "missing"]
+    )
+    def test_count_mismatch_raises(self, declared, yielded):
+        """The yielded types must match the op's results after the frame."""
+
+        duration = ConstantOp(TimeAttr(1_360_000))
+        parallel = ParallelOp(_measure_frame().result, 1, acquisitions=declared)
+        [lane_0] = parallel.lanes
+        acquire = AcquireOp(lane_0, duration)
+        values = [acquire.acquisition_result][:yielded]
+        parallel.body.block.add_ops([acquire, YieldOp(*values)])
+
+        with pytest.raises(VerifyException, match="yielded types must match"):
+            parallel.verify()
+
+    def test_value_not_from_acquire_raises(self):
+        """A yielded acquisition that no pulse.acquire made fails."""
+
+        acquisition = _ProducerOp(AcquisitionType())
+        parallel = ParallelOp(_measure_frame().result, 1, acquisitions=1)
+        parallel.body.block.add_op(YieldOp(acquisition.result))
+
+        with pytest.raises(VerifyException, match="must come from a pulse.acquire"):
+            parallel.verify()
+
+    def test_value_from_acquire_outside_region_raises(self):
+        """An acquisition made before the region cannot be yielded from it."""
+
+        duration = ConstantOp(TimeAttr(1_360_000))
+        outside_acquire = AcquireOp(_measure_frame().result, duration)
+        parallel = ParallelOp(_measure_frame().result, 1, acquisitions=1)
+        parallel.body.block.add_op(YieldOp(outside_acquire.acquisition_result))
+
+        with pytest.raises(VerifyException, match="must come from a pulse.acquire"):
+            parallel.verify()
+
+    def test_duplicate_value_raises(self):
+        """The same acquisition yielded twice fails."""
+
+        duration = ConstantOp(TimeAttr(1_360_000))
+        parallel = ParallelOp(_measure_frame().result, 1, acquisitions=2)
+        [lane_0] = parallel.lanes
+        acquire = AcquireOp(lane_0, duration)
+        result = acquire.acquisition_result
+        parallel.body.block.add_ops([acquire, YieldOp(result, result)])
+
+        with pytest.raises(VerifyException, match="more than once"):
+            parallel.verify()
