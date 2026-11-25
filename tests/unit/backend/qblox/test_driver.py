@@ -7,4 +7,4 @@ from importlib.metadata import version
 #   version (live testing)
 class TestDriverFwCompatibility:
     def test_qblox_instruments_version(self):
-        assert version("qblox_instruments") == "1.3.1"
+        assert version("qblox_instruments") == "1.4.1"

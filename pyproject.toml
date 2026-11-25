@@ -52,7 +52,10 @@ scipy = ">=1.16.1"
 pyqir = ">=0.11.0,!=0.12.0,!=0.12.1,!=0.12.2,<0.13.0"
 regex = ">=3.6.1"
 jsonpickle = ">=4.0.5"
-qblox-instruments = "==1.3.1"
+qblox-instruments = "==1.4.1"
+# Transitive via qblox-instruments. Qblox recommend 0.54.3 for a hardware issue.
+# Do not bump without Qblox confirming it is safe. COMPILER-1840
+qcodes = "==0.54.3"
 lark = "^1.3.1"
 pydantic = "^2.11.7"
 pydantic-settings = ">=2.5.2"
@@ -350,6 +353,9 @@ filterwarnings = [
   'default:.*to modify the reset time of qubits to their ground state:UserWarning:',
   # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
   'default:.*:RuntimeWarning:qcodes\\.utils\\.deprecate',
+  # TODO - qcodes 0.54.3 imports iscoroutinefunction from asyncio, deprecated in Python 3.14.
+  # Remove when qcodes is pinned to >=0.55.0. COMPILER-1840
+  'default:.*asyncio.iscoroutinefunction.* is deprecated:DeprecationWarning:qcodes\.utils\.function_helpers',
   # TODO - remove when OpenTelemetry/QCoDeS dependency chain is updated
   'default:SelectableGroups dict interface is deprecated\\. Use select\\.:DeprecationWarning',
   # TODO - remove when purr is dropped COMPILER-844
