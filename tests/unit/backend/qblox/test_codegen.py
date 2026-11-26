@@ -421,14 +421,20 @@ class TestQbloxContext:
         assert "QRC" in channel.physical_channel.id
         config = channel.physical_channel.config
         assert config.module.lo.out0_in0_en is True
+        config.sequencers[0].awg.mod_en = True
+        config.sequencers[0].demod_en_acq = True
         context = QbloxContext(ReadWriteResult(), {})
 
         pkg = context.create_package(channel, 0, 0)
 
         assert pkg.mod_config.lo.out0_in0_en is None
         assert getattr(pkg.mod_config.lo, f"{lane}_freq") is not None
+        assert pkg.seq_config.awg.mod_en is None
+        assert pkg.seq_config.demod_en_acq is None
         # Only the package changes, not the model.
         assert config.module.lo.out0_in0_en is True
+        assert config.sequencers[0].awg.mod_en is True
+        assert config.sequencers[0].demod_en_acq is True
 
     @pytest.mark.parametrize(
         "qblox_model",
@@ -446,12 +452,17 @@ class TestQbloxContext:
     def test_create_package_keeps_qrm_rf_readout_fields(self, copied_qblox_model):
         channel = copied_qblox_model.get_qubit(0).get_measure_channel()
         assert "QRM-RF" in channel.physical_channel.id
+        config = channel.physical_channel.config
+        config.sequencers[0].awg.mod_en = True
+        config.sequencers[0].demod_en_acq = True
         context = QbloxContext(ReadWriteResult(), {})
 
         pkg = context.create_package(channel, 0, 0)
 
         assert pkg.mod_config.lo.out0_in0_en is True
         assert pkg.mod_config.lo.out0_in0_freq is not None
+        assert pkg.seq_config.awg.mod_en is True
+        assert pkg.seq_config.demod_en_acq is True
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

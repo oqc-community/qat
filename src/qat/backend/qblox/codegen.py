@@ -262,6 +262,10 @@ class QbloxContext:
         steps_per_hz = CONTROL_SEQUENCER_DATA.nco_freq_steps_per_hz
         seq_config.nco.freq = round(nco_freq * steps_per_hz) / steps_per_hz
         seq_config.nco.prop_delay_comp_en = True
+        # QRC sequencers have no modulation or demodulation enables.
+        if "QRC" in target.physical_channel.id:
+            seq_config.awg.mod_en = None
+            seq_config.demod_en_acq = None
         seq_config.square_weight_acq.integration_length = (
             self.sequencer_config.square_weight_acq.integration_length
         )
