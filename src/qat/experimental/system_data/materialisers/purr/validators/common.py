@@ -69,6 +69,21 @@ def _is_real(value: Any) -> bool:
     return isinstance(value, int | float)
 
 
+def _is_qubit_device_payload(device_payload: dict[str, Any]) -> bool:
+    """Return True when a device payload structurally represents a qubit.
+
+    PuRR payload naming conventions (for example ``Q*`` IDs) are not relied on
+    here because IDs are source-specific and may evolve. A qubit carries an
+    ``index`` field or an inline ``measure_device``; resonators carry neither.
+    The ``index`` value is not checked here, so callers can still warn about a
+    qubit whose index is malformed.
+    """
+
+    return "index" in device_payload or isinstance(
+        device_payload.get("measure_device"), dict
+    )
+
+
 def _collect_qubit_indices(dto: PurrIngressV010) -> set[int]:
     """Collect the integer qubit indices present in ``quantum_devices``."""
 
@@ -80,7 +95,12 @@ def _collect_qubit_indices(dto: PurrIngressV010) -> set[int]:
 
 
 def _collect_qubit_index_by_id(dto: PurrIngressV010) -> dict[str, int]:
-    """Collect a mapping from qubit id strings to integer qubit indices."""
+    """Collect a mapping from qubit id strings to integer qubit indices.
+
+    Devices that are not qubits (see :func:`_is_qubit_device_payload`), such as resonators,
+    are skipped without a warning. A qubit whose id is not a string or whose index is not an
+    integer is skipped with a warning.
+    """
 
     qubit_index_by_id: dict[str, int] = {}
     for device_id, payload in dto.quantum_devices.items():
@@ -90,6 +110,9 @@ def _collect_qubit_index_by_id(dto: PurrIngressV010) -> dict[str, int]:
                 "payload is not a mapping.",
                 device_id,
             )
+            continue
+
+        if not _is_qubit_device_payload(payload):
             continue
 
         qubit_id = payload.get("id")

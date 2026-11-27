@@ -76,6 +76,9 @@ from qat.experimental.system_data.materialisers.purr.materialisers.signal_paths 
 from qat.experimental.system_data.materialisers.purr.validate import (
     validate_purr_ingress_graph,
 )
+from qat.experimental.system_data.materialisers.purr.validators.common import (
+    _is_qubit_device_payload,
+)
 from qat.model.target_data import TargetData
 
 _SUPPORTED_PURR_SOURCE_VERSIONS = ("0.1.0",)
@@ -92,20 +95,6 @@ _RESET_DEFAULT_ORDER = ("passive", "ddrop")
 _QBLOX_COMBINED_READOUT_RENAMES: dict[str, list[str]] = {
     "macq": ["measure", "acquire"],
 }
-
-
-def _is_qubit_device_payload(device_payload: dict[str, Any]) -> bool:
-    """Return True when a device payload structurally represents a qubit.
-
-    PuRR payload naming conventions (for example ``Q*`` IDs) are not relied on
-    here because IDs are source-specific and may evolve. The qubit ``index``
-    field is the stable structural discriminator in supported payloads.
-    """
-
-    if isinstance(device_payload.get("index"), int):
-        return True
-
-    return isinstance(device_payload.get("measure_device"), dict)
 
 
 def _detect_supported_reset_methods(payload: dict[str, Any]) -> list[str]:

@@ -19,6 +19,7 @@ from qat.experimental.system_data.materialisers.purr.materialisers.capabilities 
 from qat.experimental.system_data.materialisers.purr.validators.common import (
     _collect_qubit_index_by_id,
     _collect_qubit_indices,
+    _is_qubit_device_payload,
     _iter_device_pulse_views,
     _iter_indexed_quantum_devices,
     _iter_parsed_coupling_directions,
@@ -180,9 +181,11 @@ def test_signal_path_validators_cover_top_level_and_entry_shape_errors():
 
 
 def test_materialise_helper_functions_and_version_error_paths(monkeypatch):
-    assert purr_materialise._is_qubit_device_payload({"index": 0})
-    assert purr_materialise._is_qubit_device_payload({"measure_device": {}})
-    assert not purr_materialise._is_qubit_device_payload({"id": "R0"})
+    assert _is_qubit_device_payload({"index": 0})
+    assert _is_qubit_device_payload({"index": None})
+    assert _is_qubit_device_payload({"measure_device": {}})
+    assert not _is_qubit_device_payload({"id": "R0"})
+    assert not _is_qubit_device_payload({"id": "R0", "measure_device": None})
 
     methods = purr_materialise._detect_supported_reset_methods(
         {
