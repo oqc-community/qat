@@ -1210,3 +1210,46 @@ def test_rf_modules_accept_combined_iq_and_acquisition_routing(kind):
     assert list(binding.sequencer_config.acquisition_path_connections) == [
         AcquisitionPathConnectionAttr(0, SignalPath.iq)
     ]
+
+
+def test_channels_keep_the_sequencer_whose_supplied_nco_matches_their_calibration():
+    bindings = _resolve(
+        [
+            supplied(
+                [
+                    sequencer(0, values={"nco": {"freq": 200_000_000}}),
+                    sequencer(1, values={"nco": {"freq": 300_000_000}}),
+                ]
+            )
+        ],
+        channels_per_port=2,
+    )
+
+    assert bindings["port-0-channel-0"].sequencer_index == 0
+    assert bindings["port-0-channel-1"].sequencer_index == 1
+
+
+def test_channels_keep_the_sequencer_whose_supplied_mixer_matches_their_calibration():
+    # The mixer value must be honoured when it is the only pinned field.
+    bindings = _resolve(
+        [
+            supplied(
+                [
+                    sequencer(0, values={"mixer": {"gain_ratio": 0.5}}),
+                    sequencer(1, values={"mixer": {"gain_ratio": 0.9}}),
+                ]
+            )
+        ],
+        channels_per_port=1,
+    )
+
+    assert bindings["port-0-channel-0"].sequencer_index == 1
+
+
+@pytest.mark.parametrize(
+    "group, key", [("nco", "freq"), ("mixer", "phase_offset"), ("mixer", "gain_ratio")]
+)
+@pytest.mark.parametrize("value", ["200000000", True])
+def test_malformed_pinned_value_is_reported_as_a_configuration_error(group, key, value):
+    with pytest.raises(ValueError, match=f"non-numeric {key!r} value"):
+        _resolve([supplied([sequencer(0, values={group: {key: value}})])])

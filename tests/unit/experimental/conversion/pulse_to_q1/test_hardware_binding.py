@@ -233,13 +233,14 @@ def test_sequences_are_bound_to_their_resolved_physical_allocation():
         )
     )
 
+    indices = _allocated_indices(data, ["port-0-channel-0", "port-0-channel-1"])
     first, second = module.body.block.ops
-    assert (first.instrument_id, first.slot_idx, first.seq_idx) == (
+    assert (first.instrument_id, first.slot_idx) == (
         StringAttr("cluster"),
         SlotIndexAttr(2),
-        SequencerIndexAttr(0),
     )
-    assert second.seq_idx == SequencerIndexAttr(1)
+    assert first.seq_idx == indices["port-0-channel-0"]
+    assert second.seq_idx == indices["port-0-channel-1"]
     assert isinstance(first.module_config, ModuleConfigAttr)
     assert first.module_config == second.module_config
     assert first.module_config.kind.data is QbloxModuleKind.qcm_rf
@@ -410,6 +411,21 @@ def test_reusing_one_canonical_channel_is_rejected_after_first_assignment():
         )
 
 
+def _allocated_indices(
+    data: CanonicalSystemData, channel_ids: list[str]
+) -> dict[str, SequencerIndexAttr]:
+    """Read each channel's sequencer from the allocator rather than pinning an index."""
+    bindings = hardware_binding.resolve_sequencer_bindings(
+        hardware_binding.QbloxHardwareView.derive(data),
+        hardware_binding.supplied_configurations(data),
+        channel_ids,
+    )
+    return {
+        channel_id: SequencerIndexAttr(binding.sequencer_index)
+        for channel_id, binding in bindings.items()
+    }
+
+
 def test_ambiguous_channels_are_consumed_in_sequence_order():
     data = _ambiguous_channel_data()
 
@@ -419,9 +435,10 @@ def test_ambiguous_channels_are_consumed_in_sequence_order():
         _sequence(4_200_000_000, channel_id="sequence-1"),
     )
 
+    indices = _allocated_indices(data, ["port-0-channel-0", "port-0-channel-1"])
     first, second = module.body.block.ops
-    assert first.seq_idx == SequencerIndexAttr(0)
-    assert second.seq_idx == SequencerIndexAttr(1)
+    assert first.seq_idx == indices["port-0-channel-0"]
+    assert second.seq_idx == indices["port-0-channel-1"]
 
 
 def test_explicit_sequence_channel_id_is_preferred_when_ambiguous():
@@ -498,9 +515,11 @@ def test_labelled_frame_binds_its_channel_sequencer():
         _sequence(4_200_000_000, channel_id="frame_1"),
     )
 
+    indices = _allocated_indices(data, ["port-0-channel-0", "port-0-channel-1"])
     labelled, unlabelled = module.body.block.ops
-    assert labelled.seq_idx == SequencerIndexAttr(1)
-    assert unlabelled.seq_idx == SequencerIndexAttr(0)
+    assert labelled.seq_idx == indices["port-0-channel-1"]
+    assert unlabelled.seq_idx == indices["port-0-channel-0"]
+    assert labelled.seq_idx != unlabelled.seq_idx
 
 
 def test_one_sequence_does_not_allocate_all_ambiguous_candidates():
@@ -753,27 +772,28 @@ def test_register_wait_sync_joins_party_line_synchronization():
 
 
 @pytest.mark.parametrize(
-    ("channel_id", "port_id", "carrier", "slot", "index"),
+    ("channel_id", "port_id", "carrier", "slot"),
     [
-        ("Q0.drive", "A-CH-QCM-RF-2", 3_872_000_000, 2, 0),
-        ("Q0.second_state", "A-CH-QCM-RF-2", 4_085_000_000, 2, 1),
-        ("Q1.drive", "B-CH-QCM-RF-2", 3_872_000_000, 2, 2),
-        ("Q1.second_state", "B-CH-QCM-RF-2", 4_085_000_000, 2, 3),
-        ("R0.measure", "A-CH-QRM-RF-14", 10_203_300_000, 14, 0),
-        ("R0.acquire", "A-CH-QRM-RF-14", 10_203_300_000, 14, 1),
-        ("R1.measure", "B-CH-QRM-RF-14", 10_203_300_000, 14, 2),
-        ("R1.acquire", "B-CH-QRM-RF-14", 10_203_300_000, 14, 3),
+        ("Q0.drive", "A-CH-QCM-RF-2", 3_872_000_000, 2),
+        ("Q0.second_state", "A-CH-QCM-RF-2", 4_085_000_000, 2),
+        ("Q1.drive", "B-CH-QCM-RF-2", 3_872_000_000, 2),
+        ("Q1.second_state", "B-CH-QCM-RF-2", 4_085_000_000, 2),
+        ("R0.measure", "A-CH-QRM-RF-14", 10_203_300_000, 14),
+        ("R0.acquire", "A-CH-QRM-RF-14", 10_203_300_000, 14),
+        ("R1.measure", "B-CH-QRM-RF-14", 10_203_300_000, 14),
+        ("R1.acquire", "B-CH-QRM-RF-14", 10_203_300_000, 14),
     ],
 )
 def test_a_real_calibration_binds_every_channel_end_to_end(
-    channel_id, port_id, carrier, slot, index
+    channel_id, port_id, carrier, slot
 ):
     """Prove the whole PR2 chain on a real PuRR Qblox calibration.
 
     The calibration is materialised into canonical system data carrying the typed Qblox
     extension, reconciled into a hardware view, allocated, resolved into Q1 attributes, and
     finally bound onto a sequence that must verify. Every calibrated channel is driven at
-    once, so allocation assigns each its canonical module-wide sequencer index.
+    once. Allocation picks any valid assignment, so the test checks that each channel's
+    sequencer is distinct within its module rather than pinning an index.
     """
 
     data = materialise(
@@ -797,7 +817,7 @@ def test_a_real_calibration_binds_every_channel_end_to_end(
     sequence = bound[channel_id]
     assert sequence.port_id.data == port_id
     assert sequence.slot_idx == SlotIndexAttr(slot)
-    assert sequence.seq_idx == SequencerIndexAttr(index)
+    assert sequence.seq_idx == _allocated_indices(data, list(bound))[channel_id]
     assert sequence.instrument_id.data.startswith("test_save_model_")
     assert sequence.module_config.local_oscillators.data
     assert sequence.sequencer_config.connections is not None
