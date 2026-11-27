@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation module &mdash; qat-compiler 3.0.0.post461.dev20261127134343 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation module &mdash; qat-compiler 3.0.0.post462.dev20261127151024 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -724,11 +724,14 @@
   <section id="module-qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation">
 <span id="qat-experimental-conversion-pulse-to-q1-qblox-configuration-allocation-module"></span><h1>qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation module<a class="headerlink" href="#module-qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation" title="Link to this heading"></a></h1>
 <p>Allocate physical Qblox sequencers from the banks canonical ports supply.</p>
-<p>The allocation reproduces the legacy <code class="docutils literal notranslate"><span class="pre">AllocatingBackend</span></code> semantics: a canonical channel
-is allocated out of the bank its own port supplies, minus the sequencers already taken on
-the physical module, and every channel of one port keeps its assignment for the whole
-compilation. Nothing is synthesised - a sequencer the source never described is never
-allocated, so the supplied bank alone decides what a module may use.</p>
+<p>The allocation matches each used canonical channel to a distinct sequencer of the bank its
+own port supplies, using a maximum bipartite matching over the whole physical module. It
+follows <code class="docutils literal notranslate"><span class="pre">AllocatingBackend.allocate_bipartite</span></code> in the legacy backend
+(<code class="docutils literal notranslate"><span class="pre">qat.backend.base</span></code>), with the same sorted, hash-seed-independent ordering and
+unplaced-channel error. Any valid assignment is found whatever order the channels arrive
+in, and ports sharing a module never share a sequencer index. Nothing is synthesised - a
+sequencer the source never described is never allocated, so the supplied bank alone decides
+what a module may use.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation.allocate_sequencers">
 <span class="sig-name descname"><span class="pre">allocate_sequencers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_configurations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_channel_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation.allocate_sequencers" title="Link to this definition"></a></dt>
